@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Day Sheet · Photo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #e0e0e0; display: flex; justify-content: center; padding: 20px 0; }
+    .wf-screen { width: 375px; min-height: 812px; background: linear-gradient(to bottom, #f5f5f5 0 44%, #ededed 44% 100%); border: 2px dashed #ccc; display: flex; flex-direction: column; justify-content: flex-end; }
+    .sheet { background: #fff; border-top: 2px dashed #ccc; border-radius: 24px 24px 0 0; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+    .wf-nav { display: flex; justify-content: space-between; align-items: center; color: #666; font-size: 14px; }
+    .wf-link { color: inherit; text-decoration: none; }
+    .wf-title { font-size: 18px; font-weight: 700; color: #444; text-align: center; flex: 1; }
+    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .wf-button-secondary { background: transparent; border: 1px dashed #999; padding: 10px; font-size: 13px; color: #666; border-radius: 999px; text-align: center; }
+    .active { background: #ececec; color: #444; }
+    .wf-card { background: #fff; border: 1px dashed #ccc; border-radius: 12px; padding: 12px; }
+    .photo-frame { height: 220px; border: 1px dashed #ccc; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #777; font-size: 14px; }
+    .actions { display: flex; gap: 8px; }
+    .wf-footer { font-size: 10px; color: #aaa; text-align: center; padding-top: 4px; border-top: 1px dashed #ddd; }
+  </style>
+</head>
+<body>
+  <div class="wf-screen">
+    <div class="sheet">
+      <div class="wf-nav">
+        <a href="./month-home-photo.html" class="wf-link">Cancel</a>
+        <div class="wf-title">Wednesday, April 8</div>
+        <a href="./month-home-photo.html" class="wf-link">Done</a>
+      </div>
+
+      <div class="tabs">
+        <a href="./day-sheet-photo.html" class="wf-link"><div class="wf-button-secondary active">Photo</div></a>
+        <a href="./day-sheet-doodle.html" class="wf-link"><div class="wf-button-secondary">Doodle</div></a>
+        <a href="./day-sheet-text.html" class="wf-link"><div class="wf-button-secondary">Text</div></a>
+      </div>
+
+      <div class="wf-card">
+        <div class="photo-frame">Selected photo preview</div>
+      </div>
+
+      <div class="actions">
+        <div class="wf-button-secondary active" style="flex: 1;">Replace</div>
+        <div class="wf-button-secondary" style="flex: 1;">Clear</div>
+      </div>
+
+      <div class="wf-footer">Screen: Day Sheet · Photo Tab · Use cases: UC-003, UC-004</div>
+    </div>
+  </div>
+</body>
+</html>
