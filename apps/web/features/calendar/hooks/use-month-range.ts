@@ -68,7 +68,7 @@ export function useMonthRange(anchorDate = new Date()) {
 
     window.scrollTo({
       top: Math.max(currentMonthSection.offsetTop - MONTH_TOP_OFFSET, 0),
-      behavior: "instant",
+      behavior: "auto",
     })
     setActiveMonthKey(currentMonthKey)
     hasInitialScrollRef.current = true

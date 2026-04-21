@@ -17,6 +17,10 @@ import { motionTokens } from "@workspace/ui/lib/motion"
 import { cn } from "@workspace/ui/lib/utils"
 
 import type { CalendarDayRecord, ContentType, EditorDraft } from "../model/types"
+import {
+  createSessionPhotoSlot,
+  releaseSessionPhotoSlot,
+} from "../utils/session-photo"
 import { parseIsoDate } from "../utils/date"
 import {
   floatingSheetUi,
@@ -39,7 +43,7 @@ type DayEditorSheetProps = {
   activePreviewType: ContentType
   initialLift?: number
   onOpenChange: (open: boolean) => void
-  onSave: (record: CalendarDayRecord) => void
+  onSave: (record: CalendarDayRecord) => Promise<void> | void
   open: boolean
   record: CalendarDayRecord | null
 }
@@ -62,10 +66,13 @@ export function DayEditorSheet({
   const [stage, setStage] = React.useState<SheetStage>("peek")
   const [contentStage, setContentStage] = React.useState<SheetStage>("peek")
   const [isDrawing, setIsDrawing] = React.useState(false)
+  const [isSaving, setIsSaving] = React.useState(false)
   const [viewportWidth, setViewportWidth] = React.useState(393)
   const [viewportHeight, setViewportHeight] = React.useState(780)
   const [viewportBottomInset, setViewportBottomInset] = React.useState(0)
   const stageTimerRef = React.useRef<number | null>(null)
+  const latestDraftRef = React.useRef<EditorDraft | null>(record)
+  const latestRecordRef = React.useRef(record)
   const dockLaunchFrame = getDockHandoffFrame(initialLift, viewportWidth)
   const dockExitFrame = getDockHandoffFrame(0, viewportWidth)
   const { expanded: expandedFrame, peek: peekFrame } = getFloatingSheetDetents({
@@ -82,6 +89,13 @@ export function DayEditorSheet({
     return () => {
       if (stageTimerRef.current !== null) {
         window.clearTimeout(stageTimerRef.current)
+      }
+
+      const draftPhoto = latestDraftRef.current?.photo
+      const persistedPhoto = latestRecordRef.current?.photo
+
+      if (draftPhoto?.src !== persistedPhoto?.src) {
+        releaseSessionPhotoSlot(draftPhoto)
       }
     }
   }, [])
@@ -119,7 +133,13 @@ export function DayEditorSheet({
   }, [])
 
   React.useEffect(() => {
-    setDraft(record)
+    setDraft((current) => {
+      if (current?.photo?.src !== record?.photo?.src) {
+        releaseSessionPhotoSlot(current?.photo)
+      }
+
+      return record
+    })
 
     if (record) {
       setActiveTab(activePreviewType)
@@ -148,6 +168,14 @@ export function DayEditorSheet({
       setIsDrawing(false)
     }
   }, [open])
+
+  React.useEffect(() => {
+    latestDraftRef.current = draft
+  }, [draft])
+
+  React.useEffect(() => {
+    latestRecordRef.current = record
+  }, [record])
 
   function clearStageTimer() {
     if (stageTimerRef.current !== null) {
@@ -212,7 +240,20 @@ export function DayEditorSheet({
   }
 
   function updatePhoto(nextSlot?: EditorDraft["photo"]) {
-    setDraft((current) => (current ? { ...current, photo: nextSlot } : current))
+    setDraft((current) => {
+      if (!current) {
+        return current
+      }
+
+      if (current.photo?.src !== nextSlot?.src && current.photo?.src !== record?.photo?.src) {
+        releaseSessionPhotoSlot(current.photo)
+      }
+
+      return {
+        ...current,
+        photo: nextSlot,
+      }
+    })
   }
 
   function updateDoodle(nextSlot?: EditorDraft["doodle"]) {
@@ -223,28 +264,43 @@ export function DayEditorSheet({
     setDraft((current) => (current ? { ...current, text: nextSlot } : current))
   }
 
-  function persistDraft() {
+  async function persistDraft() {
     if (!draft) {
       return
     }
 
-    onSave({
-      ...draft,
-      currentPreviewType: activeTab,
-    })
+    setIsSaving(true)
+
+    try {
+      await onSave({
+        ...draft,
+        currentPreviewType: activeTab,
+      })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  function closeEditor() {
+  async function closeEditor() {
+    if (isSaving) {
+      return
+    }
+
     clearStageTimer()
-    persistDraft()
-    onOpenChange(false)
+
+    try {
+      await persistDraft()
+      onOpenChange(false)
+    } catch {
+      return
+    }
   }
 
   function handleDragEnd(
     _: PointerEvent | MouseEvent | TouchEvent,
     info: PanInfo
   ) {
-    if (isDrawing) {
+    if (isDrawing || isSaving) {
       settleDrag()
       return
     }
@@ -254,7 +310,7 @@ export function DayEditorSheet({
         info.offset.y > motionTokens.gesture.sheetDismissOffset ||
         info.velocity.y > motionTokens.gesture.sheetDismissVelocity
       ) {
-        closeEditor()
+        void closeEditor()
         return
       }
 
@@ -287,7 +343,13 @@ export function DayEditorSheet({
     }
 
     if (activeTab === "photo") {
-      return <PhotoEditor mode="peek" onChange={updatePhoto} slot={draft.photo} />
+      return (
+        <PhotoEditor
+          mode="peek"
+          onSelectFile={(file) => updatePhoto(createSessionPhotoSlot(file))}
+          slot={draft.photo}
+        />
+      )
     }
 
     if (activeTab === "doodle") {
@@ -327,8 +389,8 @@ export function DayEditorSheet({
               ease: motionTokens.ease.fade,
             }}
             onClick={() => {
-              if (!isDrawing) {
-                closeEditor()
+              if (!isDrawing && !isSaving) {
+                void closeEditor()
               }
             }}
           />
@@ -423,13 +485,13 @@ export function DayEditorSheet({
                   style={{
                     height: floatingSheetUi.handleTouchHeight,
                     maxWidth: 88,
-                    touchAction: isDrawing ? "auto" : "none",
+                    touchAction: isDrawing || isSaving ? "auto" : "none",
                     WebkitTapHighlightColor: "transparent",
                     WebkitUserSelect: "none",
                     userSelect: "none",
                   }}
                   onPointerDown={(event) => {
-                    if (!isDrawing) {
+                    if (!isDrawing && !isSaving) {
                       dragControls.start(event)
                     }
                   }}
@@ -551,7 +613,7 @@ export function DayEditorSheet({
                       <PhotoEditor
                         label="Photo"
                         mode="expanded"
-                        onChange={updatePhoto}
+                        onSelectFile={(file) => updatePhoto(createSessionPhotoSlot(file))}
                         slot={draft.photo}
                       />
                     </section>

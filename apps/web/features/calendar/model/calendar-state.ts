@@ -22,7 +22,7 @@ export type CalendarState = {
 export type CalendarAction =
   | { type: "open-editor"; date: string }
   | { type: "close-editor" }
-  | { type: "save-record"; record: CalendarDayRecord }
+  | { type: "save-record"; date: string; record: CalendarDayRecord | null }
   | { type: "cycle-preview-mode" }
   | { type: "toggle-filter"; contentType: ContentType }
 
@@ -30,6 +30,17 @@ const TEXT_MAX_LENGTH = 20
 
 function clampTextValue(value?: string) {
   return value?.trim().slice(0, TEXT_MAX_LENGTH)
+}
+
+function normalizePhotoSlot(record: CalendarDayRecord) {
+  if (!record.photo) {
+    return undefined
+  }
+
+  return {
+    ...record.photo,
+    assetId: record.photo.assetId ?? `${record.photo.source}:${record.photo.src}`,
+  }
 }
 
 export function createEmptyDayRecord(date: string): CalendarDayRecord {
@@ -40,6 +51,7 @@ export function createEmptyDayRecord(date: string): CalendarDayRecord {
 }
 
 export function sanitizeDayRecord(record: CalendarDayRecord) {
+  const normalizedPhoto = normalizePhotoSlot(record)
   const normalizedText = record.text
     ? {
         ...record.text,
@@ -51,7 +63,7 @@ export function sanitizeDayRecord(record: CalendarDayRecord) {
   const nextRecord: CalendarDayRecord = {
     date: record.date,
     currentPreviewType: record.currentPreviewType,
-    photo: hasSlotContent(record, "photo") ? record.photo : undefined,
+    photo: hasSlotContent(record, "photo") ? normalizedPhoto : undefined,
     doodle: hasSlotContent(record, "doodle") ? record.doodle : undefined,
     text:
       normalizedText && hasSlotContent({ ...record, text: normalizedText }, "text")
@@ -76,18 +88,27 @@ export function sanitizeDayRecord(record: CalendarDayRecord) {
 export function createInitialCalendarState(records: CalendarDayRecord[]): CalendarState {
   return {
     activePreviewType: "photo",
-    recordsByDate: records.reduce<Record<string, CalendarDayRecord>>((accumulator, record) => {
-      const sanitized = sanitizeDayRecord(record)
-
-      if (sanitized) {
-        accumulator[record.date] = sanitized
-      }
-
-      return accumulator
-    }, {}),
+    recordsByDate: normalizeCalendarRecords(records),
     previewFilter: createDefaultPreviewFilter(),
     selectedDate: null,
   }
+}
+
+export function normalizeCalendarRecords(records: CalendarDayRecord[]) {
+  return records.reduce<Record<string, CalendarDayRecord>>((accumulator, record) => {
+    const sanitized = sanitizeDayRecord(record)
+
+    if (!sanitized) {
+      return accumulator
+    }
+
+    if (accumulator[sanitized.date]) {
+      throw new Error(`Duplicate calendar day record: ${sanitized.date}`)
+    }
+
+    accumulator[sanitized.date] = sanitized
+    return accumulator
+  }, {})
 }
 
 export function getRecordForDate(
@@ -113,13 +134,12 @@ export function calendarReducer(state: CalendarState, action: CalendarAction): C
   }
 
   if (action.type === "save-record") {
-    const sanitized = sanitizeDayRecord(action.record)
     const nextRecords = { ...state.recordsByDate }
 
-    if (sanitized) {
-      nextRecords[sanitized.date] = sanitized
+    if (action.record) {
+      nextRecords[action.record.date] = action.record
     } else {
-      delete nextRecords[action.record.date]
+      delete nextRecords[action.date]
     }
 
     return {
