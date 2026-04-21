@@ -1,5 +1,7 @@
 import type { CalendarGridDay, MonthSection } from "../model/types"
 
+const isoLocalDatePattern = /^(\d{4})-(\d{2})-(\d{2})$/
+
 function pad(value: number) {
   return value.toString().padStart(2, "0")
 }
@@ -8,7 +10,35 @@ export function toIsoDate(date: Date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
+export function isValidIsoDate(value: string) {
+  const match = isoLocalDatePattern.exec(value)
+
+  if (!match) {
+    return false
+  }
+
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+
+  if (month < 1 || month > 12 || day < 1 || day > 31) {
+    return false
+  }
+
+  const candidate = new Date(year, month - 1, day)
+
+  return (
+    candidate.getFullYear() === year &&
+    candidate.getMonth() === month - 1 &&
+    candidate.getDate() === day
+  )
+}
+
 export function parseIsoDate(value: string) {
+  if (!isValidIsoDate(value)) {
+    throw new Error(`Invalid local date: ${value}`)
+  }
+
   const parts = value.split("-")
   const year = Number(parts[0] ?? 0)
   const month = Number(parts[1] ?? 1)

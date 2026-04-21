@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { isValidIsoDate } from "../utils/date"
+
 export const contentTypes = ["photo", "doodle", "text"] as const
 
 export type ContentType = (typeof contentTypes)[number]
@@ -8,6 +10,7 @@ export type PreviewFilterState = Record<ContentType, boolean>
 
 export type CalendarPhotoSlot = {
   type: "photo"
+  assetId?: string
   src: string
   alt: string
   source: "seed" | "session"
@@ -79,6 +82,7 @@ const doodleStrokeSchema = z.object({
 
 export const photoSlotSchema = z.object({
   type: z.literal("photo"),
+  assetId: z.string().min(1).optional(),
   src: z.string().min(1),
   alt: z.string().min(1),
   source: z.enum(["seed", "session"]).default("seed"),
@@ -96,7 +100,7 @@ export const textSlotSchema = z.object({
 })
 
 export const calendarDayRecordSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().refine(isValidIsoDate, "Invalid local date"),
   currentPreviewType: z.enum(contentTypes),
   photo: photoSlotSchema.optional(),
   doodle: doodleSlotSchema.optional(),

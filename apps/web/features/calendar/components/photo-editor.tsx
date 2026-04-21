@@ -12,14 +12,14 @@ import type { CalendarPhotoSlot } from "../model/types"
 type PhotoEditorProps = {
   label?: string
   mode?: "peek" | "expanded"
-  onChange: (slot?: CalendarPhotoSlot) => void
+  onSelectFile: (file: File) => void
   slot?: CalendarPhotoSlot
 }
 
 export function PhotoEditor({
   label,
   mode = "peek",
-  onChange,
+  onSelectFile,
   slot,
 }: PhotoEditorProps) {
   const inputRef = React.useRef<HTMLInputElement | null>(null)
@@ -36,16 +36,7 @@ export function PhotoEditor({
       return
     }
 
-    if (slot?.source === "session" && slot.src.startsWith("blob:")) {
-      URL.revokeObjectURL(slot.src)
-    }
-
-    onChange({
-      type: "photo",
-      src: URL.createObjectURL(file),
-      alt: file.name.replace(/\.[^.]+$/, "") || "Selected photo",
-      source: "session",
-    })
+    onSelectFile(file)
     event.target.value = ""
   }
 

@@ -3,12 +3,17 @@ import assert from "node:assert/strict"
 
 import {
   calendarReducer,
-  createEmptyDayRecord,
   createInitialCalendarState,
 } from "../model/calendar-state"
 import type { CalendarDayRecord } from "../model/types"
 import { parseCalendarSeed } from "../data/parse-calendar-seed"
-import { buildMonthSection, createInitialMonthRange, expandMonthRange } from "../utils/date"
+import {
+  buildMonthSection,
+  createInitialMonthRange,
+  expandMonthRange,
+  parseIsoDate,
+  toIsoDate,
+} from "../utils/date"
 import {
   createDefaultPreviewFilter,
   cyclePreviewMode,
@@ -38,6 +43,37 @@ test("parseCalendarSeed validates and returns records", () => {
 
   assert.equal(parsed.length, 1)
   assert.equal(parsed[0]?.date, "2026-04-21")
+})
+
+test("parseCalendarSeed rejects duplicate local dates", () => {
+  assert.throws(
+    () =>
+      parseCalendarSeed({
+        records: [
+          sampleRecord,
+          {
+            ...sampleRecord,
+            currentPreviewType: "text",
+          },
+        ],
+      }),
+    /Duplicate calendar day record/
+  )
+})
+
+test("parseCalendarSeed rejects impossible local dates", () => {
+  assert.throws(
+    () =>
+      parseCalendarSeed({
+        records: [
+          {
+            ...sampleRecord,
+            date: "2026-02-30",
+          },
+        ],
+      }),
+    /Invalid local date/
+  )
 })
 
 test("cyclePreviewMode rotates only through enabled content types", () => {
@@ -111,6 +147,15 @@ test("buildMonthSection creates a 7-column month grid", () => {
   assert.equal(section.weeks[0]?.[3]?.date, "2026-04-01")
 })
 
+test("parseIsoDate round-trips valid local dates", () => {
+  assert.equal(toIsoDate(parseIsoDate("2026-02-28")), "2026-02-28")
+  assert.equal(toIsoDate(parseIsoDate("2028-02-29")), "2028-02-29")
+})
+
+test("parseIsoDate rejects impossible local dates", () => {
+  assert.throws(() => parseIsoDate("2026-02-30"), /Invalid local date/)
+})
+
 test("calendarReducer prevents disabling the last filter type", () => {
   const initialState = createInitialCalendarState([sampleRecord])
 
@@ -144,10 +189,25 @@ test("calendarReducer removes empty records on save", () => {
   const initialState = createInitialCalendarState([sampleRecord])
   const nextState = calendarReducer(initialState, {
     type: "save-record",
-    record: createEmptyDayRecord("2026-04-21"),
+    date: "2026-04-21",
+    record: null,
   })
 
   assert.equal(nextState.recordsByDate["2026-04-21"], undefined)
+})
+
+test("createInitialCalendarState rejects duplicate record identities", () => {
+  assert.throws(
+    () =>
+      createInitialCalendarState([
+        sampleRecord,
+        {
+          ...sampleRecord,
+          currentPreviewType: "text",
+        },
+      ]),
+    /Duplicate calendar day record/
+  )
 })
 
 test("createDefaultPreviewFilter enables all types", () => {
