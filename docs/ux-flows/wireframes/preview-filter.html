@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preview Filter</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #e0e0e0; display: flex; justify-content: center; padding: 20px 0; }
+    .wf-screen { width: 375px; min-height: 812px; background: #f5f5f5; border: 2px dashed #ccc; display: flex; flex-direction: column; }
+    .wf-nav { background: #ededed; border-bottom: 1px dashed #ccc; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; color: #666; }
+    .wf-content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .wf-card, .wf-list-item { background: #fff; border: 1px dashed #ccc; border-radius: 12px; padding: 14px; }
+    .wf-list-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .wf-link { color: inherit; text-decoration: none; }
+    .wf-label { font-size: 12px; color: #888; }
+    .wf-title { font-size: 26px; font-weight: 700; color: #444; letter-spacing: -0.03em; }
+    .pill { border: 1px dashed #999; border-radius: 999px; padding: 5px 9px; font-size: 12px; color: #666; }
+    .wf-footer { font-size: 10px; color: #aaa; text-align: center; padding: 8px; border-top: 1px dashed #ddd; }
+  </style>
+</head>
+<body>
+  <div class="wf-screen">
+    <div class="wf-nav">
+      <a href="./month-home-photo.html" class="wf-link">&larr; Back</a>
+      <span>Cycle Includes</span>
+      <span></span>
+    </div>
+
+    <div class="wf-content">
+      <div class="wf-card">
+        <div class="wf-title">Preview Filter</div>
+        <div class="wf-label" style="margin-top: 6px;">Prototype links below represent valid filter outcomes and returning month states.</div>
+      </div>
+
+      <a href="./month-home-photo.html" class="wf-link">
+        <div class="wf-list-item">
+          <div>
+            <div style="font-weight: 600; color: #444;">Photo active</div>
+            <div class="wf-label" style="margin-top: 4px;">All types enabled, global mode returns in Photo.</div>
+          </div>
+          <div class="pill">Apply</div>
+        </div>
+      </a>
+
+      <a href="./month-home-doodle.html" class="wf-link">
+        <div class="wf-list-item">
+          <div>
+            <div style="font-weight: 600; color: #444;">Doodle active</div>
+            <div class="wf-label" style="margin-top: 4px;">Global mode returns in Doodle.</div>
+          </div>
+          <div class="pill">Apply</div>
+        </div>
+      </a>
+
+      <a href="./month-home-text.html" class="wf-link">
+        <div class="wf-list-item">
+          <div>
+            <div style="font-weight: 600; color: #444;">Text active</div>
+            <div class="wf-label" style="margin-top: 4px;">Global mode returns in Text.</div>
+          </div>
+          <div class="pill">Apply</div>
+        </div>
+      </a>
+
+      <div class="wf-card">
+        <div class="wf-label">Rule</div>
+        <div style="margin-top: 6px; color: #555; font-size: 14px; line-height: 1.45;">At least one type always stays enabled. The menu stays compact and does not explain the product.</div>
+      </div>
+    </div>
+
+    <div class="wf-footer">Screen: Preview Filter · Use cases: UC-005, UC-006</div>
+  </div>
+</body>
+</html>

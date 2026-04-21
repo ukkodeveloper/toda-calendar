@@ -1,0 +1,592 @@
+{
+  "records": [
+    {
+      "date": "2026-03-29",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/window-light.svg",
+        "alt": "Soft morning light on a window ledge.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "title": "Spring light",
+        "body": "Kept the windows open all morning."
+      }
+    },
+    {
+      "date": "2026-04-01",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/window-light.svg",
+        "alt": "Sunlight on a white curtain.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "title": "April open",
+        "body": "Started April by airing out the room and making the bed."
+      }
+    },
+    {
+      "date": "2026-04-02",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "Booked a slower afternoon and kept the phone face down."
+      }
+    },
+    {
+      "date": "2026-04-03",
+      "currentPreviewType": "doodle",
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 20, "y": 72 }, { "x": 24, "y": 40 }, { "x": 34, "y": 22 }, { "x": 42, "y": 38 }, { "x": 50, "y": 18 }, { "x": 58, "y": 38 }, { "x": 66, "y": 22 }, { "x": 76, "y": 40 }, { "x": 80, "y": 72 }, { "x": 20, "y": 72 }]
+          },
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 38, "y": 50 }, { "x": 40, "y": 50 }]
+          },
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 60, "y": 50 }, { "x": 62, "y": 50 }]
+          },
+          {
+            "color": "#F97316",
+            "width": 3,
+            "points": [{ "x": 44, "y": 63 }, { "x": 50, "y": 67 }, { "x": 56, "y": 63 }]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Sketched a sleepy cat face after the rain."
+      }
+    },
+    {
+      "date": "2026-04-04",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/breakfast-toast.svg",
+        "alt": "Toast and coffee on a pale table.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "title": "Slow breakfast",
+        "body": "A tiny breakfast that felt more expensive than it was."
+      }
+    },
+    {
+      "date": "2026-04-05",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "Did laundry, watered the plant, and kept the evening quiet."
+      }
+    },
+    {
+      "date": "2026-04-06",
+      "currentPreviewType": "doodle",
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 26, "y": 76 }, { "x": 22, "y": 50 }, { "x": 26, "y": 16 }, { "x": 34, "y": 12 }, { "x": 38, "y": 44 }, { "x": 50, "y": 30 }, { "x": 62, "y": 44 }, { "x": 66, "y": 12 }, { "x": 74, "y": 16 }, { "x": 78, "y": 50 }, { "x": 74, "y": 76 }, { "x": 26, "y": 76 }]
+          },
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 40, "y": 56 }, { "x": 42, "y": 56 }]
+          },
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 58, "y": 56 }, { "x": 60, "y": 56 }]
+          },
+          {
+            "color": "#EC4899",
+            "width": 3,
+            "points": [{ "x": 48, "y": 68 }, { "x": 50, "y": 72 }, { "x": 52, "y": 68 }]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Tried drawing a bunny with long ears and a small pink nose."
+      }
+    },
+    {
+      "date": "2026-04-07",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/blossom-path.svg",
+        "alt": "Soft pink blossoms over a walking path.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "title": "Detour",
+        "body": "The side street was full of pale blossom light."
+      }
+    },
+    {
+      "date": "2026-04-08",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "Left work on time and resisted opening the laptop again."
+      }
+    },
+    {
+      "date": "2026-04-09",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/subway-window.svg",
+        "alt": "Evening lights reflected in a subway window.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "body": "Watched the city blur by and did absolutely nothing else."
+      }
+    },
+    {
+      "date": "2026-04-10",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "title": "Tiny win",
+        "body": "Closed the week with a calmer mind and a cleaner desk."
+      }
+    },
+    {
+      "date": "2026-04-11",
+      "currentPreviewType": "doodle",
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 22, "y": 72 }, { "x": 20, "y": 44 }, { "x": 28, "y": 24 }, { "x": 38, "y": 18 }, { "x": 44, "y": 30 }, { "x": 56, "y": 30 }, { "x": 62, "y": 18 }, { "x": 72, "y": 24 }, { "x": 80, "y": 44 }, { "x": 78, "y": 72 }, { "x": 22, "y": 72 }]
+          },
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 38, "y": 50 }, { "x": 40, "y": 50 }]
+          },
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 60, "y": 50 }, { "x": 62, "y": 50 }]
+          },
+          {
+            "color": "#F59E0B",
+            "width": 3,
+            "points": [{ "x": 46, "y": 60 }, { "x": 50, "y": 64 }, { "x": 54, "y": 60 }]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "A round little bear face came out better than expected."
+      }
+    },
+    {
+      "date": "2026-04-12",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/studio-plant.svg",
+        "alt": "A quiet corner with a plant and stacked books.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "body": "Moved the shelf around and the room felt new again."
+      }
+    },
+    {
+      "date": "2026-04-13",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "A very plain Monday, which was exactly what I needed."
+      }
+    },
+    {
+      "date": "2026-04-14",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/quiet-desk.svg",
+        "alt": "A quiet desk with tea and a notebook.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "title": "Desk ritual",
+        "body": "Tea first, messages later."
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "currentPreviewType": "doodle",
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 20, "y": 72 }, { "x": 24, "y": 40 }, { "x": 34, "y": 22 }, { "x": 42, "y": 38 }, { "x": 50, "y": 18 }, { "x": 58, "y": 38 }, { "x": 66, "y": 22 }, { "x": 76, "y": 40 }, { "x": 80, "y": 72 }, { "x": 20, "y": 72 }]
+          },
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 38, "y": 50 }, { "x": 40, "y": 50 }]
+          },
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 60, "y": 50 }, { "x": 62, "y": 50 }]
+          },
+          {
+            "color": "#F97316",
+            "width": 3,
+            "points": [{ "x": 44, "y": 63 }, { "x": 50, "y": 67 }, { "x": 56, "y": 63 }]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Drew the cat again, but this one looked more awake."
+      }
+    },
+    {
+      "date": "2026-04-16",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/evening-lamp.svg",
+        "alt": "A warm lamp beside an open book.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "title": "Lamp glow",
+        "body": "Read three chapters before bed and slept early."
+      }
+    },
+    {
+      "date": "2026-04-17",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "Canceled one plan and instantly became a nicer person."
+      }
+    },
+    {
+      "date": "2026-04-18",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/river-walk.svg",
+        "alt": "An early evening river walk with a pale blue sky.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "body": "The wind was cold, but the river looked silver."
+      }
+    },
+    {
+      "date": "2026-04-19",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "Used the long way home just to stay outside a little longer."
+      }
+    },
+    {
+      "date": "2026-04-20",
+      "currentPreviewType": "doodle",
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 26, "y": 76 }, { "x": 22, "y": 50 }, { "x": 26, "y": 16 }, { "x": 34, "y": 12 }, { "x": 38, "y": 44 }, { "x": 50, "y": 30 }, { "x": 62, "y": 44 }, { "x": 66, "y": 12 }, { "x": 74, "y": 16 }, { "x": 78, "y": 50 }, { "x": 74, "y": 76 }, { "x": 26, "y": 76 }]
+          },
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 40, "y": 56 }, { "x": 42, "y": 56 }]
+          },
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 58, "y": 56 }, { "x": 60, "y": 56 }]
+          },
+          {
+            "color": "#EC4899",
+            "width": 3,
+            "points": [{ "x": 48, "y": 68 }, { "x": 50, "y": 72 }, { "x": 52, "y": 68 }]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Another bunny face, this time with softer ears."
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/quiet-desk.svg",
+        "alt": "A quiet desk with tea and a notebook.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 22, "y": 72 }, { "x": 20, "y": 44 }, { "x": 28, "y": 24 }, { "x": 38, "y": 18 }, { "x": 44, "y": 30 }, { "x": 56, "y": 30 }, { "x": 62, "y": 18 }, { "x": 72, "y": 24 }, { "x": 80, "y": 44 }, { "x": 78, "y": 72 }, { "x": 22, "y": 72 }]
+          },
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 38, "y": 50 }, { "x": 40, "y": 50 }]
+          },
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 60, "y": 50 }, { "x": 62, "y": 50 }]
+          },
+          {
+            "color": "#F59E0B",
+            "width": 3,
+            "points": [{ "x": 46, "y": 60 }, { "x": 50, "y": 64 }, { "x": 54, "y": 60 }]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Built the first calm draft of the calendar."
+      }
+    },
+    {
+      "date": "2026-04-22",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/window-light.svg",
+        "alt": "Soft morning light on a window ledge.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "body": "The light hit the wall so gently that I stopped working for a minute."
+      }
+    },
+    {
+      "date": "2026-04-23",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "A good meeting, a short walk, and dinner before eight."
+      }
+    },
+    {
+      "date": "2026-04-24",
+      "currentPreviewType": "doodle",
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 22, "y": 72 }, { "x": 20, "y": 44 }, { "x": 28, "y": 24 }, { "x": 38, "y": 18 }, { "x": 44, "y": 30 }, { "x": 56, "y": 30 }, { "x": 62, "y": 18 }, { "x": 72, "y": 24 }, { "x": 80, "y": 44 }, { "x": 78, "y": 72 }, { "x": 22, "y": 72 }]
+          },
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 38, "y": 50 }, { "x": 40, "y": 50 }]
+          },
+          {
+            "color": "#5B4636",
+            "width": 3,
+            "points": [{ "x": 60, "y": 50 }, { "x": 62, "y": 50 }]
+          },
+          {
+            "color": "#F59E0B",
+            "width": 3,
+            "points": [{ "x": 46, "y": 60 }, { "x": 50, "y": 64 }, { "x": 54, "y": 60 }]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "The bear sketch somehow looked like it was smiling."
+      }
+    },
+    {
+      "date": "2026-04-25",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/breakfast-toast.svg",
+        "alt": "Toast and coffee on a pale table.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "body": "Weekend breakfast on the smallest plate I own."
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "Reset the apartment for Monday and queued up one favorite album."
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/subway-window.svg",
+        "alt": "Evening lights reflected in a subway window.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "body": "Commute home, headphones on, no notifications."
+      }
+    },
+    {
+      "date": "2026-04-28",
+      "currentPreviewType": "doodle",
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 20, "y": 72 }, { "x": 24, "y": 40 }, { "x": 34, "y": 22 }, { "x": 42, "y": 38 }, { "x": 50, "y": 18 }, { "x": 58, "y": 38 }, { "x": 66, "y": 22 }, { "x": 76, "y": 40 }, { "x": 80, "y": 72 }, { "x": 20, "y": 72 }]
+          },
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 38, "y": 50 }, { "x": 40, "y": 50 }]
+          },
+          {
+            "color": "#1F2937",
+            "width": 3,
+            "points": [{ "x": 60, "y": 50 }, { "x": 62, "y": 50 }]
+          },
+          {
+            "color": "#F97316",
+            "width": 3,
+            "points": [{ "x": 44, "y": 63 }, { "x": 50, "y": 67 }, { "x": 56, "y": 63 }]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "One more cat face, mostly because the cheeks were fun to draw."
+      }
+    },
+    {
+      "date": "2026-04-29",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "body": "Kept the calendar light on purpose and left some space blank."
+      }
+    },
+    {
+      "date": "2026-04-30",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/blossom-path.svg",
+        "alt": "Soft pink blossoms over a walking path.",
+        "source": "seed"
+      },
+      "text": {
+        "type": "text",
+        "title": "April close",
+        "body": "Finished the month outside while the petals kept falling."
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/river-walk.svg",
+        "alt": "An early evening river walk with a pale blue sky.",
+        "source": "seed"
+      }
+    },
+    {
+      "date": "2026-05-18",
+      "currentPreviewType": "text",
+      "text": {
+        "type": "text",
+        "title": "Reminder to self",
+        "body": "Make room for the reminder surface next, but keep the calendar calm."
+      }
+    },
+    {
+      "date": "2026-06-07",
+      "currentPreviewType": "doodle",
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 26, "y": 76 }, { "x": 22, "y": 50 }, { "x": 26, "y": 16 }, { "x": 34, "y": 12 }, { "x": 38, "y": 44 }, { "x": 50, "y": 30 }, { "x": 62, "y": 44 }, { "x": 66, "y": 12 }, { "x": 74, "y": 16 }, { "x": 78, "y": 50 }, { "x": 74, "y": 76 }, { "x": 26, "y": 76 }]
+          },
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 40, "y": 56 }, { "x": 42, "y": 56 }]
+          },
+          {
+            "color": "#4B5563",
+            "width": 3,
+            "points": [{ "x": 58, "y": 56 }, { "x": 60, "y": 56 }]
+          },
+          {
+            "color": "#EC4899",
+            "width": 3,
+            "points": [{ "x": 48, "y": 68 }, { "x": 50, "y": 72 }, { "x": 52, "y": 68 }]
+          }
+        ]
+      }
+    }
+  ]
+}

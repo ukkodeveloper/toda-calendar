@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Month Timeline · Photo Mode</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #e0e0e0; display: flex; justify-content: center; padding: 20px 0; }
+    .wf-screen { width: 375px; min-height: 812px; background: #f5f5f5; border: 2px dashed #ccc; display: flex; flex-direction: column; }
+    .wf-nav { background: #ededed; border-bottom: 1px dashed #ccc; padding: 12px 16px 10px; display: flex; justify-content: space-between; gap: 12px; }
+    .wf-content { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .wf-card { background: #fff; border: 1px dashed #ccc; border-radius: 12px; padding: 10px; }
+    .wf-link { color: inherit; text-decoration: none; }
+    .wf-label { font-size: 12px; color: #888; }
+    .wf-title { font-size: 32px; line-height: 1.05; font-weight: 700; color: #444; letter-spacing: -0.03em; }
+    .wf-button-secondary { background: transparent; border: 1px dashed #999; padding: 9px 12px; font-size: 13px; color: #666; border-radius: 999px; text-align: center; }
+    .weekday-row { display: grid; grid-template-columns: repeat(7, 1fr); font-size: 11px; color: #777; text-align: center; gap: 4px; }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .day-cell { min-height: 82px; background: #fff; border: 1px dashed #ccc; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+    .day-cell.muted { background: #f0f0f0; color: #999; }
+    .day-num { font-size: 11px; font-weight: 700; color: #555; }
+    .preview-box { flex: 1; border: 1px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #777; }
+    .section-hint { font-size: 12px; color: #777; padding: 4px 2px 0; }
+    .wf-footer { font-size: 10px; color: #aaa; text-align: center; padding: 8px; border-top: 1px dashed #ddd; }
+  </style>
+</head>
+<body>
+  <div class="wf-screen">
+    <div class="wf-nav">
+      <div>
+        <div class="wf-title">April 2026</div>
+        <a href="./month-home-photo.html" class="wf-link"><div class="wf-label" style="margin-top: 4px; color: #666;">Today</div></a>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: flex-start; margin-top: 4px;">
+        <a href="./month-home-doodle.html" class="wf-link"><div class="wf-button-secondary">Photo</div></a>
+        <a href="./preview-filter.html" class="wf-link"><div class="wf-button-secondary">Filter</div></a>
+      </div>
+    </div>
+
+    <div class="wf-content">
+      <div class="wf-card">
+        <div class="weekday-row">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+      </div>
+
+      <div class="month-grid">
+        <div class="day-cell muted"><div class="day-num">29</div><div class="preview-box"></div></div>
+        <div class="day-cell muted"><div class="day-num">30</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">1</div><div class="preview-box">Photo</div></div>
+        <div class="day-cell"><div class="day-num">2</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">3</div><div class="preview-box">Photo</div></div>
+        <div class="day-cell"><div class="day-num">4</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">5</div><div class="preview-box"></div></div>
+
+        <div class="day-cell"><div class="day-num">6</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">7</div><div class="preview-box">Photo</div></div>
+        <a href="./day-sheet-photo.html" class="wf-link"><div class="day-cell"><div class="day-num">8</div><div class="preview-box">Photo</div></div></a>
+        <div class="day-cell"><div class="day-num">9</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">10</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">11</div><div class="preview-box">Photo</div></div>
+        <div class="day-cell"><div class="day-num">12</div><div class="preview-box"></div></div>
+
+        <div class="day-cell"><div class="day-num">13</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">14</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">15</div><div class="preview-box">Photo</div></div>
+        <div class="day-cell"><div class="day-num">16</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">17</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">18</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">19</div><div class="preview-box">Photo</div></div>
+
+        <div class="day-cell"><div class="day-num">20</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">21</div><div class="preview-box">Photo</div></div>
+        <div class="day-cell"><div class="day-num">22</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">23</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">24</div><div class="preview-box">Photo</div></div>
+        <div class="day-cell"><div class="day-num">25</div><div class="preview-box"></div></div>
+        <div class="day-cell"><div class="day-num">26</div><div class="preview-box"></div></div>
+      </div>
+
+      <div class="section-hint">May 2026 continues below as you scroll.</div>
+    </div>
+
+    <div class="wf-footer">Screen: Month Timeline · Photo Mode · Use cases: UC-001, UC-002, UC-005, UC-006</div>
+  </div>
+</body>
+</html>
