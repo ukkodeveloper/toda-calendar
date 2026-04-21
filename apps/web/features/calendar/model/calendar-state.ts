@@ -26,6 +26,12 @@ export type CalendarAction =
   | { type: "cycle-preview-mode" }
   | { type: "toggle-filter"; contentType: ContentType }
 
+const TEXT_MAX_LENGTH = 20
+
+function clampTextValue(value?: string) {
+  return value?.trim().slice(0, TEXT_MAX_LENGTH)
+}
+
 export function createEmptyDayRecord(date: string): CalendarDayRecord {
   return {
     date,
@@ -34,12 +40,23 @@ export function createEmptyDayRecord(date: string): CalendarDayRecord {
 }
 
 export function sanitizeDayRecord(record: CalendarDayRecord) {
+  const normalizedText = record.text
+    ? {
+        ...record.text,
+        title: clampTextValue(record.text.title),
+        body: clampTextValue(record.text.body) ?? "",
+      }
+    : undefined
+
   const nextRecord: CalendarDayRecord = {
     date: record.date,
     currentPreviewType: record.currentPreviewType,
     photo: hasSlotContent(record, "photo") ? record.photo : undefined,
     doodle: hasSlotContent(record, "doodle") ? record.doodle : undefined,
-    text: hasSlotContent(record, "text") ? record.text : undefined,
+    text:
+      normalizedText && hasSlotContent({ ...record, text: normalizedText }, "text")
+        ? normalizedText
+        : undefined,
   }
 
   const filled = getFilledContentTypes(nextRecord)

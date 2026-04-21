@@ -2,8 +2,10 @@
 
 import {
   AnimatePresence,
+  LayoutGroup,
   animate,
   motion,
+  useDragControls,
   useMotionValue,
   useTransform,
   useReducedMotion,
@@ -73,13 +75,14 @@ function ClosedJournalDock({
   prompt: string
 }) {
   const reducedMotion = useReducedMotion()
+  const dragControls = useDragControls()
   const x = useMotionValue(0)
   const y = useMotionValue(0)
   const [viewportWidth, setViewportWidth] = React.useState(393)
   const sideInset = useTransform(
     y,
     [-dockDetents.gestureRange, 0],
-    [dockDetents.liftedInset, 0],
+    [dockDetents.liftedInset, dockDetents.restInset],
     { clamp: true }
   )
   const bottomInset = useTransform(
@@ -165,6 +168,7 @@ function ClosedJournalDock({
   return (
     <motion.div
       drag
+      dragControls={dragControls}
       dragConstraints={{
         top: -Math.max(180, dockDetents.gestureRange * 2),
         right: Math.max(72, viewportWidth * 0.48),
@@ -172,7 +176,10 @@ function ClosedJournalDock({
         left: -Math.max(72, viewportWidth * 0.48),
       }}
       dragElastic={0.14}
+      dragListener={false}
       dragMomentum={false}
+      onDragEnd={handleDragEnd}
+      className="pointer-events-auto fixed z-40 overflow-hidden text-foreground shadow-[var(--calendar-sheet-shadow)] backdrop-blur-[28px] backdrop-saturate-[1.35]"
       style={{
         x,
         left: sideInset,
@@ -185,9 +192,9 @@ function ClosedJournalDock({
         height: dockHeight,
         scale,
         y,
+        backgroundColor: "var(--calendar-sheet-surface)",
+        boxShadow: "var(--calendar-sheet-shadow), var(--calendar-sheet-inner-shadow)",
       }}
-      onDragEnd={handleDragEnd}
-      className="pointer-events-auto fixed z-40 overflow-hidden border border-black/[0.06] bg-white/92 shadow-[0_-8px_22px_rgba(15,23,42,0.06)] backdrop-blur-[18px]"
       initial={reducedMotion ? { opacity: 1 } : { y: 18, opacity: 0 }}
       animate={reducedMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
       exit={reducedMotion ? { opacity: 0 } : { opacity: 0 }}
@@ -200,27 +207,47 @@ function ClosedJournalDock({
             }
       }
     >
-      <div className="flex h-full flex-col px-[16px] pt-[8px] pb-[max(14px,env(safe-area-inset-bottom))]">
-        <div
-          className="flex w-full items-center justify-center"
-          style={{ height: floatingSheetUi.handleTouchHeight }}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[var(--calendar-sheet-surface)]" />
+        <div className="absolute inset-0 bg-[image:var(--calendar-sheet-glass-overlay)]" />
+        <div className="absolute inset-0 bg-[image:var(--calendar-sheet-top-sheen)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-[var(--calendar-sheet-edge-highlight)]" />
+      </div>
+
+      <div className="relative z-10 flex h-full flex-col px-[16px] pt-[8px] pb-[max(14px,env(safe-area-inset-bottom))]">
+        <button
+          type="button"
+          aria-label="Drag journal drawer"
+          className="flex w-full items-center justify-center rounded-full active:cursor-grabbing"
+          style={{
+            height: floatingSheetUi.handleTouchHeight,
+            touchAction: "none",
+            WebkitTapHighlightColor: "transparent",
+            WebkitUserSelect: "none",
+            userSelect: "none",
+          }}
+          onPointerDown={(event) => {
+            dragControls.start(event)
+          }}
         >
           <motion.span
-            className="rounded-full bg-foreground/14"
+            className="rounded-full"
             initial={false}
             animate={{
               width: floatingSheetUi.handleWidth,
               height: floatingSheetUi.handleHeight,
             }}
+            style={{ backgroundColor: "var(--calendar-sheet-handle)" }}
           />
-        </div>
+        </button>
         <motion.div
           style={{ opacity: promptOpacity }}
           className="mt-[8px] flex flex-1 items-center justify-center"
         >
           <button
             type="button"
-            className="min-w-0 max-w-[288px] text-center outline-none focus-visible:ring-2 focus-visible:ring-[var(--calendar-accent)]/30"
+            className="min-w-0 max-w-[288px] rounded-full px-[12px] py-[6px] text-center outline-none focus-visible:ring-2 focus-visible:ring-[var(--calendar-accent)]/30"
+            style={{ backgroundColor: "var(--calendar-sheet-pill)" }}
             onClick={() => onOpenToday(0)}
           >
             <div className="text-[15px] font-medium tracking-[-0.38px] text-foreground/74">
@@ -296,7 +323,7 @@ export function CalendarApp() {
     modeTimerRef.current = window.setTimeout(() => {
       setIsModeSwitching(false)
       modeTimerRef.current = null
-    }, 240)
+    }, 320)
   }, [dispatch, state.activePreviewType, state.previewFilter])
 
   return (
@@ -329,9 +356,9 @@ export function CalendarApp() {
               <motion.div
                 key={modeLabel}
                 className="inline-flex rounded-full bg-white/82 px-3 py-1.5 text-[0.84rem] font-semibold tracking-[-0.02em] text-foreground/68 shadow-[0_8px_22px_rgba(15,23,42,0.07)] backdrop-blur-[16px]"
-                initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
-                animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
+                initial={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985 }}
+                animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985 }}
                 transition={
                   reducedMotion
                     ? { duration: motionTokens.duration.instant }
@@ -347,62 +374,93 @@ export function CalendarApp() {
           </AnimatePresence>
         </div>
 
-        <div className="mt-3 grid grid-cols-7 px-2.5 text-center text-[0.68rem] font-medium tracking-[0.04em] text-foreground/36">
+        <div className="mt-3 grid grid-cols-7 px-0 text-center text-[0.68rem] font-medium tracking-[0.04em] text-foreground/36">
           {["S", "M", "T", "W", "T", "F", "S"].map((label, index) => (
             <div key={`${label}-${index}`}>{label}</div>
           ))}
         </div>
       </div>
 
-      <div className="relative overflow-hidden px-1.5 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
+      <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
         <div ref={topSentinelRef} className="h-px" />
 
-        <motion.div
-          className="relative"
-          animate={
-            isModeSwitching && !reducedMotion
-              ? { x: -10, opacity: 0.92, scale: 0.997 }
-              : { x: 0, opacity: 1, scale: 1 }
-          }
-          transition={
-            reducedMotion
-              ? { duration: motionTokens.duration.instant }
-              : {
-                  duration: motionTokens.duration.quick,
-                  ease: motionTokens.ease.enter,
-                }
-          }
-        >
+        <div className="relative">
           <AnimatePresence initial={false}>
             {isModeSwitching && !reducedMotion ? (
               <motion.div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 z-10 rounded-[30px] bg-[color:var(--calendar-surface-wash)] backdrop-blur-[8px]"
+                className="pointer-events-none absolute inset-0 z-10 overflow-hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: motionTokens.duration.quick, ease: motionTokens.ease.fade }}
-              />
+                transition={{
+                  duration: motionTokens.duration.quick,
+                  ease: motionTokens.ease.fade,
+                }}
+              >
+                <motion.div
+                  className="absolute inset-0 bg-[color:var(--calendar-mode-flash)] backdrop-blur-[4px]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0.02, 0.1, 0] }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    ...motionTokens.intent.modePageSwap,
+                    times: [0, 0.52, 1],
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 bg-[color:var(--calendar-mode-accent-wash)]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 0.42, 0] }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    ...motionTokens.intent.modePageSwap,
+                    times: [0, 0.32, 1],
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-y-[-8%] left-[-12%] w-[36%] bg-[image:var(--calendar-mode-accent-glow)] blur-[16px]"
+                  initial={{ opacity: 0, x: "10%" }}
+                  animate={{ opacity: [0, 0.64, 0], x: ["10%", "0%", "-12%"] }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    ...motionTokens.intent.modePageSwap,
+                    times: [0, 0.42, 1],
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-y-[-8%] left-[-16%] w-[42%] bg-[image:var(--calendar-mode-sweep-glow)] blur-[14px]"
+                  initial={{ opacity: 0, x: "14%" }}
+                  animate={{ opacity: [0, 0.5, 0], x: ["14%", "2%", "-14%"] }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    ...motionTokens.intent.modePageSwap,
+                    times: [0, 0.48, 1],
+                  }}
+                />
+              </motion.div>
             ) : null}
           </AnimatePresence>
 
-          {sections.map((section) => (
-            <CalendarMonthSection
-              key={section.key}
-              activePreviewType={state.activePreviewType}
-              modeSwapVersion={modeSwapVersion}
-              onCyclePreview={handleCyclePreview}
-              onOpenDay={(date) => {
-                setSheetLaunchLift(0)
-                dispatch({ type: "open-editor", date })
-              }}
-              registerSection={registerSection}
-              recordsByDate={state.recordsByDate}
-              selectedDate={state.selectedDate}
-              section={section}
-            />
-          ))}
-        </motion.div>
+          <LayoutGroup id="calendar-selection-badge">
+            {sections.map((section) => (
+              <CalendarMonthSection
+                key={section.key}
+                activePreviewType={state.activePreviewType}
+                modeSwapVersion={modeSwapVersion}
+                onCyclePreview={handleCyclePreview}
+                onOpenDay={(date) => {
+                  setSheetLaunchLift(0)
+                  dispatch({ type: "open-editor", date })
+                }}
+                registerSection={registerSection}
+                recordsByDate={state.recordsByDate}
+                selectedDate={state.selectedDate}
+                section={section}
+              />
+            ))}
+          </LayoutGroup>
+        </div>
 
         <div ref={bottomSentinelRef} className="h-8" />
       </div>

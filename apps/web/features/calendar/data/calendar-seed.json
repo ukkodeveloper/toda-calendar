@@ -5,7 +5,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/window-light.svg",
+        "src": "/calendar/photos/window-light.jpg",
         "alt": "Soft morning light on a window ledge.",
         "source": "seed"
       },
@@ -20,7 +20,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/window-light.svg",
+        "src": "/calendar/photos/window-light.jpg",
         "alt": "Sunlight on a white curtain.",
         "source": "seed"
       },
@@ -76,7 +76,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/breakfast-toast.svg",
+        "src": "/calendar/photos/breakfast-toast.jpg",
         "alt": "Toast and coffee on a pale table.",
         "source": "seed"
       },
@@ -132,7 +132,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/blossom-path.svg",
+        "src": "/calendar/photos/blossom-path.jpg",
         "alt": "Soft pink blossoms over a walking path.",
         "source": "seed"
       },
@@ -155,7 +155,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/subway-window.svg",
+        "src": "/calendar/photos/subway-window.jpg",
         "alt": "Evening lights reflected in a subway window.",
         "source": "seed"
       },
@@ -211,7 +211,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/studio-plant.svg",
+        "src": "/calendar/photos/studio-plant.jpg",
         "alt": "A quiet corner with a plant and stacked books.",
         "source": "seed"
       },
@@ -233,7 +233,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/quiet-desk.svg",
+        "src": "/calendar/photos/quiet-desk.jpg",
         "alt": "A quiet desk with tea and a notebook.",
         "source": "seed"
       },
@@ -281,7 +281,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/evening-lamp.svg",
+        "src": "/calendar/photos/evening-lamp.jpg",
         "alt": "A warm lamp beside an open book.",
         "source": "seed"
       },
@@ -304,7 +304,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/river-walk.svg",
+        "src": "/calendar/photos/river-walk.jpg",
         "alt": "An early evening river walk with a pale blue sky.",
         "source": "seed"
       },
@@ -359,7 +359,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/quiet-desk.svg",
+        "src": "/calendar/photos/quiet-desk.jpg",
         "alt": "A quiet desk with tea and a notebook.",
         "source": "seed"
       },
@@ -398,7 +398,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/window-light.svg",
+        "src": "/calendar/photos/window-light.jpg",
         "alt": "Soft morning light on a window ledge.",
         "source": "seed"
       },
@@ -453,7 +453,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/breakfast-toast.svg",
+        "src": "/calendar/photos/breakfast-toast.jpg",
         "alt": "Toast and coffee on a pale table.",
         "source": "seed"
       },
@@ -475,7 +475,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/subway-window.svg",
+        "src": "/calendar/photos/subway-window.jpg",
         "alt": "Evening lights reflected in a subway window.",
         "source": "seed"
       },
@@ -530,7 +530,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/blossom-path.svg",
+        "src": "/calendar/photos/blossom-path.jpg",
         "alt": "Soft pink blossoms over a walking path.",
         "source": "seed"
       },
@@ -545,7 +545,7 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/river-walk.svg",
+        "src": "/calendar/photos/river-walk.jpg",
         "alt": "An early evening river walk with a pale blue sky.",
         "source": "seed"
       }

@@ -14,6 +14,7 @@ export type CalendarPhotoSlot = {
 }
 
 export type DoodlePoint = {
+  t?: number
   x: number
   y: number
 }
@@ -65,6 +66,7 @@ export type MonthSection = {
 }
 
 const doodlePointSchema = z.object({
+  t: z.number().min(0).optional(),
   x: z.number().min(0).max(100),
   y: z.number().min(0).max(100),
 })

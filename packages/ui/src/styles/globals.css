@@ -95,10 +95,42 @@
   --calendar-preview-empty: color-mix(in srgb, rgb(148 163 184) 9%, white);
   --calendar-date-overlay: rgba(255, 255, 255, 0.72);
   --calendar-date-shadow: 0 2px 12px rgba(15, 23, 42, 0.1);
-  --calendar-selection-fill: rgba(15, 23, 42, 0.045);
-  --calendar-selection-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  --calendar-date-badge: rgba(255, 255, 255, 0.58);
+  --calendar-date-badge-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  --calendar-date-today: rgba(255, 255, 255, 0.66);
+  --calendar-date-selected: rgba(17, 24, 39, 0.94);
+  --calendar-date-selected-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  --calendar-date-selected-halo: rgba(255, 59, 48, 0.18);
+  --calendar-today-shadow: 0 8px 18px rgba(255, 59, 48, 0.12);
+  --calendar-date-text-strong: rgba(15, 23, 42, 0.86);
+  --calendar-selection-fill:
+    radial-gradient(120% 88% at 20% 14%, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.12) 38%, rgba(255, 255, 255, 0.02) 78%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.045) 0%, rgba(15, 23, 42, 0.03) 100%);
+  --calendar-selection-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --calendar-selection-ring: rgba(255, 255, 255, 0.46);
+  --calendar-selection-inner-highlight: rgba(255, 255, 255, 0.52);
+  --calendar-mode-flash: rgba(255, 255, 255, 0.3);
+  --calendar-mode-accent-wash: rgba(255, 59, 48, 0.08);
+  --calendar-mode-sweep-glow:
+    linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 34%, rgba(255, 255, 255, 0.74) 50%, rgba(255, 255, 255, 0.4) 66%, rgba(255, 255, 255, 0) 100%);
+  --calendar-mode-accent-glow:
+    linear-gradient(90deg, rgba(255, 59, 48, 0) 0%, rgba(255, 59, 48, 0.12) 34%, rgba(255, 59, 48, 0.22) 52%, rgba(255, 59, 48, 0.12) 70%, rgba(255, 59, 48, 0) 100%);
   --calendar-sheet-border: rgba(15, 23, 42, 0.08);
   --calendar-sheet-shadow: 0 28px 88px rgba(15, 23, 42, 0.16);
+  --calendar-sheet-surface: rgba(255, 255, 255, 0.54);
+  --calendar-sheet-surface-strong: rgba(255, 255, 255, 0.64);
+  --calendar-sheet-edge-highlight: rgba(255, 255, 255, 0.82);
+  --calendar-sheet-edge-shadow: rgba(15, 23, 42, 0.08);
+  --calendar-sheet-top-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.28) 36%, rgba(255, 255, 255, 0) 100%);
+  --calendar-sheet-glass-overlay:
+    radial-gradient(140% 88% at 14% 0%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.12) 42%, rgba(255, 255, 255, 0) 72%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 100%);
+  --calendar-sheet-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.24);
+  --calendar-sheet-handle: rgba(15, 23, 42, 0.16);
+  --calendar-sheet-pill: rgba(255, 255, 255, 0.42);
+  --calendar-sheet-pill-active: rgba(255, 255, 255, 0.86);
+  --calendar-sheet-pill-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
   --calendar-mode-sweep: rgba(255, 255, 255, 0.7);
   --calendar-surface-wash: rgba(255, 255, 255, 0.64);
   --calendar-muted-label: rgba(15, 23, 42, 0.42);
@@ -149,10 +181,42 @@
   --calendar-preview-empty: color-mix(in srgb, rgba(51, 65, 85, 0.72) 82%, transparent);
   --calendar-date-overlay: rgba(255, 255, 255, 0.82);
   --calendar-date-shadow: 0 2px 12px rgba(2, 6, 23, 0.24);
-  --calendar-selection-fill: rgba(255, 255, 255, 0.1);
-  --calendar-selection-shadow: 0 10px 30px rgba(2, 6, 23, 0.22);
+  --calendar-date-badge: rgba(15, 23, 42, 0.54);
+  --calendar-date-badge-shadow: 0 8px 24px rgba(2, 6, 23, 0.18);
+  --calendar-date-today: rgba(15, 23, 42, 0.6);
+  --calendar-date-selected: rgba(5, 10, 18, 0.92);
+  --calendar-date-selected-shadow: 0 12px 28px rgba(2, 6, 23, 0.3);
+  --calendar-date-selected-halo: rgba(255, 105, 97, 0.18);
+  --calendar-today-shadow: 0 8px 18px rgba(255, 105, 97, 0.12);
+  --calendar-date-text-strong: rgba(255, 255, 255, 0.92);
+  --calendar-selection-fill:
+    radial-gradient(120% 88% at 20% 14%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 38%, rgba(255, 255, 255, 0.03) 78%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
+  --calendar-selection-shadow: 0 12px 30px rgba(2, 6, 23, 0.26);
+  --calendar-selection-ring: rgba(255, 255, 255, 0.16);
+  --calendar-selection-inner-highlight: rgba(255, 255, 255, 0.18);
+  --calendar-mode-flash: rgba(255, 255, 255, 0.12);
+  --calendar-mode-accent-wash: rgba(255, 105, 97, 0.1);
+  --calendar-mode-sweep-glow:
+    linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.12) 34%, rgba(255, 255, 255, 0.22) 50%, rgba(255, 255, 255, 0.12) 66%, rgba(255, 255, 255, 0) 100%);
+  --calendar-mode-accent-glow:
+    linear-gradient(90deg, rgba(255, 105, 97, 0) 0%, rgba(255, 105, 97, 0.12) 34%, rgba(255, 105, 97, 0.24) 52%, rgba(255, 105, 97, 0.12) 70%, rgba(255, 105, 97, 0) 100%);
   --calendar-sheet-border: rgba(255, 255, 255, 0.08);
   --calendar-sheet-shadow: 0 28px 88px rgba(2, 6, 23, 0.42);
+  --calendar-sheet-surface: rgba(30, 41, 59, 0.58);
+  --calendar-sheet-surface-strong: rgba(30, 41, 59, 0.7);
+  --calendar-sheet-edge-highlight: rgba(255, 255, 255, 0.16);
+  --calendar-sheet-edge-shadow: rgba(2, 6, 23, 0.4);
+  --calendar-sheet-top-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 36%, rgba(255, 255, 255, 0) 100%);
+  --calendar-sheet-glass-overlay:
+    radial-gradient(140% 88% at 14% 0%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 38%, rgba(255, 255, 255, 0) 72%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  --calendar-sheet-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  --calendar-sheet-handle: rgba(255, 255, 255, 0.18);
+  --calendar-sheet-pill: rgba(255, 255, 255, 0.08);
+  --calendar-sheet-pill-active: rgba(255, 255, 255, 0.16);
+  --calendar-sheet-pill-shadow: 0 10px 28px rgba(2, 6, 23, 0.3);
   --calendar-mode-sweep: rgba(255, 255, 255, 0.18);
   --calendar-surface-wash: rgba(255, 255, 255, 0.1);
   --calendar-muted-label: rgba(255, 255, 255, 0.48);

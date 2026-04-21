@@ -41,10 +41,13 @@ const floatingSheetResize = {
 }
 
 const modePageSwap = {
-  type: "spring" as const,
-  stiffness: 240,
-  damping: 30,
-  mass: 0.96,
+  duration: 0.26,
+  ease: [0.24, 1, 0.32, 1] as const,
+}
+
+const modeCellSwap = {
+  duration: 0.22,
+  ease: [0.22, 1, 0.36, 1] as const,
 }
 
 const cellReveal = {
@@ -80,6 +83,7 @@ export const motionTokens = {
     selectionFlow,
     dragFollow,
     modePageSwap,
+    modeCellSwap,
     cellReveal,
     floatingSheet: {
       enter: floatingSheetEnter,
@@ -96,7 +100,7 @@ export const motionTokens = {
   },
   preview: {
     photoAspectRatio: 4 / 5,
-    doodleAspectRatio: 1,
+    doodleAspectRatio: 4 / 5,
     textPreviewLines: 3,
   },
 } as const

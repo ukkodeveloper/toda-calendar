@@ -34,15 +34,15 @@ export function CalendarMonthSection({
     <section
       ref={(node) => registerSection(section.key, node)}
       aria-label={section.monthLabel}
-      className="px-1"
+      className="px-0"
       style={{ contentVisibility: "auto", containIntrinsicSize: "396px" }}
     >
       <h2 className="sr-only">{section.monthLabel}</h2>
-      <div className="space-y-0.5">
+      <div className="space-y-0">
         {section.weeks.map((week, weekIndex) => (
           <div
             key={`${section.key}-${weekIndex}`}
-            className={cn("grid grid-cols-7 gap-x-0")}
+            className={cn("grid grid-cols-7 gap-0")}
           >
             {week.map((day, dayIndex) => (
               <CalendarDayCell
@@ -54,7 +54,7 @@ export function CalendarMonthSection({
                 onCyclePreview={onCyclePreview}
                 onOpenDay={onOpenDay}
                 record={day.date ? recordsByDate[day.date] : undefined}
-                revealDelay={0.045}
+                revealDelay={0.018 + 0.004 * (dayIndex % 2)}
               />
             ))}
           </div>

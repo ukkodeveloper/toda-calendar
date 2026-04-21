@@ -66,11 +66,12 @@ export function DayEditorSheet({
   const [viewportHeight, setViewportHeight] = React.useState(780)
   const [viewportBottomInset, setViewportBottomInset] = React.useState(0)
   const stageTimerRef = React.useRef<number | null>(null)
-  const dockLaunchFrame = getDockHandoffFrame(initialLift)
-  const dockExitFrame = getDockHandoffFrame(0)
+  const dockLaunchFrame = getDockHandoffFrame(initialLift, viewportWidth)
+  const dockExitFrame = getDockHandoffFrame(0, viewportWidth)
   const { expanded: expandedFrame, peek: peekFrame } = getFloatingSheetDetents({
     bottomInset: viewportBottomInset,
     height: viewportHeight,
+    width: viewportWidth,
   })
 
   React.useEffect(() => {
@@ -222,7 +223,7 @@ export function DayEditorSheet({
     setDraft((current) => (current ? { ...current, text: nextSlot } : current))
   }
 
-  function handleSave() {
+  function persistDraft() {
     if (!draft) {
       return
     }
@@ -231,6 +232,11 @@ export function DayEditorSheet({
       ...draft,
       currentPreviewType: activeTab,
     })
+  }
+
+  function closeEditor() {
+    clearStageTimer()
+    persistDraft()
     onOpenChange(false)
   }
 
@@ -248,8 +254,7 @@ export function DayEditorSheet({
         info.offset.y > motionTokens.gesture.sheetDismissOffset ||
         info.velocity.y > motionTokens.gesture.sheetDismissVelocity
       ) {
-        clearStageTimer()
-        onOpenChange(false)
+        closeEditor()
         return
       }
 
@@ -291,6 +296,7 @@ export function DayEditorSheet({
           mode="peek"
           onChange={updateDoodle}
           onDrawingChange={setIsDrawing}
+          recordKey={draft.date}
           slot={draft.doodle}
         />
       )
@@ -322,7 +328,7 @@ export function DayEditorSheet({
             }}
             onClick={() => {
               if (!isDrawing) {
-                onOpenChange(false)
+                closeEditor()
               }
             }}
           />
@@ -344,6 +350,8 @@ export function DayEditorSheet({
             dragElastic={0.12}
             dragListener={false}
             dragMomentum={false}
+            onDragEnd={handleDragEnd}
+            className="pointer-events-auto fixed z-10 flex flex-col overflow-hidden text-foreground shadow-[var(--calendar-sheet-shadow)] backdrop-blur-[32px] backdrop-saturate-[1.35]"
             style={{
               x,
               y,
@@ -368,12 +376,9 @@ export function DayEditorSheet({
                   : peekFrame.borderBottomRightRadius,
               height: stage === "expanded" ? expandedFrame.height : peekFrame.height,
               scale: 1,
+              backgroundColor: "var(--calendar-sheet-surface-strong)",
+              boxShadow: "var(--calendar-sheet-shadow), var(--calendar-sheet-inner-shadow)",
             }}
-            onDragEnd={handleDragEnd}
-            className={cn(
-              "pointer-events-auto fixed z-10 flex max-w-[34rem] flex-col overflow-hidden border bg-[var(--surface-panel)] text-foreground shadow-[var(--calendar-sheet-shadow)] backdrop-blur-[28px]",
-              "border-[var(--calendar-sheet-border)]"
-            )}
             initial={reducedMotion ? { opacity: 0 } : dockLaunchFrame}
             animate={
               reducedMotion
@@ -391,8 +396,15 @@ export function DayEditorSheet({
                   : motionTokens.intent.floatingSheet.resize
             }
           >
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-0 bg-[var(--calendar-sheet-surface-strong)]" />
+              <div className="absolute inset-0 bg-[image:var(--calendar-sheet-glass-overlay)]" />
+              <div className="absolute inset-0 bg-[image:var(--calendar-sheet-top-sheen)]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-[var(--calendar-sheet-edge-highlight)]" />
+            </div>
+
             <header
-              className="flex flex-col"
+              className="relative z-10 flex flex-col"
               style={{
                 paddingLeft: floatingSheetUi.headerPaddingX,
                 paddingRight: floatingSheetUi.headerPaddingX,
@@ -411,6 +423,10 @@ export function DayEditorSheet({
                   style={{
                     height: floatingSheetUi.handleTouchHeight,
                     maxWidth: 88,
+                    touchAction: isDrawing ? "auto" : "none",
+                    WebkitTapHighlightColor: "transparent",
+                    WebkitUserSelect: "none",
+                    userSelect: "none",
                   }}
                   onPointerDown={(event) => {
                     if (!isDrawing) {
@@ -419,45 +435,32 @@ export function DayEditorSheet({
                   }}
                 >
                   <span
-                    className="rounded-full bg-foreground/16"
+                    className="rounded-full"
                     style={{
                       width: floatingSheetUi.handleWidth,
                       height: floatingSheetUi.handleHeight,
+                      backgroundColor: "var(--calendar-sheet-handle)",
                     }}
                   />
                 </button>
               </div>
 
-              <div className="mt-[6px] grid grid-cols-[40px_1fr_40px] items-center gap-[8px]">
-                <div />
-                <div className="text-center">
-                  <h2
-                    className="truncate font-semibold"
-                    style={{
-                      fontSize: floatingSheetUi.titleSize,
-                      letterSpacing: `${floatingSheetUi.titleTracking}px`,
-                    }}
-                  >
-                    {record
-                      ? new Intl.DateTimeFormat("en-US", {
-                          weekday: "short",
-                          month: "long",
-                          day: "numeric",
-                        }).format(parseIsoDate(record.date))
-                      : "Edit day"}
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  className="rounded-full px-[4px] font-semibold text-[var(--calendar-accent)] outline-none transition-colors hover:bg-black/4 focus-visible:ring-2 focus-visible:ring-[var(--calendar-accent)]/40"
+              <div className="mt-[8px] text-center">
+                <h2
+                  className="truncate font-semibold"
                   style={{
-                    height: floatingSheetUi.actionHeight,
-                    fontSize: floatingSheetUi.actionSize,
+                    fontSize: floatingSheetUi.titleSize,
+                    letterSpacing: `${floatingSheetUi.titleTracking}px`,
                   }}
-                  onClick={handleSave}
                 >
-                  Done
-                </button>
+                  {record
+                    ? new Intl.DateTimeFormat("en-US", {
+                        weekday: "short",
+                        month: "long",
+                        day: "numeric",
+                      }).format(parseIsoDate(record.date))
+                    : "Edit day"}
+                </h2>
               </div>
 
               {contentStage === "peek" ? (
@@ -514,7 +517,7 @@ export function DayEditorSheet({
             </header>
 
             <div
-              className="min-h-0 flex-1"
+              className="relative z-10 min-h-0 flex-1"
               style={{
                 paddingLeft: floatingSheetUi.contentPaddingX,
                 paddingRight: floatingSheetUi.contentPaddingX,
@@ -543,38 +546,33 @@ export function DayEditorSheet({
                     </motion.div>
                   </AnimatePresence>
                 ) : (
-                  <div className="grid h-full grid-rows-[minmax(0,1fr)_minmax(0,0.88fr)] gap-3">
-                    <div className="grid min-h-0 grid-cols-2 gap-3">
-                      <section className="flex min-h-0 flex-col">
-                        <div className="pb-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-foreground/34">
-                          Photo
-                        </div>
-                        <div className="min-h-0 flex-1">
-                          <PhotoEditor mode="expanded" onChange={updatePhoto} slot={draft.photo} />
-                        </div>
-                      </section>
-                      <section className="flex min-h-0 flex-col">
-                        <div className="pb-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-foreground/34">
-                          Sketch
-                        </div>
-                        <div className="min-h-0 flex-1">
-                          <DoodleCanvas
-                            mode="expanded"
-                            onChange={updateDoodle}
-                            onDrawingChange={setIsDrawing}
-                            slot={draft.doodle}
-                          />
-                        </div>
-                      </section>
-                    </div>
+                  <div className="grid h-full min-h-0 grid-cols-2 grid-rows-[auto_minmax(0,1fr)] gap-3">
+                    <section className="min-h-0">
+                      <PhotoEditor
+                        label="Photo"
+                        mode="expanded"
+                        onChange={updatePhoto}
+                        slot={draft.photo}
+                      />
+                    </section>
+                    <section className="min-h-0">
+                      <DoodleCanvas
+                        label="Sketch"
+                        mode="expanded"
+                        onChange={updateDoodle}
+                        onDrawingChange={setIsDrawing}
+                        recordKey={draft.date}
+                        slot={draft.doodle}
+                      />
+                    </section>
 
-                    <section className="flex min-h-0 flex-col">
-                      <div className="pb-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-foreground/34">
-                        Text
-                      </div>
-                      <div className="min-h-0 flex-1">
-                        <TextEditor mode="expanded" onChange={updateText} slot={draft.text} />
-                      </div>
+                    <section className="col-span-2 min-h-0">
+                      <TextEditor
+                        label="Text"
+                        mode="expanded"
+                        onChange={updateText}
+                        slot={draft.text}
+                      />
                     </section>
                   </div>
                 )

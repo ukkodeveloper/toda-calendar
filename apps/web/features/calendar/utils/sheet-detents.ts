@@ -4,6 +4,7 @@ function clamp(value: number, min: number, max: number) {
 
 export const dockDetents = {
   gestureRange: 96,
+  restInset: -1,
   liftedInset: 10,
   liftedBottom: 16,
   liftedRadius: 30,
@@ -16,12 +17,12 @@ export const dockDetents = {
 export const floatingSheetUi = {
   handleWidth: 40,
   handleHeight: 6,
-  handleTouchHeight: 20,
-  headerPaddingX: 14,
+  handleTouchHeight: 28,
+  headerPaddingX: 16,
   headerPaddingTop: 8,
-  headerPaddingBottom: 10,
-  contentPaddingX: 14,
-  contentPaddingBottom: 14,
+  headerPaddingBottom: 12,
+  contentPaddingX: 16,
+  contentPaddingBottom: 16,
   titleSize: 16,
   titleTracking: -0.4,
   actionSize: 13,
@@ -34,21 +35,24 @@ export const floatingSheetUi = {
 type FloatingSheetViewport = {
   bottomInset: number
   height: number
+  width: number
 }
 
 export function getFloatingSheetDetents({
   bottomInset,
   height,
+  width,
 }: FloatingSheetViewport) {
   const floatingBottom = Math.max(16, bottomInset + 16)
+  const sideInset = clamp(Math.round(width * 0.028), 10, 18)
   const maxVisibleHeight = Math.max(320, height - floatingBottom - 12)
-  const peekPreferred = clamp(height - floatingBottom - 136, 280, 352)
+  const peekPreferred = clamp(height - floatingBottom - 126, 328, 396)
   const expandedPreferred = clamp(height - floatingBottom - 12, 440, 736)
 
   return {
     peek: {
-      left: dockDetents.liftedInset,
-      right: dockDetents.liftedInset,
+      left: sideInset,
+      right: sideInset,
       bottom: floatingBottom,
       borderTopLeftRadius: dockDetents.liftedRadius,
       borderTopRightRadius: dockDetents.liftedRadius,
@@ -59,8 +63,8 @@ export function getFloatingSheetDetents({
       scale: 1,
     },
     expanded: {
-      left: dockDetents.liftedInset,
-      right: dockDetents.liftedInset,
+      left: sideInset,
+      right: sideInset,
       bottom: floatingBottom,
       borderTopLeftRadius: 34,
       borderTopRightRadius: 34,
@@ -73,12 +77,13 @@ export function getFloatingSheetDetents({
   }
 }
 
-export function getDockHandoffFrame(lift: number) {
+export function getDockHandoffFrame(lift: number, width = 393) {
   const progress = clamp(lift / dockDetents.gestureRange, 0, 1)
+  const sideInset = clamp(Math.round(width * 0.028), 10, 18)
 
   return {
-    left: dockDetents.liftedInset * progress,
-    right: dockDetents.liftedInset * progress,
+    left: dockDetents.restInset + (sideInset - dockDetents.restInset) * progress,
+    right: dockDetents.restInset + (sideInset - dockDetents.restInset) * progress,
     bottom: dockDetents.liftedBottom * progress,
     borderTopLeftRadius: dockDetents.liftedRadius * progress,
     borderTopRightRadius: dockDetents.liftedRadius * progress,

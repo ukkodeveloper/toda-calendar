@@ -24,7 +24,11 @@ export function useDayCellGesture({
     }
   }, [])
 
-  function onPointerUp() {
+  function onPointerUp(event: React.PointerEvent<HTMLElement>) {
+    if (event.cancelable) {
+      event.preventDefault()
+    }
+
     const now = Date.now()
 
     if (now - lastTapRef.current <= motionTokens.gesture.doubleTapMs) {
