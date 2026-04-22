@@ -1,4 +1,9 @@
-export { apiErrorSchema, localDateSchema, monthKeySchema } from "./common.js"
+export {
+  apiErrorSchema,
+  authErrorCodeSchema,
+  localDateSchema,
+  monthKeySchema,
+} from "./common.js"
 export {
   calendarSummarySchema,
   dayRecordSchema,
@@ -29,4 +34,4 @@ export type {
   MonthLayer,
   PatchDayRecordBody,
 } from "./calendar.js"
-export type { ApiErrorResponse } from "./common.js"
+export type { ApiErrorResponse, AuthErrorCode } from "./common.js"

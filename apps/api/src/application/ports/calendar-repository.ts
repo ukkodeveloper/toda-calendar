@@ -1,4 +1,4 @@
-import type { CalendarSummary, DayRecord, DayRecordSlot, UserProfile } from "../../domain/models.js"
+import type { CalendarSummary, DayRecord, DayRecordSlot } from "../../domain/models.js"
 
 export type UpsertDayRecordInput = {
   id?: string
@@ -15,7 +15,6 @@ export interface CalendarRepository {
   deleteDayRecord(ownerUserId: string, calendarId: string, localDate: string): Promise<void>
   findCalendarById(ownerUserId: string, calendarId: string): Promise<CalendarSummary | null>
   findDayRecord(ownerUserId: string, calendarId: string, localDate: string): Promise<DayRecord | null>
-  getCurrentUser(): Promise<UserProfile>
   listCalendars(ownerUserId: string): Promise<CalendarSummary[]>
   listDayRecordsForDateRange(
     ownerUserId: string,

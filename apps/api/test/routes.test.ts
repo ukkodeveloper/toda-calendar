@@ -18,10 +18,53 @@ afterEach(async () => {
 })
 
 describe("API routes", () => {
-  it("returns a 422 error with the shared error shape for invalid month queries", async () => {
-    const { app, calendarId } = await createApp()
+  it("keeps health public while protecting product routes", async () => {
+    const { app } = await createApp()
+
+    const healthResponse = await app.inject({
+      method: "GET",
+      url: "/health",
+    })
+    const meResponse = await app.inject({
+      method: "GET",
+      url: "/v1/me",
+    })
+
+    expect(healthResponse.statusCode).toBe(200)
+    expect(healthResponse.json()).toEqual({
+      status: "ok",
+    })
+    expect(meResponse.statusCode).toBe(401)
+    expect(meResponse.json()).toMatchObject({
+      error: {
+        code: "AUTH_REQUIRED",
+        message: "Authentication is required",
+      },
+    })
+  })
+
+  it("allows Authorization through CORS preflight", async () => {
+    const { app, calendarId, headers } = await createApp()
 
     const response = await app.inject({
+      headers: {
+        "access-control-request-headers": "authorization, content-type",
+        origin: "http://localhost:3000",
+      },
+      method: "OPTIONS",
+      url: `/v1/calendars/${calendarId}/day-records/2026-04-22`,
+    })
+
+    expect(response.statusCode).toBe(204)
+    expect(response.headers["access-control-allow-headers"]).toContain("Authorization")
+    expect(headers.authorization).toContain("Bearer")
+  })
+
+  it("returns a 422 error with the shared error shape for invalid month queries", async () => {
+    const { app, calendarId, headers } = await createApp()
+
+    const response = await app.inject({
+      headers,
       method: "GET",
       url: `/v1/calendars/${calendarId}/month-view?month=2026-13&layer=TEXT`,
     })
@@ -36,9 +79,10 @@ describe("API routes", () => {
   })
 
   it("persists day-record updates through the HTTP boundary", async () => {
-    const { app, calendarId } = await createApp()
+    const { app, calendarId, headers } = await createApp()
 
     const patchResponse = await app.inject({
+      headers,
       method: "PATCH",
       payload: {
         text: {
@@ -66,6 +110,7 @@ describe("API routes", () => {
     })
 
     const getResponse = await app.inject({
+      headers,
       method: "GET",
       url: `/v1/calendars/${calendarId}/day-records/2026-04-22`,
     })
@@ -75,9 +120,10 @@ describe("API routes", () => {
   })
 
   it("lists month records for the shared web client hydration path", async () => {
-    const { app, calendarId } = await createApp()
+    const { app, calendarId, headers } = await createApp()
 
     await app.inject({
+      headers,
       method: "PATCH",
       payload: {
         text: {
@@ -88,6 +134,7 @@ describe("API routes", () => {
     })
 
     const response = await app.inject({
+      headers,
       method: "GET",
       url: `/v1/calendars/${calendarId}/day-records?month=2026-04`,
     })
@@ -105,9 +152,10 @@ describe("API routes", () => {
   })
 
   it("returns a six-week month grid so clients can render the visible range consistently", async () => {
-    const { app, calendarId } = await createApp()
+    const { app, calendarId, headers } = await createApp()
 
     await app.inject({
+      headers,
       method: "PATCH",
       payload: {
         text: {
@@ -118,6 +166,7 @@ describe("API routes", () => {
     })
 
     const response = await app.inject({
+      headers,
       method: "GET",
       url: `/v1/calendars/${calendarId}/month-view?month=2026-04&layer=TEXT`,
     })
@@ -148,9 +197,10 @@ describe("API routes", () => {
   })
 
   it("returns 404 when the requested calendar does not belong to the current user", async () => {
-    const { app } = await createApp()
+    const { app, headers } = await createApp()
 
     const response = await app.inject({
+      headers,
       method: "GET",
       url: "/v1/calendars/20000000-0000-4000-8000-000000000099/day-records/2026-04-22",
     })
@@ -181,7 +231,11 @@ async function createApp() {
     directory,
   })
 
+  const headers = {
+    authorization: "Bearer dev:routes-user:routes@example.com",
+  }
   const meResponse = await app.inject({
+    headers,
     method: "GET",
     url: "/v1/me",
   })
@@ -189,5 +243,6 @@ async function createApp() {
   return {
     app,
     calendarId: meResponse.json().defaultCalendarId as string,
+    headers,
   }
 }

@@ -15,6 +15,16 @@ const persistedUserSchema = z.object({
   timezone: z.string().min(1).max(100),
 })
 
+const persistedAuthIdentitySchema = z.object({
+  createdAt: isoDateTimeSchema,
+  email: z.string().email().nullable(),
+  externalSubject: z.string().trim().min(1).max(255),
+  id: z.string().uuid(),
+  source: z.enum(["SUPABASE", "DEVELOPMENT"]),
+  updatedAt: isoDateTimeSchema,
+  userId: z.string().uuid(),
+})
+
 const persistedCalendarSchema = z.object({
   createdAt: isoDateTimeSchema,
   id: z.string().uuid(),
@@ -37,6 +47,14 @@ const persistedDayRecordSchema = z.object({
 })
 
 const persistedStoreSchema = z.object({
+  authIdentities: z.array(persistedAuthIdentitySchema),
+  calendars: z.array(persistedCalendarSchema),
+  dayRecords: z.array(persistedDayRecordSchema),
+  users: z.array(persistedUserSchema),
+  version: z.literal(2),
+})
+
+const legacyStoreSchema = z.object({
   calendars: z.array(persistedCalendarSchema),
   dayRecords: z.array(persistedDayRecordSchema),
   user: persistedUserSchema,
@@ -44,15 +62,12 @@ const persistedStoreSchema = z.object({
 
 export type PersistedStore = z.infer<typeof persistedStoreSchema>
 
-const DEFAULT_USER_ID = "00000000-0000-4000-8000-000000000001"
-const DEFAULT_CALENDAR_ID = "10000000-0000-4000-8000-000000000001"
-
 export class JsonFileStore {
   private writeQueue = Promise.resolve()
 
   constructor(private readonly filePath: string) {}
 
-  async read() {
+  async read(): Promise<PersistedStore> {
     return this.readFresh()
   }
 
@@ -91,37 +106,70 @@ export class JsonFileStore {
     await rename(tempFilePath, this.filePath)
   }
 
-  private async readFresh() {
+  private async readFresh(): Promise<PersistedStore> {
     await this.ensureFile()
 
     const raw = await readFile(this.filePath, "utf8")
+    const { didMigrate, state } = parsePersistedStore(raw)
 
-    return persistedStoreSchema.parse(JSON.parse(raw))
+    if (didMigrate) {
+      await this.persist(state)
+    }
+
+    return state
   }
 }
 
 function createInitialStore(): PersistedStore {
+  return {
+    authIdentities: [],
+    calendars: [],
+    dayRecords: [],
+    users: [],
+    version: 2,
+  }
+}
+
+function parsePersistedStore(raw: string): {
+  state: PersistedStore
+  didMigrate: boolean
+} {
+  const parsed = JSON.parse(raw)
+  const current = persistedStoreSchema.safeParse(parsed)
+
+  if (current.success) {
+    return {
+      didMigrate: false,
+      state: current.data,
+    }
+  }
+
+  const legacy = legacyStoreSchema.parse(parsed)
+
+  return {
+    didMigrate: true,
+    state: migrateLegacyStore(legacy),
+  }
+}
+
+function migrateLegacyStore(legacy: z.infer<typeof legacyStoreSchema>): PersistedStore {
   const now = new Date().toISOString()
 
   return {
-    calendars: [
+    authIdentities: [
       {
         createdAt: now,
-        id: DEFAULT_CALENDAR_ID,
-        isDefault: true,
-        name: "My Calendar",
-        ownerUserId: DEFAULT_USER_ID,
-        slug: "my-calendar",
+        email: null,
+        externalSubject: legacy.user.id,
+        id: randomUUID(),
+        source: "DEVELOPMENT",
         updatedAt: now,
+        userId: legacy.user.id,
       },
     ],
-    dayRecords: [],
-    user: {
-      defaultCalendarId: DEFAULT_CALENDAR_ID,
-      displayName: "Toda Demo",
-      id: DEFAULT_USER_ID,
-      locale: "ko-KR",
-      timezone: "Asia/Seoul",
-    },
+    calendars: legacy.calendars,
+    dayRecords: legacy.dayRecords,
+    users: [legacy.user],
+    version: 2,
   }
 }

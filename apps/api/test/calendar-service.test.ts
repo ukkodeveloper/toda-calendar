@@ -5,7 +5,10 @@ import { join } from "node:path"
 
 import { afterEach, describe, expect, it } from "vitest"
 
+import { AuthContextService } from "../src/application/services/auth-context-service.js"
 import { CalendarService } from "../src/application/services/calendar-service.js"
+import { MockAccessTokenVerifier } from "../src/infrastructure/auth/mock-access-token-verifier.js"
+import { FileAuthRepository } from "../src/infrastructure/persistence/file-auth-repository.js"
 import { FileCalendarRepository } from "../src/infrastructure/persistence/file-calendar-repository.js"
 import { JsonFileStore } from "../src/infrastructure/persistence/file-store.js"
 
@@ -21,11 +24,12 @@ afterEach(async () => {
 
 describe("CalendarService", () => {
   it("returns an empty day record when no record exists yet", async () => {
-    const { calendarId, service } = await createService()
+    const { calendarId, currentUser, service } = await createService()
 
     const response = await service.getDayRecord({
       calendarId,
       localDate: "2026-04-10",
+      user: currentUser,
     })
 
     expect(response).toEqual({
@@ -40,7 +44,7 @@ describe("CalendarService", () => {
   })
 
   it("creates, merges, and removes slots without leaking transport concerns", async () => {
-    const { calendarId, service } = await createService()
+    const { calendarId, currentUser, service } = await createService()
 
     const created = await service.patchDayRecord({
       calendarId,
@@ -55,6 +59,7 @@ describe("CalendarService", () => {
           title: "Morning",
         },
       },
+      user: currentUser,
     })
 
     expect(created.dayRecord.id).not.toBeNull()
@@ -79,6 +84,7 @@ describe("CalendarService", () => {
           body: "Tea instead of coffee.",
         },
       },
+      user: currentUser,
     })
 
     expect(updated.dayRecord.slots).toEqual([
@@ -101,6 +107,7 @@ describe("CalendarService", () => {
         photo: null,
         text: null,
       },
+      user: currentUser,
     })
 
     expect(removed).toEqual({
@@ -115,7 +122,7 @@ describe("CalendarService", () => {
   })
 
   it("builds a stable month view with full-month coverage and layer-specific previews", async () => {
-    const { calendarId, service } = await createService()
+    const { calendarId, currentUser, service } = await createService()
 
     await service.patchDayRecord({
       calendarId,
@@ -125,6 +132,7 @@ describe("CalendarService", () => {
           body: "Month grid starts here.",
         },
       },
+      user: currentUser,
     })
 
     await service.patchDayRecord({
@@ -135,6 +143,7 @@ describe("CalendarService", () => {
           body: "A quiet Sunday.",
         },
       },
+      user: currentUser,
     })
 
     await service.patchDayRecord({
@@ -154,12 +163,14 @@ describe("CalendarService", () => {
           ],
         },
       },
+      user: currentUser,
     })
 
     const response = await service.getMonthView({
       calendarId,
       layer: "TEXT",
       month: "2026-04",
+      user: currentUser,
     })
 
     expect(response.cells).toHaveLength(42)
@@ -200,19 +211,33 @@ describe("CalendarService", () => {
 
 async function createService() {
   const tempDirectory = await mkdtemp(join(tmpdir(), "toda-api-service-"))
+  const store = new JsonFileStore(join(tempDirectory, "store.json"))
 
   tempDirectories.push(tempDirectory)
 
-  const repository = new FileCalendarRepository(
-    new JsonFileStore(join(tempDirectory, "store.json"))
+  const authContextService = new AuthContextService(
+    new MockAccessTokenVerifier(),
+    new FileAuthRepository(store),
+    {
+      clock: () => "2026-04-22T10:00:00.000Z",
+      defaultCalendarName: "My Calendar",
+      defaultLocale: "en",
+      defaultTimezone: "Asia/Seoul",
+      idGenerator: () => randomUUID(),
+    }
   )
+  const repository = new FileCalendarRepository(store)
   const service = new CalendarService(repository, {
     clock: () => "2026-04-22T10:00:00.000Z",
     idGenerator: () => randomUUID(),
   })
-  const me = await service.getMe()
+  const authenticatedUser = await authContextService.authenticate(
+    "dev:calendar-service-user:calendar@example.com"
+  )
+  const me = await service.getMe(authenticatedUser.user)
 
   return {
+    currentUser: authenticatedUser.user,
     calendarId: me.defaultCalendarId,
     service,
   }

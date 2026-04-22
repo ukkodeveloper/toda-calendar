@@ -1,7 +1,5 @@
-import type {
-  CalendarRepository,
-  UpsertDayRecordInput,
-} from "../../application/ports/calendar-repository.js"
+import type { CalendarRepository, UpsertDayRecordInput } from "../../application/ports/calendar-repository.js"
+import type { CalendarSummary, DayRecord } from "../../domain/models.js"
 import { JsonFileStore } from "./file-store.js"
 
 export class FileCalendarRepository implements CalendarRepository {
@@ -22,7 +20,10 @@ export class FileCalendarRepository implements CalendarRepository {
     })
   }
 
-  async findCalendarById(ownerUserId: string, calendarId: string) {
+  async findCalendarById(
+    ownerUserId: string,
+    calendarId: string
+  ): Promise<CalendarSummary | null> {
     const state = await this.store.read()
 
     return (
@@ -33,7 +34,11 @@ export class FileCalendarRepository implements CalendarRepository {
     )
   }
 
-  async findDayRecord(ownerUserId: string, calendarId: string, localDate: string) {
+  async findDayRecord(
+    ownerUserId: string,
+    calendarId: string,
+    localDate: string
+  ): Promise<DayRecord | null> {
     const state = await this.store.read()
 
     return (
@@ -46,13 +51,7 @@ export class FileCalendarRepository implements CalendarRepository {
     )
   }
 
-  async getCurrentUser() {
-    const state = await this.store.read()
-
-    return state.user
-  }
-
-  async listCalendars(ownerUserId: string) {
+  async listCalendars(ownerUserId: string): Promise<CalendarSummary[]> {
     const state = await this.store.read()
 
     return state.calendars
@@ -69,7 +68,7 @@ export class FileCalendarRepository implements CalendarRepository {
     calendarId: string,
     startLocalDate: string,
     endLocalDate: string
-  ) {
+  ): Promise<DayRecord[]> {
     const state = await this.store.read()
 
     return state.dayRecords
@@ -83,7 +82,7 @@ export class FileCalendarRepository implements CalendarRepository {
       .sort((left, right) => left.localDate.localeCompare(right.localDate))
   }
 
-  async upsertDayRecord(input: UpsertDayRecordInput) {
+  async upsertDayRecord(input: UpsertDayRecordInput): Promise<DayRecord> {
     return this.store.mutate((state) => {
       const index = state.dayRecords.findIndex(
         (record) =>
@@ -91,14 +90,14 @@ export class FileCalendarRepository implements CalendarRepository {
           record.calendarId === input.calendarId &&
           record.localDate === input.localDate
       )
-      const existing = index === -1 ? null : state.dayRecords[index]
+      const existing = index === -1 ? null : state.dayRecords[index]!
       const id = existing?.id ?? input.id
 
       if (!id) {
         throw new Error("Day record id is required for upsert")
       }
 
-      const nextRecord = {
+      const nextRecord: DayRecord = {
         calendarId: input.calendarId,
         createdAt: existing?.createdAt ?? input.createdAt ?? input.updatedAt,
         id,

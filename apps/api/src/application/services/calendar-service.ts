@@ -2,7 +2,7 @@ import type { CalendarRepository } from "../ports/calendar-repository.js"
 import { applyDayRecordPatch, buildMonthViewCells, type DayRecordPatch } from "../../domain/calendar-rules.js"
 import { NotFoundError } from "../../domain/errors.js"
 import { getMonthGridRange, listLocalDatesForMonth } from "../../domain/local-date.js"
-import type { DayRecord, MonthLayer } from "../../domain/models.js"
+import type { DayRecord, MonthLayer, UserProfile } from "../../domain/models.js"
 
 type CalendarServiceDependencies = {
   clock: () => string
@@ -15,9 +15,7 @@ export class CalendarService {
     private readonly dependencies: CalendarServiceDependencies
   ) {}
 
-  async getMe() {
-    const user = await this.repository.getCurrentUser()
-
+  async getMe(user: UserProfile) {
     return {
       defaultCalendarId: user.defaultCalendarId,
       user: {
@@ -29,8 +27,7 @@ export class CalendarService {
     }
   }
 
-  async listCalendars() {
-    const user = await this.repository.getCurrentUser()
+  async listCalendars(user: UserProfile) {
     const calendars = await this.repository.listCalendars(user.id)
 
     return {
@@ -44,17 +41,17 @@ export class CalendarService {
   }
 
   async getMonthView(input: {
+    user: UserProfile
     calendarId: string
     month: string
     layer: MonthLayer
   }) {
-    const user = await this.repository.getCurrentUser()
     const visibleRange = getMonthGridRange(input.month)
 
-    await this.getCalendarOrThrow(user.id, input.calendarId)
+    await this.getCalendarOrThrow(input.user.id, input.calendarId)
 
     const records = await this.repository.listDayRecordsForDateRange(
-      user.id,
+      input.user.id,
       input.calendarId,
       visibleRange.startLocalDate,
       visibleRange.endLocalDate
@@ -67,13 +64,16 @@ export class CalendarService {
     }
   }
 
-  async listDayRecords(input: { calendarId: string; month: string }) {
-    const user = await this.repository.getCurrentUser()
+  async listDayRecords(input: {
+    user: UserProfile
+    calendarId: string
+    month: string
+  }) {
     const monthDates = listLocalDatesForMonth(input.month)
     const startLocalDate = monthDates[0]
     const endLocalDate = monthDates.at(-1)
 
-    await this.getCalendarOrThrow(user.id, input.calendarId)
+    await this.getCalendarOrThrow(input.user.id, input.calendarId)
 
     if (!startLocalDate || !endLocalDate) {
       return {
@@ -84,7 +84,7 @@ export class CalendarService {
 
     return {
       dayRecords: (await this.repository.listDayRecordsForDateRange(
-        user.id,
+        input.user.id,
         input.calendarId,
         startLocalDate,
         endLocalDate
@@ -93,13 +93,15 @@ export class CalendarService {
     }
   }
 
-  async getDayRecord(input: { calendarId: string; localDate: string }) {
-    const user = await this.repository.getCurrentUser()
-
-    await this.getCalendarOrThrow(user.id, input.calendarId)
+  async getDayRecord(input: {
+    user: UserProfile
+    calendarId: string
+    localDate: string
+  }) {
+    await this.getCalendarOrThrow(input.user.id, input.calendarId)
 
     const record = await this.repository.findDayRecord(
-      user.id,
+      input.user.id,
       input.calendarId,
       input.localDate
     )
@@ -112,22 +114,21 @@ export class CalendarService {
             id: null,
             localDate: input.localDate,
             slots: [],
-            timezone: user.timezone,
+            timezone: input.user.timezone,
           },
     }
   }
 
   async patchDayRecord(input: {
+    user: UserProfile
     calendarId: string
     localDate: string
     patch: DayRecordPatch
   }) {
-    const user = await this.repository.getCurrentUser()
-
-    await this.getCalendarOrThrow(user.id, input.calendarId)
+    await this.getCalendarOrThrow(input.user.id, input.calendarId)
 
     const existingRecord = await this.repository.findDayRecord(
-      user.id,
+      input.user.id,
       input.calendarId,
       input.localDate
     )
@@ -138,14 +139,18 @@ export class CalendarService {
       idGenerator: this.dependencies.idGenerator,
       localDate: input.localDate,
       nowIso: this.dependencies.clock(),
-      ownerUserId: user.id,
+      ownerUserId: input.user.id,
       patch: input.patch,
-      timezone: existingRecord?.timezone ?? user.timezone,
+      timezone: existingRecord?.timezone ?? input.user.timezone,
     })
 
     if (!nextRecord) {
       if (existingRecord) {
-        await this.repository.deleteDayRecord(user.id, input.calendarId, input.localDate)
+        await this.repository.deleteDayRecord(
+          input.user.id,
+          input.calendarId,
+          input.localDate
+        )
       }
 
       return {
@@ -154,7 +159,7 @@ export class CalendarService {
           id: null,
           localDate: input.localDate,
           slots: [],
-          timezone: existingRecord?.timezone ?? user.timezone,
+          timezone: existingRecord?.timezone ?? input.user.timezone,
         },
       }
     }

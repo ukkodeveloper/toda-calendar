@@ -17,4 +17,11 @@ export const apiErrorSchema = z.object({
   }),
 })
 
+export const authErrorCodeSchema = z.enum([
+  "AUTH_REQUIRED",
+  "INVALID_ACCESS_TOKEN",
+  "AUTH_BOOTSTRAP_FAILED",
+])
+
 export type ApiErrorResponse = z.infer<typeof apiErrorSchema>
+export type AuthErrorCode = z.infer<typeof authErrorCodeSchema>
