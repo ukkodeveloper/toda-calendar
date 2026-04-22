@@ -79,6 +79,7 @@ export function DoodleCanvas({
   const surfaceRef = React.useRef<SVGSVGElement | null>(null)
   const [activeStroke, setActiveStroke] = React.useState<CalendarDoodleStroke | null>(null)
   const [isEditing, setIsEditing] = React.useState(false)
+  const [isStrokeActive, setIsStrokeActive] = React.useState(false)
   const reducedMotion = useReducedMotion()
   const compact = mode === "expanded"
   const stageMaxWidth = compact ? 196 : 220
@@ -86,6 +87,8 @@ export function DoodleCanvas({
   const strokeStartRef = React.useRef<number | null>(null)
   const strokeOffsetRef = React.useRef(0)
   const activePointerIdRef = React.useRef<number | null>(null)
+  const activeStrokeRef = React.useRef<CalendarDoodleStroke | null>(null)
+  const slotStrokesRef = React.useRef(slot?.strokes ?? [])
   const previousRecordKeyRef = React.useRef(recordKey)
   const hasCommittedStrokes = Boolean(slot?.strokes.length)
 
@@ -102,13 +105,19 @@ export function DoodleCanvas({
   }, [slot?.strokes.length])
 
   React.useEffect(() => {
+    slotStrokesRef.current = slot?.strokes ?? []
+  }, [slot?.strokes])
+
+  React.useEffect(() => {
     if (previousRecordKeyRef.current === recordKey) {
       return
     }
 
     previousRecordKeyRef.current = recordKey
     setActiveStroke(null)
+    activeStrokeRef.current = null
     setIsEditing(false)
+    setIsStrokeActive(false)
     strokeStartRef.current = null
     activePointerIdRef.current = null
     onDrawingChange?.(false)
@@ -118,6 +127,10 @@ export function DoodleCanvas({
   const isCanvasInteractive = isEditing
 
   function pointFromEvent(event: React.PointerEvent<SVGSVGElement>): DoodlePoint | null {
+    return pointFromClientPosition(event.clientX, event.clientY)
+  }
+
+  function pointFromClientPosition(clientX: number, clientY: number): DoodlePoint | null {
     const rect = surfaceRef.current?.getBoundingClientRect()
 
     if (!rect) {
@@ -125,9 +138,38 @@ export function DoodleCanvas({
     }
 
     return {
-      x: clamp(((event.clientX - rect.left) / rect.width) * 100, 0, 100),
-      y: clamp(((event.clientY - rect.top) / rect.height) * 100, 0, 100),
+      x: clamp(((clientX - rect.left) / rect.width) * 100, 0, 100),
+      y: clamp(((clientY - rect.top) / rect.height) * 100, 0, 100),
     }
+  }
+
+  function getEventPoints(event: React.PointerEvent<SVGSVGElement>) {
+    const nativeEvent = event.nativeEvent
+    const samples =
+      typeof nativeEvent.getCoalescedEvents === "function"
+        ? nativeEvent.getCoalescedEvents()
+        : [nativeEvent]
+
+    return samples
+      .map((sample, index) => {
+        const point = pointFromClientPosition(sample.clientX, sample.clientY)
+
+        if (!point) {
+          return null
+        }
+
+        return {
+          ...point,
+          t:
+            strokeOffsetRef.current +
+            Math.max(
+              0,
+              performance.now() - (strokeStartRef.current ?? performance.now())
+            ) +
+            index * 4,
+        }
+      })
+      .filter((point): point is DoodlePoint & { t: number } => point !== null)
   }
 
   function handlePointerDown(event: React.PointerEvent<SVGSVGElement>) {
@@ -150,12 +192,14 @@ export function DoodleCanvas({
     strokeStartRef.current = performance.now()
     strokeOffsetRef.current = lastTimedPoint > 0 ? lastTimedPoint + 90 : 0
     activePointerIdRef.current = event.pointerId
+    setIsStrokeActive(true)
     onDrawingChange?.(true)
     if (event.cancelable) {
       event.preventDefault()
     }
+    event.stopPropagation()
     event.currentTarget.setPointerCapture(event.pointerId)
-    setActiveStroke({
+    const nextStroke = {
       color: DEFAULT_STROKE_COLOR,
       width: DEFAULT_STROKE_WIDTH,
       points: [
@@ -164,7 +208,9 @@ export function DoodleCanvas({
           t: strokeOffsetRef.current,
         },
       ],
-    })
+    }
+    activeStrokeRef.current = nextStroke
+    setActiveStroke(nextStroke)
   }
 
   function handlePointerMove(event: React.PointerEvent<SVGSVGElement>) {
@@ -177,40 +223,47 @@ export function DoodleCanvas({
       return
     }
 
-    if (!activeStroke) {
+    if (!activeStrokeRef.current) {
       return
     }
 
-    const point = pointFromEvent(event)
+    if (event.cancelable) {
+      event.preventDefault()
+    }
 
-    if (!point) {
+    const nextPoints = getEventPoints(event)
+
+    if (!nextPoints.length) {
       return
     }
 
-    const now = performance.now()
-    setActiveStroke((current) =>
-      current ? (() => {
-        const lastPoint = current.points[current.points.length - 1]!
-        const distance = Math.hypot(point.x - lastPoint.x, point.y - lastPoint.y)
+    setActiveStroke((current) => {
+      const baseStroke = current ?? activeStrokeRef.current
 
-        if (distance < 0.8) {
-          return current
-        }
+      if (!baseStroke) {
+        return current
+      }
 
-        return {
-          ...current,
-          points: [
-            ...current.points,
-            {
-              ...point,
-              t:
-                strokeOffsetRef.current +
-                Math.max(0, now - (strokeStartRef.current ?? now)),
-            },
-          ],
-        }
-      })() : current
-    )
+      const appendedPoints = nextPoints.filter((point) => {
+        const lastPoint =
+          (baseStroke.points[baseStroke.points.length - 1] ??
+            activeStrokeRef.current?.points[activeStrokeRef.current.points.length - 1])!
+
+        return Math.hypot(point.x - lastPoint.x, point.y - lastPoint.y) >= 0.45
+      })
+
+      if (!appendedPoints.length) {
+        return baseStroke
+      }
+
+      const nextStroke = {
+        ...baseStroke,
+        points: [...baseStroke.points, ...appendedPoints],
+      }
+
+      activeStrokeRef.current = nextStroke
+      return nextStroke
+    })
   }
 
   function commitStroke(event?: React.PointerEvent<SVGSVGElement>) {
@@ -223,40 +276,50 @@ export function DoodleCanvas({
     }
 
     activePointerIdRef.current = null
+    setIsStrokeActive(false)
 
-    if (!activeStroke) {
+    const strokeToCommit = activeStrokeRef.current
+
+    if (!strokeToCommit) {
       onDrawingChange?.(false)
       return
     }
 
     onChange({
       type: "doodle",
-      strokes: [...(slot?.strokes ?? []), activeStroke],
+      strokes: [...slotStrokesRef.current, strokeToCommit],
     })
+    activeStrokeRef.current = null
     setActiveStroke(null)
     strokeStartRef.current = null
     onDrawingChange?.(false)
   }
 
   function clearDoodle() {
+    activeStrokeRef.current = null
     setActiveStroke(null)
     setIsEditing(false)
+    setIsStrokeActive(false)
     activePointerIdRef.current = null
     onDrawingChange?.(false)
     onChange(undefined)
   }
 
   function finishEditing() {
-    if (activeStroke) {
+    const strokeToCommit = activeStrokeRef.current
+
+    if (strokeToCommit) {
       onChange({
         type: "doodle",
-        strokes: [...(slot?.strokes ?? []), activeStroke],
+        strokes: [...slotStrokesRef.current, strokeToCommit],
       })
+      activeStrokeRef.current = null
       setActiveStroke(null)
     }
 
     strokeStartRef.current = null
     activePointerIdRef.current = null
+    setIsStrokeActive(false)
     onDrawingChange?.(false)
     setIsEditing(false)
   }
@@ -303,10 +366,14 @@ export function DoodleCanvas({
           preserveAspectRatio="none"
           className="absolute inset-0 h-full w-full touch-none"
           fill="none"
-          style={{ pointerEvents: isLockedPreview || !isCanvasInteractive ? "none" : "auto" }}
+          style={{
+            pointerEvents: isLockedPreview || !isCanvasInteractive ? "none" : "auto",
+            touchAction: "none",
+            overscrollBehavior: "none",
+          }}
           onPointerCancel={commitStroke}
           onPointerDown={handlePointerDown}
-          onPointerLeave={commitStroke}
+          onLostPointerCapture={commitStroke}
           onPointerMove={handlePointerMove}
           onPointerUp={commitStroke}
         >
@@ -380,7 +447,7 @@ export function DoodleCanvas({
         </AnimatePresence>
 
         <AnimatePresence initial={false}>
-          {isEditing && hasPreviewStrokes ? (
+          {isEditing && hasPreviewStrokes && !isStrokeActive ? (
             <motion.div
               className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/24 via-black/10 to-transparent px-3 pb-3 pt-8"
               initial={
