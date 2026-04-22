@@ -2,15 +2,11 @@ import { access, copyFile, mkdir } from "node:fs/promises"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import { resolve } from "node:path"
 
-import type { FastifyInstance } from "fastify"
-
-import { buildApiApp } from "../apps/api/src/app.js"
-
 const DEPLOYMENT_DATA_DIRECTORY = resolve("/tmp", "toda-calendar")
 const DEPLOYMENT_DATA_FILE = resolve(DEPLOYMENT_DATA_DIRECTORY, "store.json")
 const SEED_DATA_FILE = resolve(process.cwd(), "apps/api/.data/store.json")
 
-let appPromise: Promise<FastifyInstance> | null = null
+let appPromise: Promise<any> | null = null
 
 async function ensureDeploymentStore() {
   await mkdir(DEPLOYMENT_DATA_DIRECTORY, { recursive: true })
@@ -30,6 +26,7 @@ async function getApp() {
   if (!appPromise) {
     appPromise = (async () => {
       await ensureDeploymentStore()
+      const { buildApiApp } = await import("../apps/api/dist/app.js")
 
       const { app } = await buildApiApp({
         env: {
