@@ -6,7 +6,6 @@ const workspaceRoot = path.join(__dirname, "../..")
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export",
   transpilePackages: ["@workspace/ui"],
   outputFileTracingRoot: workspaceRoot,
   turbopack: {

@@ -6,6 +6,7 @@ import * as React from "react"
 import { cn } from "@workspace/ui/lib/utils"
 
 import { CalendarHeader } from "@/components/calendar/calendar-header"
+import type { AppSession } from "@/lib/auth/app-session"
 import { ClosedJournalDock } from "@/components/calendar/closed-journal-dock"
 import { useMonthRange } from "../hooks/use-month-range"
 import { useCalendarState } from "../hooks/use-calendar-state"
@@ -35,7 +36,11 @@ function getNextPromptIndex(current: number) {
   return next
 }
 
-export function CalendarApp() {
+type CalendarAppProps = {
+  session?: AppSession
+}
+
+export function CalendarApp({ session }: CalendarAppProps) {
   const {
     activeMonthLabel,
     bottomSentinelRef,
@@ -59,6 +64,9 @@ export function CalendarApp() {
   )
   const previousOpenRef = React.useRef<boolean | null>(null)
   const isEditorOpen = Boolean(selectedRecord)
+  const showAuthActions =
+    session?.runtime === "configured" && session.isAuthenticated
+  const sessionLabel = session?.identity?.email ?? "Signed in"
 
   const openTodayEditor = React.useCallback((lift = 0) => {
     setSheetLaunchLift(lift)
@@ -126,7 +134,11 @@ export function CalendarApp() {
         aria-hidden={isEditorOpen}
         className={cn("relative", isEditorOpen && "pointer-events-none")}
       >
-        <CalendarHeader activeMonthLabel={activeMonthLabel} />
+        <CalendarHeader
+          activeMonthLabel={activeMonthLabel}
+          sessionLabel={sessionLabel}
+          showAuthActions={showAuthActions}
+        />
 
         <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
           <div ref={topSentinelRef} className="h-px" />

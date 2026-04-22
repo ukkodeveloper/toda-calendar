@@ -11,6 +11,7 @@ import {
 import { z } from "zod"
 
 import { getApiBaseUrl } from "../env"
+import { getBrowserAccessToken } from "../supabase/browser"
 
 export class ApiClientError extends Error {
   constructor(
@@ -36,12 +37,20 @@ async function request<T>(
     )
   }
 
+  const accessToken = await getBrowserAccessToken()
+  const headers = new Headers(init?.headers)
+
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json")
+  }
+
+  if (accessToken && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${accessToken}`)
+  }
+
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
+    headers,
   })
 
   if (!response.ok) {
