@@ -23,7 +23,21 @@ export async function buildApiApp(options: BuildApiAppOptions = {}) {
     idGenerator: () => randomUUID(),
   })
   const app = Fastify({
+    bodyLimit: 20 * 1024 * 1024,
     logger: options.logger ?? true,
+  })
+
+  app.addHook("onRequest", async (request, reply) => {
+    const origin = request.headers.origin
+
+    reply.header("Access-Control-Allow-Origin", origin ?? "*")
+    reply.header("Access-Control-Allow-Headers", "Content-Type")
+    reply.header("Access-Control-Allow-Methods", "GET, PATCH, OPTIONS")
+    reply.header("Vary", "Origin")
+
+    if (request.method === "OPTIONS") {
+      return reply.status(204).send()
+    }
   })
 
   app.setErrorHandler((error, _request, reply) => {

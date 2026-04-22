@@ -74,6 +74,36 @@ describe("API routes", () => {
     expect(getResponse.json()).toEqual(patchResponse.json())
   })
 
+  it("lists month records for the shared web client hydration path", async () => {
+    const { app, calendarId } = await createApp()
+
+    await app.inject({
+      method: "PATCH",
+      payload: {
+        text: {
+          body: "Closed the laptop before midnight.",
+        },
+      },
+      url: `/v1/calendars/${calendarId}/day-records/2026-04-22`,
+    })
+
+    const response = await app.inject({
+      method: "GET",
+      url: `/v1/calendars/${calendarId}/day-records?month=2026-04`,
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toMatchObject({
+      dayRecords: [
+        {
+          calendarId,
+          localDate: "2026-04-22",
+        },
+      ],
+      month: "2026-04",
+    })
+  })
+
   it("returns 404 when the requested calendar does not belong to the current user", async () => {
     const { app } = await createApp()
 

@@ -108,36 +108,6 @@ export function expandMonthRange(
   return [...monthStarts, ...nextKeys]
 }
 
-export function getMonthRenderWindow(
-  monthStarts: string[],
-  activeMonthKey: string,
-  monthsBefore: number,
-  monthsAfter: number
-) {
-  if (!monthStarts.length) {
-    return {
-      endIndex: -1,
-      startIndex: 0,
-    }
-  }
-
-  const resolvedActiveIndex = monthStarts.indexOf(activeMonthKey)
-  const activeIndex = resolvedActiveIndex >= 0 ? resolvedActiveIndex : 0
-
-  return {
-    endIndex: Math.min(monthStarts.length - 1, activeIndex + monthsAfter),
-    startIndex: Math.max(0, activeIndex - monthsBefore),
-  }
-}
-
-export function estimateMonthSectionHeight(weekCount: number, viewportWidth: number) {
-  const safeViewportWidth = Math.max(320, viewportWidth)
-  const cellWidth = safeViewportWidth / 7
-  const cellHeight = cellWidth * (5 / 4)
-
-  return Math.max(cellHeight * weekCount, 396)
-}
-
 function createGridDay(date: Date, todayKey: string): CalendarGridDay {
   return {
     date: toIsoDate(date),

@@ -1,6 +1,6 @@
 # Toda Calendar Mobile
 
-Expo Router based native client for `toda-calendar`.
+Expo shell app for `toda-calendar`.
 
 ## Commands
 
@@ -18,13 +18,11 @@ pnpm --filter mobile typecheck
 
 - `app/`
   Route files and stack layouts only
-- `src/features`
-  Screen composition and data wiring
-- `src/components`
-  Reusable native UI and calendar primitives
-- `src/services`
-  On-device repository and native integrations
+- `src/features/web-shell`
+  WebView shell that loads the web support surface
+- `src/components`, `src/features`, `src/services`
+  Earlier native-first calendar work kept in place for future follow-up
 
-This branch intentionally keeps storage local to the mobile workspace so we can
-iterate on the native product surface without coupling to unfinished backend
-work.
+The current integration path treats mobile as a React Native shell around the
+web app, so `EXPO_PUBLIC_WEB_APP_URL` is the main switch for local/dev preview
+flows.

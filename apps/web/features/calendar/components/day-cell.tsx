@@ -94,7 +94,12 @@ function DayPreview({
                 fill
                 sizes="(max-width: 768px) 14vw, 110px"
                 src={record.photo.src}
-                unoptimized={record.photo.src.startsWith("blob:")}
+                unoptimized={
+                  record.photo.src.startsWith("blob:") ||
+                  record.photo.src.startsWith("data:") ||
+                  record.photo.src.startsWith("http://") ||
+                  record.photo.src.startsWith("https://")
+                }
               />
             </div>
           ) : null}
@@ -122,16 +127,7 @@ function DayPreview({
   )
 }
 
-const MemoizedDayPreview = React.memo(
-  DayPreview,
-  (previousProps, nextProps) =>
-    previousProps.activePreviewType === nextProps.activePreviewType &&
-    previousProps.modeSwapVersion === nextProps.modeSwapVersion &&
-    previousProps.record === nextProps.record &&
-    previousProps.revealDelay === nextProps.revealDelay
-)
-
-function CalendarDayCellComponent({
+export function CalendarDayCell({
   activePreviewType,
   day,
   isSelected,
@@ -177,7 +173,7 @@ function CalendarDayCellComponent({
       onPointerUp={gesture.onPointerUp}
     >
       {hasVisiblePreview ? (
-        <MemoizedDayPreview
+        <DayPreview
           activePreviewType={activePreviewType}
           modeSwapVersion={modeSwapVersion}
           record={record}
@@ -330,16 +326,3 @@ function CalendarDayCellComponent({
     </motion.button>
   )
 }
-
-export const CalendarDayCell = React.memo(
-  CalendarDayCellComponent,
-  (previousProps, nextProps) =>
-    previousProps.activePreviewType === nextProps.activePreviewType &&
-    previousProps.day === nextProps.day &&
-    previousProps.isSelected === nextProps.isSelected &&
-    previousProps.modeSwapVersion === nextProps.modeSwapVersion &&
-    previousProps.onCyclePreview === nextProps.onCyclePreview &&
-    previousProps.onOpenDay === nextProps.onOpenDay &&
-    previousProps.record === nextProps.record &&
-    previousProps.revealDelay === nextProps.revealDelay
-)

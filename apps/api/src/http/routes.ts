@@ -1,16 +1,18 @@
 import type { FastifyInstance } from "fastify"
 import { z } from "zod"
-
-import { CalendarService } from "../application/services/calendar-service.js"
 import {
   getDayRecordResponseSchema,
   getMonthViewQuerySchema,
   getMonthViewResponseSchema,
   listCalendarsResponseSchema,
+  listDayRecordsQuerySchema,
+  listDayRecordsResponseSchema,
+  localDateSchema,
   meResponseSchema,
   patchDayRecordBodySchema,
-} from "../contracts/calendar.js"
-import { localDateSchema } from "../contracts/common.js"
+} from "@workspace/contracts"
+
+import { CalendarService } from "../application/services/calendar-service.js"
 import { InputValidationError } from "../domain/errors.js"
 
 const calendarParamsSchema = z.object({
@@ -46,6 +48,19 @@ export async function registerRoutes(
       await service.getMonthView({
         calendarId: params.calendarId,
         layer: query.layer ?? "PHOTO",
+        month: query.month,
+      })
+    )
+  })
+
+  app.get("/v1/calendars/:calendarId/day-records", async (request) => {
+    const params = parseOrThrow(calendarParamsSchema, request.params)
+    const query = parseOrThrow(listDayRecordsQuerySchema, request.query)
+
+    return validateResponse(
+      listDayRecordsResponseSchema,
+      await service.listDayRecords({
+        calendarId: params.calendarId,
         month: query.month,
       })
     )

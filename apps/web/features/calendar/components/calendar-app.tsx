@@ -62,19 +62,22 @@ export function CalendarApp() {
   const reducedMotion = useReducedMotion()
   const {
     activeMonthLabel,
-    bottomSpacerHeight,
+    bottomSentinelRef,
     registerSection,
     sections,
-    topSpacerHeight,
+    topSentinelRef,
   } = useMonthRange()
   const {
     advancePreviewMode,
     closeEditor,
+    error,
+    isInitialLoading,
     openDay,
+    reload,
     saveDayRecord,
     selectedRecord,
     state,
-  } = useCalendarState()
+  } = useCalendarState(sections.map((section) => section.monthStart.slice(0, 7)))
   const [modeSwapVersion, setModeSwapVersion] = React.useState(0)
   const [isModeSwitching, setIsModeSwitching] = React.useState(false)
   const [modeLabel, setModeLabel] = React.useState<ContentType | null>(null)
@@ -89,13 +92,6 @@ export function CalendarApp() {
     setSheetLaunchLift(lift)
     openDay(toIsoDate(new Date()))
   }, [openDay])
-  const handleOpenDay = React.useCallback(
-    (date: string) => {
-      setSheetLaunchLift(0)
-      openDay(date)
-    },
-    [openDay]
-  )
 
   React.useEffect(() => {
     return () => {
@@ -137,6 +133,47 @@ export function CalendarApp() {
     }, 320)
   }, [advancePreviewMode, state.activePreviewType, state.previewFilter])
 
+  if (isInitialLoading) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center bg-[var(--calendar-app-bg)] px-6 text-center text-foreground">
+        <div className="max-w-sm space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-foreground/50">
+            Connecting
+          </p>
+          <h1 className="text-2xl font-medium tracking-[-0.03em]">
+            Pulling your calendar from the API.
+          </h1>
+          <p className="text-sm leading-6 text-foreground/60">
+            The web surface now reads month records from `apps/api` instead of the local seed.
+          </p>
+        </div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center bg-[var(--calendar-app-bg)] px-6 text-center text-foreground">
+        <div className="max-w-md space-y-4 rounded-[28px] bg-white/55 px-6 py-7 shadow-[0_20px_48px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-foreground/42">
+            API Unavailable
+          </p>
+          <h1 className="text-2xl font-medium tracking-[-0.03em]">
+            The calendar could not reach the backend.
+          </h1>
+          <p className="text-sm leading-6 text-foreground/62">{error}</p>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-2 text-sm font-medium text-white"
+            onClick={reload}
+          >
+            Retry connection
+          </button>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-dvh bg-[var(--calendar-app-bg)] text-foreground">
       <CalendarHeader
@@ -146,11 +183,9 @@ export function CalendarApp() {
       />
 
       <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
-        <div className="relative">
-          {topSpacerHeight > 0 ? (
-            <div aria-hidden="true" style={{ height: topSpacerHeight }} />
-          ) : null}
+        <div ref={topSentinelRef} className="h-px" />
 
+        <div className="relative">
           <AnimatePresence initial={false}>
             {isModeSwitching && !reducedMotion ? (
               <motion.div
@@ -213,23 +248,22 @@ export function CalendarApp() {
               <CalendarMonthSection
                 key={section.key}
                 activePreviewType={state.activePreviewType}
-                lastRecordMutationDate={state.lastRecordMutationDate}
                 modeSwapVersion={modeSwapVersion}
                 onCyclePreview={handleCyclePreview}
-                onOpenDay={handleOpenDay}
+                onOpenDay={(date) => {
+                  setSheetLaunchLift(0)
+                  openDay(date)
+                }}
                 registerSection={registerSection}
                 recordsByDate={state.recordsByDate}
-                recordsVersion={state.recordsVersion}
                 selectedDate={state.selectedDate}
                 section={section}
               />
             ))}
           </LayoutGroup>
-
-          {bottomSpacerHeight > 0 ? (
-            <div aria-hidden="true" style={{ height: bottomSpacerHeight }} />
-          ) : null}
         </div>
+
+        <div ref={bottomSentinelRef} className="h-8" />
       </div>
 
       <AnimatePresence initial={false}>

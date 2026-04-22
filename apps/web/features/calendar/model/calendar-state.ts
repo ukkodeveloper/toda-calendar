@@ -14,9 +14,7 @@ import {
 
 export type CalendarState = {
   activePreviewType: ContentType
-  lastRecordMutationDate: string | null
   recordsByDate: Record<string, CalendarDayRecord>
-  recordsVersion: number
   previewFilter: PreviewFilterState
   selectedDate: string | null
 }
@@ -24,6 +22,8 @@ export type CalendarState = {
 export type CalendarAction =
   | { type: "open-editor"; date: string }
   | { type: "close-editor" }
+  | { type: "merge-records"; records: CalendarDayRecord[] }
+  | { type: "reset-records" }
   | { type: "save-record"; date: string; record: CalendarDayRecord | null }
   | { type: "cycle-preview-mode" }
   | { type: "toggle-filter"; contentType: ContentType }
@@ -90,9 +90,7 @@ export function sanitizeDayRecord(record: CalendarDayRecord) {
 export function createInitialCalendarState(records: CalendarDayRecord[]): CalendarState {
   return {
     activePreviewType: "photo",
-    lastRecordMutationDate: null,
     recordsByDate: normalizeCalendarRecords(records),
-    recordsVersion: 0,
     previewFilter: createDefaultPreviewFilter(),
     selectedDate: null,
   }
@@ -137,6 +135,24 @@ export function calendarReducer(state: CalendarState, action: CalendarAction): C
     }
   }
 
+  if (action.type === "merge-records") {
+    return {
+      ...state,
+      recordsByDate: {
+        ...state.recordsByDate,
+        ...normalizeCalendarRecords(action.records),
+      },
+    }
+  }
+
+  if (action.type === "reset-records") {
+    return {
+      ...state,
+      recordsByDate: {},
+      selectedDate: null,
+    }
+  }
+
   if (action.type === "save-record") {
     const nextRecords = { ...state.recordsByDate }
 
@@ -148,9 +164,7 @@ export function calendarReducer(state: CalendarState, action: CalendarAction): C
 
     return {
       ...state,
-      lastRecordMutationDate: action.date,
       recordsByDate: nextRecords,
-      recordsVersion: state.recordsVersion + 1,
     }
   }
 

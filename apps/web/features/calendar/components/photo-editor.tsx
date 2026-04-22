@@ -82,7 +82,12 @@ export function PhotoEditor({
               fill
               sizes={compact ? "34vw" : "(max-width: 768px) 58vw, 260px"}
               src={slot.src}
-              unoptimized={slot.src.startsWith("blob:")}
+              unoptimized={
+                slot.src.startsWith("blob:") ||
+                slot.src.startsWith("data:") ||
+                slot.src.startsWith("http://") ||
+                slot.src.startsWith("https://")
+              }
             />
           </>
         ) : (

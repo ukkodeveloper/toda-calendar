@@ -3,7 +3,7 @@ import { resolve } from "node:path"
 import { z } from "zod"
 
 const envSchema = z.object({
-  HOST: z.string().trim().min(1).default("127.0.0.1"),
+  HOST: z.string().trim().min(1).default("0.0.0.0"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3030),
   TODA_API_DATA_FILE: z.string().trim().min(1).optional(),
 })

@@ -64,6 +64,21 @@ export class CalendarService {
     }
   }
 
+  async listDayRecords(input: { calendarId: string; month: string }) {
+    const user = await this.repository.getCurrentUser()
+
+    await this.getCalendarOrThrow(user.id, input.calendarId)
+
+    return {
+      dayRecords: (await this.repository.listDayRecordsForMonth(
+        user.id,
+        input.calendarId,
+        input.month
+      )).map((record) => this.serializeDayRecord(record)),
+      month: input.month,
+    }
+  }
+
   async getDayRecord(input: { calendarId: string; localDate: string }) {
     const user = await this.repository.getCurrentUser()
 

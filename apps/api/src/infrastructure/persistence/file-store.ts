@@ -2,10 +2,8 @@ import { randomUUID } from "node:crypto"
 import { access, mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname } from "node:path"
 
+import { dayRecordSlotSchema, localDateSchema } from "@workspace/contracts"
 import { z } from "zod"
-
-import { dayRecordSlotSchema } from "../../contracts/calendar.js"
-import { localDateSchema } from "../../contracts/common.js"
 
 const isoDateTimeSchema = z.string().datetime()
 

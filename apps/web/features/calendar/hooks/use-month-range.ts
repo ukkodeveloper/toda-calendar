@@ -6,128 +6,54 @@ import { startTransition, useEffectEvent } from "react"
 import {
   buildMonthSection,
   createInitialMonthRange,
-  estimateMonthSectionHeight,
   expandMonthRange,
-  getMonthRenderWindow,
   monthKey,
   startOfMonth,
   toIsoDate,
 } from "../utils/date"
-import type { MonthSection } from "../model/types"
 
 const INITIAL_MONTHS_BEFORE = 2
 const INITIAL_MONTHS_AFTER = 5
 const CHUNK_SIZE = 4
-const EXPANSION_MARGIN = 1
 const MONTH_TOP_OFFSET = 84
 const ACTIVE_MONTH_OFFSET = 120
-const WINDOW_MONTHS_BEFORE = 2
-const WINDOW_MONTHS_AFTER = 4
-const DEFAULT_VIEWPORT_WIDTH = 393
 
 export function useMonthRange(anchorDate = new Date()) {
-  const anchorDateRef = React.useRef(anchorDate)
+  const topSentinelRef = React.useRef<HTMLDivElement | null>(null)
+  const bottomSentinelRef = React.useRef<HTMLDivElement | null>(null)
   const sectionRefs = React.useRef(new Map<string, HTMLElement>())
-  const sectionCacheRef = React.useRef(new Map<string, MonthSection>())
-  const pendingPrependOffsetRef = React.useRef(0)
+  const previousScrollHeightRef = React.useRef<number | null>(null)
   const frameRef = React.useRef<number | null>(null)
   const hasInitialScrollRef = React.useRef(false)
-  const resolvedAnchorDate = anchorDateRef.current
-  const currentMonthKey = monthKey(resolvedAnchorDate)
-  const todayKey = toIsoDate(resolvedAnchorDate)
+  const currentMonthKey = monthKey(anchorDate)
   const [monthStarts, setMonthStarts] = React.useState(() =>
     createInitialMonthRange(
-      startOfMonth(resolvedAnchorDate),
+      startOfMonth(anchorDate),
       INITIAL_MONTHS_BEFORE,
       INITIAL_MONTHS_AFTER
     )
   )
   const [activeMonthKey, setActiveMonthKey] = React.useState(currentMonthKey)
-  const [viewportWidth, setViewportWidth] = React.useState(() =>
-    typeof window === "undefined"
-      ? DEFAULT_VIEWPORT_WIDTH
-      : (window.visualViewport?.width ?? window.innerWidth)
-  )
-  const activeMonthIndex = React.useMemo(() => {
-    const resolvedIndex = monthStarts.indexOf(activeMonthKey)
-
-    if (resolvedIndex >= 0) {
-      return resolvedIndex
-    }
-
-    const currentMonthIndex = monthStarts.indexOf(currentMonthKey)
-    return currentMonthIndex >= 0 ? currentMonthIndex : 0
-  }, [activeMonthKey, currentMonthKey, monthStarts])
-  const renderWindow = React.useMemo(
-    () =>
-      getMonthRenderWindow(
-        monthStarts,
-        monthStarts[activeMonthIndex] ?? currentMonthKey,
-        WINDOW_MONTHS_BEFORE,
-        WINDOW_MONTHS_AFTER
-      ),
-    [activeMonthIndex, currentMonthKey, monthStarts]
-  )
-  const visibleMonthStarts = React.useMemo(
-    () =>
-      monthStarts.slice(renderWindow.startIndex, Math.max(renderWindow.endIndex + 1, 0)),
-    [monthStarts, renderWindow.endIndex, renderWindow.startIndex]
-  )
-
-  React.useEffect(() => {
-    sectionCacheRef.current.clear()
-  }, [todayKey])
-
-  const getMonthSection = React.useCallback(
-    (monthStart: string) => {
-      const cachedSection = sectionCacheRef.current.get(monthStart)
-
-      if (cachedSection) {
-        return cachedSection
-      }
-
-      const nextSection = buildMonthSection(monthStart, todayKey)
-      sectionCacheRef.current.set(monthStart, nextSection)
-
-      return nextSection
-    },
-    [todayKey]
-  )
-
+  const todayKey = toIsoDate(anchorDate)
   const sections = React.useMemo(
-    () => visibleMonthStarts.map((monthStart) => getMonthSection(monthStart)),
-    [getMonthSection, visibleMonthStarts]
+    () => monthStarts.map((monthStart) => buildMonthSection(monthStart, todayKey)),
+    [monthStarts, todayKey]
   )
-  const prefixHeights = React.useMemo(() => {
-    const nextPrefixHeights = [0]
-
-    for (const monthStart of monthStarts) {
-      const section = getMonthSection(monthStart)
-      const previousHeight =
-        nextPrefixHeights[nextPrefixHeights.length - 1] ?? 0
-
-      nextPrefixHeights.push(
-        previousHeight +
-          estimateMonthSectionHeight(section.weeks.length, viewportWidth)
-      )
-    }
-
-    return nextPrefixHeights
-  }, [getMonthSection, monthStarts, viewportWidth])
-  const topSpacerHeight = prefixHeights[renderWindow.startIndex] ?? 0
-  const totalHeight = prefixHeights[prefixHeights.length - 1] ?? 0
-  const renderedHeight =
-    (prefixHeights[renderWindow.endIndex + 1] ?? totalHeight) - topSpacerHeight
-  const bottomSpacerHeight = Math.max(totalHeight - topSpacerHeight - renderedHeight, 0)
 
   React.useLayoutEffect(() => {
-    if (!pendingPrependOffsetRef.current || typeof window === "undefined") {
+    if (previousScrollHeightRef.current == null || typeof window === "undefined") {
       return
     }
 
-    window.scrollBy(0, pendingPrependOffsetRef.current)
-    pendingPrependOffsetRef.current = 0
-  }, [monthStarts, renderWindow.startIndex])
+    const nextHeight = document.documentElement.scrollHeight
+    const diff = nextHeight - previousScrollHeightRef.current
+
+    if (diff > 0) {
+      window.scrollBy(0, diff)
+    }
+
+    previousScrollHeightRef.current = null
+  }, [monthStarts])
 
   React.useLayoutEffect(() => {
     if (hasInitialScrollRef.current) {
@@ -149,29 +75,14 @@ export function useMonthRange(anchorDate = new Date()) {
   }, [currentMonthKey, monthStarts])
 
   const prependMonths = useEffectEvent(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    previousScrollHeightRef.current = document.documentElement.scrollHeight
+
     startTransition(() => {
-      setMonthStarts((current) => {
-        if (!current[0]) {
-          return current
-        }
-
-        const nextMonthStarts = expandMonthRange(current, "past", CHUNK_SIZE)
-        const prependedMonthStarts = nextMonthStarts.slice(
-          0,
-          nextMonthStarts.length - current.length
-        )
-
-        pendingPrependOffsetRef.current += prependedMonthStarts.reduce((total, monthStart) => {
-          const section = getMonthSection(monthStart)
-
-          return (
-            total +
-            estimateMonthSectionHeight(section.weeks.length, viewportWidth)
-          )
-        }, 0)
-
-        return nextMonthStarts
-      })
+      setMonthStarts((current) => expandMonthRange(current, "past", CHUNK_SIZE))
     })
   })
 
@@ -182,14 +93,14 @@ export function useMonthRange(anchorDate = new Date()) {
   })
 
   const syncActiveMonth = useEffectEvent(() => {
-    if (!visibleMonthStarts.length || typeof window === "undefined") {
+    if (!monthStarts.length || typeof window === "undefined") {
       return
     }
 
     const threshold = window.scrollY + ACTIVE_MONTH_OFFSET
-    let nextActiveMonth = visibleMonthStarts[0] ?? currentMonthKey
+    let nextActiveMonth = monthStarts[0] ?? currentMonthKey
 
-    for (const monthStart of visibleMonthStarts) {
+    for (const monthStart of monthStarts) {
       const section = sectionRefs.current.get(monthStart)
 
       if (!section) {
@@ -220,44 +131,62 @@ export function useMonthRange(anchorDate = new Date()) {
     })
   }
 
-  const registerSection = React.useCallback((key: string, node: HTMLElement | null) => {
+  function registerSection(key: string, node: HTMLElement | null) {
     if (node) {
       sectionRefs.current.set(key, node)
       return
     }
 
     sectionRefs.current.delete(key)
-  }, [])
+  }
 
   React.useEffect(() => {
-    if (typeof window === "undefined") {
+    if (!topSentinelRef.current || !bottomSentinelRef.current) {
       return
     }
 
-    const syncViewport = () => {
-      setViewportWidth(window.visualViewport?.width ?? window.innerWidth)
+    let pastLocked = false
+    let futureLocked = false
+    const releasePastLock = () => {
+      pastLocked = false
+    }
+    const releaseFutureLock = () => {
+      futureLocked = false
     }
 
-    syncViewport()
-    window.addEventListener("resize", syncViewport)
-    window.visualViewport?.addEventListener("resize", syncViewport)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return
+          }
+
+          if (entry.target === topSentinelRef.current && !pastLocked) {
+            pastLocked = true
+            prependMonths()
+            window.setTimeout(releasePastLock, 160)
+          }
+
+          if (entry.target === bottomSentinelRef.current && !futureLocked) {
+            futureLocked = true
+            appendMonths()
+            window.setTimeout(releaseFutureLock, 160)
+          }
+        })
+      },
+      {
+        root: null,
+        rootMargin: "640px 0px 640px 0px",
+      }
+    )
+
+    observer.observe(topSentinelRef.current)
+    observer.observe(bottomSentinelRef.current)
 
     return () => {
-      window.removeEventListener("resize", syncViewport)
-      window.visualViewport?.removeEventListener("resize", syncViewport)
+      observer.disconnect()
     }
   }, [])
-
-  React.useEffect(() => {
-    if (activeMonthIndex <= EXPANSION_MARGIN) {
-      prependMonths()
-      return
-    }
-
-    if (monthStarts.length - activeMonthIndex - 1 <= EXPANSION_MARGIN) {
-      appendMonths()
-    }
-  }, [activeMonthIndex, monthStarts.length])
 
   React.useEffect(() => {
     if (typeof window === "undefined") {
@@ -285,17 +214,19 @@ export function useMonthRange(anchorDate = new Date()) {
         cancelAnimationFrame(frameRef.current)
       }
     }
-  }, [visibleMonthStarts])
+  }, [monthStarts.length])
 
   const activeMonthLabel =
-    getMonthSection(monthStarts[activeMonthIndex] ?? currentMonthKey).monthLabel
+    sections.find((section) => section.key === activeMonthKey)?.monthLabel ??
+    sections[0]?.monthLabel ??
+    ""
 
   return {
-    activeMonthLabel,
-    bottomSpacerHeight,
-    registerSection,
+    topSentinelRef,
+    bottomSentinelRef,
     sections,
+    activeMonthLabel,
+    registerSection,
     scrollToCurrentMonth: () => scrollToMonth(currentMonthKey, "smooth"),
-    topSpacerHeight,
   }
 }

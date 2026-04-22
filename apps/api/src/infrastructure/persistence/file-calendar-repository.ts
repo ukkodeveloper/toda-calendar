@@ -1,5 +1,5 @@
 import type { CalendarRepository, UpsertDayRecordInput } from "../../application/ports/calendar-repository.js"
-import { getMonthKeyFromLocalDate } from "../../domain/local-date.js"
+import { getMonthKeyFromLocalDate } from "@workspace/app-core"
 
 import { JsonFileStore } from "./file-store.js"
 
