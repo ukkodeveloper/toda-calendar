@@ -55,6 +55,56 @@ export function listLocalDatesForMonth(monthKey: string): string[] {
   )
 }
 
+function parseMonthKeyUtc(monthKey: string) {
+  return new Date(
+    Date.UTC(Number(monthKey.slice(0, 4)), Number(monthKey.slice(5, 7)) - 1, 1)
+  )
+}
+
+function parseLocalDateUtc(localDate: string) {
+  return new Date(
+    Date.UTC(
+      Number(localDate.slice(0, 4)),
+      Number(localDate.slice(5, 7)) - 1,
+      Number(localDate.slice(8, 10))
+    )
+  )
+}
+
+function addUtcDays(date: Date, amount: number) {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + amount)
+  )
+}
+
+function formatUtcLocalDate(date: Date) {
+  return formatLocalDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate())
+}
+
+export function getMonthGridRange(monthKey: string) {
+  if (!isValidMonthKey(monthKey)) {
+    throw new Error(`Invalid month key: ${monthKey}`)
+  }
+
+  const monthStart = parseMonthKeyUtc(monthKey)
+  const gridStart = addUtcDays(monthStart, -monthStart.getUTCDay())
+  const gridEnd = addUtcDays(gridStart, 41)
+
+  return {
+    endLocalDate: formatUtcLocalDate(gridEnd),
+    startLocalDate: formatUtcLocalDate(gridStart),
+  }
+}
+
+export function listLocalDatesForMonthGrid(monthKey: string): string[] {
+  const { startLocalDate } = getMonthGridRange(monthKey)
+  const gridStart = parseLocalDateUtc(startLocalDate)
+
+  return Array.from({ length: 42 }, (_, index) =>
+    formatUtcLocalDate(addUtcDays(gridStart, index))
+  )
+}
+
 export function toLocalDateKey(date: Date) {
   return formatLocalDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
 }

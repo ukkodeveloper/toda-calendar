@@ -11,7 +11,7 @@
   "rewrites": [
     {
       "source": "/api/:route*",
-      "destination": "/api?route=:route*"
+      "destination": "/api"
     }
   ]
 }

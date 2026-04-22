@@ -29,6 +29,16 @@ design clean while preserving an easy extraction path later.
 - `PATCH /v1/calendars/:calendarId/day-records/:localDate`
 - Vitest-based backend test mode
 
+## Additional Backend Decision
+
+- `month-view` is backed by the full visible `6-week` grid, not only the
+  in-month dates.
+- The repository boundary now queries day records by `localDate` range instead
+  of a month-only shortcut so later week-view or mobile surfaces can reuse the
+  same access pattern.
+- Each returned month-view cell includes `isCurrentMonth` so web/mobile clients
+  can choose whether to render adjacent dates or quiet placeholders.
+
 ## Key Constraints
 
 - Persistence is local-only/demo-only for now.

@@ -119,6 +119,16 @@ describe("CalendarService", () => {
 
     await service.patchDayRecord({
       calendarId,
+      localDate: "2026-03-29",
+      patch: {
+        text: {
+          body: "Month grid starts here.",
+        },
+      },
+    })
+
+    await service.patchDayRecord({
+      calendarId,
       localDate: "2026-04-05",
       patch: {
         text: {
@@ -152,9 +162,20 @@ describe("CalendarService", () => {
       month: "2026-04",
     })
 
-    expect(response.cells).toHaveLength(30)
-    expect(response.cells[4]).toEqual({
+    expect(response.cells).toHaveLength(42)
+    expect(response.cells[0]).toEqual({
       hasContent: true,
+      isCurrentMonth: false,
+      localDate: "2026-03-29",
+      preview: {
+        body: "Month grid starts here.",
+        title: null,
+        type: "TEXT",
+      },
+    })
+    expect(response.cells[7]).toEqual({
+      hasContent: true,
+      isCurrentMonth: true,
       localDate: "2026-04-05",
       preview: {
         body: "A quiet Sunday.",
@@ -162,9 +183,16 @@ describe("CalendarService", () => {
         type: "TEXT",
       },
     })
-    expect(response.cells[6]).toEqual({
+    expect(response.cells[9]).toEqual({
       hasContent: true,
+      isCurrentMonth: true,
       localDate: "2026-04-07",
+      preview: null,
+    })
+    expect(response.cells[41]).toEqual({
+      hasContent: false,
+      isCurrentMonth: false,
+      localDate: "2026-05-09",
       preview: null,
     })
   })

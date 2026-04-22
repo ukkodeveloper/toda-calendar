@@ -1,6 +1,7 @@
 import type { CalendarRepository } from "../ports/calendar-repository.js"
 import { applyDayRecordPatch, buildMonthViewCells, type DayRecordPatch } from "../../domain/calendar-rules.js"
 import { NotFoundError } from "../../domain/errors.js"
+import { getMonthGridRange, listLocalDatesForMonth } from "../../domain/local-date.js"
 import type { DayRecord, MonthLayer } from "../../domain/models.js"
 
 type CalendarServiceDependencies = {
@@ -48,13 +49,15 @@ export class CalendarService {
     layer: MonthLayer
   }) {
     const user = await this.repository.getCurrentUser()
+    const visibleRange = getMonthGridRange(input.month)
 
     await this.getCalendarOrThrow(user.id, input.calendarId)
 
-    const records = await this.repository.listDayRecordsForMonth(
+    const records = await this.repository.listDayRecordsForDateRange(
       user.id,
       input.calendarId,
-      input.month
+      visibleRange.startLocalDate,
+      visibleRange.endLocalDate
     )
 
     return {
@@ -66,14 +69,25 @@ export class CalendarService {
 
   async listDayRecords(input: { calendarId: string; month: string }) {
     const user = await this.repository.getCurrentUser()
+    const monthDates = listLocalDatesForMonth(input.month)
+    const startLocalDate = monthDates[0]
+    const endLocalDate = monthDates.at(-1)
 
     await this.getCalendarOrThrow(user.id, input.calendarId)
 
+    if (!startLocalDate || !endLocalDate) {
+      return {
+        dayRecords: [],
+        month: input.month,
+      }
+    }
+
     return {
-      dayRecords: (await this.repository.listDayRecordsForMonth(
+      dayRecords: (await this.repository.listDayRecordsForDateRange(
         user.id,
         input.calendarId,
-        input.month
+        startLocalDate,
+        endLocalDate
       )).map((record) => this.serializeDayRecord(record)),
       month: input.month,
     }
