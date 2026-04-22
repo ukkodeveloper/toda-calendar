@@ -28,7 +28,6 @@ Motion explains hierarchy and interaction state. It should feel calm, intentiona
 ## Gesture thresholds
 | Token | Value | Use |
 | --- | --- | --- |
-| `motion.gesture.doubleTapMs` | `220` | distinguish single tap from double tap |
 | `motion.gesture.sheetDismissOffset` | `120` | drag distance to dismiss sheet |
 | `motion.gesture.sheetDismissVelocity` | `700` | drag release velocity to dismiss sheet |
 

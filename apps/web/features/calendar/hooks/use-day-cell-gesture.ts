@@ -2,65 +2,96 @@
 
 import * as React from "react"
 
-import { motionTokens } from "@workspace/ui/lib/motion"
+import { exceedsTapSlop, isActivationKey } from "../utils/interactions"
 
 type UseDayCellGestureProps = {
-  onDoubleTap: () => void
-  onSingleTap: () => void
+  onPress: () => void
 }
 
 export function useDayCellGesture({
-  onDoubleTap,
-  onSingleTap,
+  onPress,
 }: UseDayCellGestureProps) {
-  const timeoutRef = React.useRef<number | null>(null)
-  const lastTapRef = React.useRef(0)
+  const pointerRef = React.useRef<{
+    id: number
+    moved: boolean
+    startX: number
+    startY: number
+  } | null>(null)
 
-  React.useEffect(() => {
-    return () => {
-      if (timeoutRef.current !== null) {
-        window.clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [])
+  function resetPointer() {
+    pointerRef.current = null
+  }
 
-  function onPointerUp(event: React.PointerEvent<HTMLElement>) {
-    if (event.cancelable) {
-      event.preventDefault()
-    }
-
-    const now = Date.now()
-
-    if (now - lastTapRef.current <= motionTokens.gesture.doubleTapMs) {
-      if (timeoutRef.current !== null) {
-        window.clearTimeout(timeoutRef.current)
-      }
-
-      timeoutRef.current = null
-      lastTapRef.current = 0
-      onDoubleTap()
+  function onPointerDown(event: React.PointerEvent<HTMLElement>) {
+    if (!event.isPrimary) {
       return
     }
 
-    lastTapRef.current = now
-    timeoutRef.current = window.setTimeout(() => {
-      onSingleTap()
-      timeoutRef.current = null
-      lastTapRef.current = 0
-    }, motionTokens.gesture.doubleTapMs)
+    pointerRef.current = {
+      id: event.pointerId,
+      moved: false,
+      startX: event.clientX,
+      startY: event.clientY,
+    }
+  }
+
+  function onPointerMove(event: React.PointerEvent<HTMLElement>) {
+    const current = pointerRef.current
+
+    if (!current || current.id !== event.pointerId) {
+      return
+    }
+
+    if (
+      exceedsTapSlop(
+        { x: current.startX, y: current.startY },
+        { x: event.clientX, y: event.clientY }
+      )
+    ) {
+      current.moved = true
+    }
+  }
+
+  function onPointerUp(event: React.PointerEvent<HTMLElement>) {
+    const current = pointerRef.current
+    resetPointer()
+
+    if (!current || current.id !== event.pointerId || current.moved) {
+      return
+    }
+
+    onPress()
+  }
+
+  function onPointerCancel() {
+    resetPointer()
+  }
+
+  function onPointerLeave(event: React.PointerEvent<HTMLElement>) {
+    const current = pointerRef.current
+
+    if (!current || current.id !== event.pointerId) {
+      return
+    }
+
+    current.moved = true
   }
 
   function onKeyDown(event: React.KeyboardEvent<HTMLElement>) {
-    if (event.key !== "Enter" && event.key !== " ") {
+    if (!isActivationKey(event.key)) {
       return
     }
 
     event.preventDefault()
-    onSingleTap()
+    onPress()
   }
 
   return {
-    onPointerUp,
     onKeyDown,
+    onPointerCancel,
+    onPointerDown,
+    onPointerLeave,
+    onPointerMove,
+    onPointerUp,
   }
 }

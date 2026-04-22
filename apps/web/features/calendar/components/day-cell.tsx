@@ -17,7 +17,6 @@ type CalendarDayCellProps = {
   day: CalendarGridDay
   isSelected: boolean
   modeSwapVersion: number
-  onCyclePreview: () => void
   onOpenDay: (date: string) => void
   record?: CalendarDayRecord
   revealDelay?: number
@@ -132,7 +131,6 @@ export function CalendarDayCell({
   day,
   isSelected,
   modeSwapVersion,
-  onCyclePreview,
   onOpenDay,
   record,
   revealDelay = 0,
@@ -149,8 +147,7 @@ export function CalendarDayCell({
   const hasVisiblePreview = Boolean(visibleType)
   const showDateBadgeSurface = hasVisiblePreview || isSelected || isToday
   const gesture = useDayCellGesture({
-    onDoubleTap: onCyclePreview,
-    onSingleTap: () => {
+    onPress: () => {
       if (day.date) {
         onOpenDay(day.date)
       }
@@ -166,10 +163,14 @@ export function CalendarDayCell({
       type="button"
       whileTap={reducedMotion ? undefined : { scale: 0.985 }}
       transition={motionTokens.spring.press}
-      aria-label={`${day.date}. Tap once to edit. Double tap to cycle all calendar content.`}
+      aria-label={`${day.date}. Open the day editor.`}
       className="relative w-full touch-manipulation rounded-none bg-transparent px-0 py-0 text-left outline-none"
       style={{ aspectRatio: dayCellAspectRatio }}
       onKeyDown={gesture.onKeyDown}
+      onPointerCancel={gesture.onPointerCancel}
+      onPointerDown={gesture.onPointerDown}
+      onPointerLeave={gesture.onPointerLeave}
+      onPointerMove={gesture.onPointerMove}
       onPointerUp={gesture.onPointerUp}
     >
       {hasVisiblePreview ? (

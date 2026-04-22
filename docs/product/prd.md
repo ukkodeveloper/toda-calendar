@@ -137,8 +137,8 @@ Rejected behavior:
 - Touch feedback is required but subtle.
 
 ## 7.3 Global preview cycle
-- Double tap is a global month-view behavior, not a per-day setting.
-- Double tapping anywhere inside the month grid cycles the active preview mode through enabled formats.
+- The visible preview control in the top bar is the primary way to cycle the active preview mode on touch devices.
+- Cycling preview mode must never delay the primary day-open tap interaction.
 - Active preview modes are limited to `photo`, `doodle`, and `text`.
 - If a day does not contain content for the active mode, the cell stays quiet rather than falling back to another type.
 - The mode change should behave like a surface-level swap first, then cell content should reveal second.
@@ -149,8 +149,8 @@ Rejected behavior:
 - The filter must be compact and menu-like, not a large instructional panel.
 
 ## 7.5 Explicit accessibility alternative
-- The app must not rely on double tap alone.
-- A compact visible control in the top bar may cycle the active preview mode.
+- The app must not rely on a hidden gesture for preview mode changes.
+- A compact visible control in the top bar cycles the active preview mode directly.
 - Keyboard and assistive technologies must be able to reach the same behavior without gesture discovery.
 
 ## 8. Bottom Sheet Strategy

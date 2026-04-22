@@ -1,3 +1,5 @@
+import { calendarInteractionUi } from "./interactions"
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
@@ -17,7 +19,7 @@ export const dockDetents = {
 export const floatingSheetUi = {
   handleWidth: 40,
   handleHeight: 6,
-  handleTouchHeight: 28,
+  handleTouchHeight: calendarInteractionUi.minTouchTarget,
   headerPaddingX: 16,
   headerPaddingTop: 8,
   headerPaddingBottom: 12,
@@ -26,8 +28,8 @@ export const floatingSheetUi = {
   titleSize: 16,
   titleTracking: -0.4,
   actionSize: 13,
-  actionHeight: 30,
-  segmentHeight: 30,
+  actionHeight: calendarInteractionUi.minTouchTarget,
+  segmentHeight: calendarInteractionUi.minTouchTarget,
   segmentRadius: 11,
   segmentContainerRadius: 15,
 } as const

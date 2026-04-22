@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 
 import { motionTokens } from "@workspace/ui/lib/motion"
 import type { CalendarDoodleSlot, CalendarDoodleStroke, DoodlePoint } from "../model/types"
+import { calendarInteractionUi } from "../utils/interactions"
 import { DoodleArt } from "./doodle-art"
 
 type DoodleCanvasProps = {
@@ -84,6 +85,7 @@ export function DoodleCanvas({
   const aspectRatio = motionTokens.preview.doodleAspectRatio
   const strokeStartRef = React.useRef<number | null>(null)
   const strokeOffsetRef = React.useRef(0)
+  const activePointerIdRef = React.useRef<number | null>(null)
   const previousRecordKeyRef = React.useRef(recordKey)
   const hasCommittedStrokes = Boolean(slot?.strokes.length)
 
@@ -108,6 +110,7 @@ export function DoodleCanvas({
     setActiveStroke(null)
     setIsEditing(!(slot?.strokes.length ?? 0))
     strokeStartRef.current = null
+    activePointerIdRef.current = null
     onDrawingChange?.(false)
   }, [onDrawingChange, recordKey, slot?.strokes.length])
 
@@ -127,7 +130,7 @@ export function DoodleCanvas({
   }
 
   function handlePointerDown(event: React.PointerEvent<SVGSVGElement>) {
-    if (isLockedPreview) {
+    if (isLockedPreview || !event.isPrimary) {
       return
     }
 
@@ -145,7 +148,11 @@ export function DoodleCanvas({
 
     strokeStartRef.current = performance.now()
     strokeOffsetRef.current = lastTimedPoint > 0 ? lastTimedPoint + 90 : 0
+    activePointerIdRef.current = event.pointerId
     onDrawingChange?.(true)
+    if (event.cancelable) {
+      event.preventDefault()
+    }
     event.currentTarget.setPointerCapture(event.pointerId)
     setActiveStroke({
       color: DEFAULT_STROKE_COLOR,
@@ -160,7 +167,11 @@ export function DoodleCanvas({
   }
 
   function handlePointerMove(event: React.PointerEvent<SVGSVGElement>) {
-    if (isLockedPreview) {
+    if (
+      isLockedPreview ||
+      !event.isPrimary ||
+      activePointerIdRef.current !== event.pointerId
+    ) {
       return
     }
 
@@ -200,7 +211,17 @@ export function DoodleCanvas({
     )
   }
 
-  function commitStroke() {
+  function commitStroke(event?: React.PointerEvent<SVGSVGElement>) {
+    if (
+      event &&
+      activePointerIdRef.current !== null &&
+      event.pointerId !== activePointerIdRef.current
+    ) {
+      return
+    }
+
+    activePointerIdRef.current = null
+
     if (!activeStroke) {
       onDrawingChange?.(false)
       return
@@ -218,6 +239,7 @@ export function DoodleCanvas({
   function clearDoodle() {
     setActiveStroke(null)
     setIsEditing(true)
+    activePointerIdRef.current = null
     onDrawingChange?.(false)
     onChange(undefined)
   }
@@ -232,6 +254,7 @@ export function DoodleCanvas({
     }
 
     strokeStartRef.current = null
+    activePointerIdRef.current = null
     onDrawingChange?.(false)
     setIsEditing(false)
   }
@@ -311,7 +334,7 @@ export function DoodleCanvas({
               <motion.button
                 type="button"
                 aria-label="Edit sketch"
-                className="pointer-events-auto inline-flex rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-semibold tracking-[-0.01em] text-foreground/68 shadow-[0_10px_22px_rgba(15,23,42,0.1)] backdrop-blur-[14px] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                className="pointer-events-auto inline-flex min-h-11 rounded-full bg-white/80 px-4 py-2 text-[11px] font-semibold tracking-[-0.01em] text-foreground/68 shadow-[0_10px_22px_rgba(15,23,42,0.1)] backdrop-blur-[14px] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                 transition={motionTokens.intent.touchFeedback}
                 onClick={(event) => {
@@ -342,11 +365,14 @@ export function DoodleCanvas({
                   : motionTokens.intent.selectionFlow
               }
             >
-              <div className="pointer-events-auto flex items-center gap-2">
+              <div
+                className="pointer-events-auto flex items-center gap-2"
+                style={{ minHeight: calendarInteractionUi.minTouchTarget }}
+              >
                 <motion.button
                   type="button"
                   aria-label="Clear sketch"
-                  className="inline-flex rounded-full bg-white/8 px-[3px] py-[3px] shadow-[0_10px_24px_rgba(15,23,42,0.12)] backdrop-blur-[10px] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  className="inline-flex min-h-11 rounded-full bg-white/8 px-[3px] py-[3px] shadow-[0_10px_24px_rgba(15,23,42,0.12)] backdrop-blur-[10px] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                   whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                   transition={motionTokens.intent.touchFeedback}
                   onClick={(event) => {
@@ -354,7 +380,7 @@ export function DoodleCanvas({
                     clearDoodle()
                   }}
                 >
-                  <span className="rounded-full bg-white/82 px-3 py-1.5 text-[11px] font-semibold tracking-[-0.01em] text-foreground/64">
+                  <span className="rounded-full bg-white/82 px-4 py-2 text-[11px] font-semibold tracking-[-0.01em] text-foreground/64">
                     Clear
                   </span>
                 </motion.button>
@@ -362,7 +388,7 @@ export function DoodleCanvas({
                 <motion.button
                   type="button"
                   aria-label="Finish sketch editing"
-                  className="inline-flex rounded-full bg-[linear-gradient(180deg,rgba(255,110,100,0.98)_0%,rgba(255,59,48,0.98)_100%)] px-3 py-1.5 text-[11px] font-semibold tracking-[-0.01em] text-white shadow-[0_12px_24px_rgba(255,59,48,0.24),inset_0_1px_0_rgba(255,255,255,0.32)] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  className="inline-flex min-h-11 rounded-full bg-[linear-gradient(180deg,rgba(255,110,100,0.98)_0%,rgba(255,59,48,0.98)_100%)] px-4 py-2 text-[11px] font-semibold tracking-[-0.01em] text-white shadow-[0_12px_24px_rgba(255,59,48,0.24),inset_0_1px_0_rgba(255,255,255,0.32)] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                   whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                   transition={motionTokens.intent.touchFeedback}
                   onClick={(event) => {

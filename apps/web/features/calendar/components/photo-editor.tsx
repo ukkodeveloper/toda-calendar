@@ -42,29 +42,23 @@ export function PhotoEditor({
 
   return (
     <div className="flex h-full min-h-0 items-center justify-center">
-      <motion.div
+      <motion.button
+        type="button"
         aria-label={slot ? "Replace photo" : "Add photo"}
         className={cn(
           "group relative w-full overflow-hidden rounded-[26px] bg-white/46 text-left outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_18px_32px_rgba(15,23,42,0.08)] transition-transform focus-visible:ring-2 focus-visible:ring-[var(--calendar-accent)]/35",
           compact ? "rounded-[24px]" : "rounded-[28px]"
         )}
-        role="button"
-        tabIndex={0}
         style={{
           maxHeight: "100%",
           maxWidth: stageMaxWidth,
           aspectRatio: `${aspectRatio}`,
           WebkitTapHighlightColor: "transparent",
+          touchAction: "manipulation",
         }}
         whileTap={reducedMotion ? undefined : { scale: 0.985 }}
         transition={motionTokens.intent.touchFeedback}
         onClick={() => inputRef.current?.click()}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault()
-            inputRef.current?.click()
-          }
-        }}
       >
         {label ? (
           <div className="pointer-events-none absolute top-3 left-3 z-[1]">
@@ -115,7 +109,7 @@ export function PhotoEditor({
             </motion.div>
           </AnimatePresence>
         </div>
-      </motion.div>
+      </motion.button>
 
       <input
         ref={inputRef}

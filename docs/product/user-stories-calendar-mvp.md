@@ -25,7 +25,7 @@
 
 ### Acceptance Criteria
 - Given I single tap a day cell
-- When the interaction is treated as a single tap instead of a double tap
+- When the interaction stays within the mobile tap tolerance
 - Then a floating bottom sheet opens for that date.
 
 - Given the bottom sheet is open
@@ -76,12 +76,12 @@
 
 ## Story 6 — Change the Visible Preview
 **As a** personal user  
-**I want to** double tap the calendar grid  
+**I want to** tap the visible preview control  
 **So that** I can cycle the visible preview mode for the whole month view.
 
 ### Acceptance Criteria
 - Given the current format filter allows more than one preview type
-- When I double tap the grid
+- When I tap the preview control
 - Then the active preview mode advances to the next enabled format.
 
 - Given the active preview mode changes
@@ -90,7 +90,7 @@
 
 ## Story 7 — Control the Preview Filter
 **As a** personal user  
-**I want to** control which formats are available to double tap cycling  
+**I want to** control which formats are available to preview cycling  
 **So that** I can focus the grid on the representations I care about.
 
 ### Acceptance Criteria
@@ -108,8 +108,8 @@
 
 ## Story 8 — Visible Preview Control Outside the Gesture
 **As a** personal user  
-**I want to** change the visible preview without relying only on double tap  
-**So that** I have an accessible alternative to double tap.
+**I want to** change the visible preview without relying on a hidden gesture  
+**So that** I have an accessible mobile-first path for the same action.
 
 ### Acceptance Criteria
 - Given the top navigation is visible

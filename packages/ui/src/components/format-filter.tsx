@@ -62,11 +62,29 @@ function FormatFilter<T extends string>({
     }
   }, [open])
 
+  React.useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [open])
+
   return (
     <div ref={rootRef} className={cn("relative", className)}>
       <IconButton
         aria-expanded={open}
-        aria-haspopup="dialog"
+        aria-haspopup="menu"
         aria-label="Open preview filter"
         size="sm"
         onClick={() => setOpen((current) => !current)}
@@ -76,7 +94,7 @@ function FormatFilter<T extends string>({
       <AnimatePresence>
         {open ? (
           <motion.div
-            role="dialog"
+            role="menu"
             aria-label={title}
             className="absolute top-11 right-0 z-30 w-[min(12rem,calc(100vw-1.5rem))] rounded-[20px] border border-black/6 bg-[var(--surface-panel)] p-1.5 text-left shadow-[0_18px_38px_rgba(15,23,42,0.14)] backdrop-blur-2xl"
             initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
@@ -102,9 +120,10 @@ function FormatFilter<T extends string>({
                 <button
                   key={option.value}
                   type="button"
-                  aria-pressed={selected[option.value]}
+                  aria-checked={selected[option.value]}
+                  role="menuitemcheckbox"
                   className={cn(
-                    "flex w-full items-center justify-between rounded-[16px] px-3 py-2.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]/45",
+                    "flex min-h-11 w-full items-center justify-between rounded-[16px] px-3 py-2.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]/45",
                     selected[option.value]
                       ? "bg-white/88 text-foreground"
                       : "bg-transparent text-foreground/66"

@@ -8,7 +8,7 @@ import {
   createInitialCalendarState,
   getRecordForDate,
 } from "../model/calendar-state"
-import type { CalendarDayRecord } from "../model/types"
+import type { CalendarDayRecord, ContentType } from "../model/types"
 import { releaseReplacedSessionPhoto } from "../utils/session-photo"
 
 function toErrorMessage(error: unknown) {
@@ -154,6 +154,10 @@ export function useCalendarState(months: string[]) {
     setReloadToken((current) => current + 1)
   }, [])
 
+  const togglePreviewFilter = React.useCallback((contentType: ContentType) => {
+    dispatch({ type: "toggle-filter", contentType })
+  }, [])
+
   const saveDayRecord = React.useCallback(
     async (record: CalendarDayRecord) => {
       if (!calendarId) {
@@ -186,5 +190,6 @@ export function useCalendarState(months: string[]) {
     saveDayRecord,
     selectedRecord,
     state,
+    togglePreviewFilter,
   }
 }

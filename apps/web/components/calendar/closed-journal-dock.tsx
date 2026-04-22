@@ -17,6 +17,7 @@ import {
   dockDetents,
   floatingSheetUi,
 } from "@/features/calendar/utils/sheet-detents"
+import { calendarInteractionUi } from "@/features/calendar/utils/interactions"
 
 type ClosedJournalDockProps = {
   onOpenToday: (lift?: number) => void
@@ -199,8 +200,11 @@ export function ClosedJournalDock({
         >
           <button
             type="button"
-            className="min-w-0 max-w-[288px] rounded-full px-[12px] py-[6px] text-center outline-none focus-visible:ring-2 focus-visible:ring-[var(--calendar-accent)]/30"
-            style={{ backgroundColor: "var(--calendar-sheet-pill)" }}
+            className="min-w-0 max-w-[288px] rounded-full px-[14px] py-[8px] text-center outline-none focus-visible:ring-2 focus-visible:ring-[var(--calendar-accent)]/30"
+            style={{
+              backgroundColor: "var(--calendar-sheet-pill)",
+              minHeight: calendarInteractionUi.minTouchTarget,
+            }}
             onClick={() => onOpenToday(0)}
           >
             <div className="text-[15px] font-medium tracking-[-0.38px] text-foreground/74">

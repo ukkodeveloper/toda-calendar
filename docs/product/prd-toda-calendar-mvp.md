@@ -26,7 +26,7 @@ Create a polished month-view journaling calendar that feels native, calm, and in
 - Users can scroll continuously through months in both directions without losing orientation.
 - The sticky month title updates to the currently visible month as the user scrolls.
 - Users can open a floating bottom sheet from any day cell and create or edit photo, doodle, and text content in one place.
-- Users can double tap the calendar grid to cycle the global visible preview mode through the allowed formats.
+- Users can cycle the global visible preview mode from a visible top-bar control without losing touch responsiveness on day cells.
 - The month grid remains readable at mobile widths, with stable cell height and clear preview hierarchy.
 
 ## 5. Market Segment(s)
@@ -37,7 +37,7 @@ Create a polished month-view journaling calendar that feels native, calm, and in
 ## 6. Value Proposition(s)
 - Combines a familiar calendar interaction model with richer, more visual day content.
 - Preserves the calm and predictable feel of Apple-style navigation while making cells larger and more readable for journaling previews.
-- Uses motion to explain hierarchy: tap opens depth, double tap cycles the whole calendar representation, and the filter defines what the cycle may show.
+- Uses motion to explain hierarchy: tap opens depth, the preview control cycles the whole calendar representation, and the filter defines what the cycle may show.
 
 ## 7. Solution
 
@@ -45,9 +45,9 @@ Create a polished month-view journaling calendar that feels native, calm, and in
 - Primary screen: continuous month list with roomy 7-column month grids inside a full-width mobile shell.
 - Day interaction:
   - Single tap opens a floating bottom sheet.
-  - Double tap cycles the global preview format within the current filter.
+  - The top-bar preview control cycles the global preview format within the current filter.
 - Sticky navigation bar shows the currently visible month and a compact control for the active preview mode.
-- Top-right action opens a format filter popover that controls which formats are eligible for double-tap cycling.
+- Top-right action opens a format filter popover that controls which formats are eligible for preview cycling.
 - Supporting docs live in `docs/ux-flows/`.
 
 ### 7.2 Key features
@@ -80,7 +80,7 @@ Create a polished month-view journaling calendar that feels native, calm, and in
 - English only.
 - JSON seed + in-session editing.
 - Photo, doodle, and text editing inside a floating sheet.
-- Global format filter and double-tap preview cycling.
+- Global format filter and explicit preview cycling.
 
 ### Later releases
 - Persistence backend and user accounts.

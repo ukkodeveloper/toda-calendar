@@ -8,7 +8,7 @@ sequenceDiagram
     participant Filter as Preview Filter State
     participant Grid as Day Grid
 
-    User->>View: Double tap grid or tap preview pill
+    User->>View: Tap preview pill
     View->>Reducer: dispatch(cycle-preview-mode)
     Reducer->>Filter: Read enabled types
     Filter-->>Reducer: Eligible order

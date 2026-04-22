@@ -2,7 +2,7 @@
 
 ```mermaid
 graph TD
-    A["Month Timeline"] --> B([User double taps grid or taps preview pill])
+    A["Month Timeline"] --> B([User taps preview pill])
     B --> C["Read enabled preview types"]
     C --> D{"More than one type enabled?"}
     D -- "No" --> E["Keep active mode"]

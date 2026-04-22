@@ -16,7 +16,6 @@ import type { ContentType } from "../model/types"
 import { useMonthRange } from "../hooks/use-month-range"
 import { useCalendarState } from "../hooks/use-calendar-state"
 import { toIsoDate } from "../utils/date"
-import { cyclePreviewMode } from "../utils/preview"
 import { CalendarMonthSection } from "./month-section"
 import { DayEditorSheet } from "./day-editor-sheet"
 
@@ -77,16 +76,17 @@ export function CalendarApp() {
     saveDayRecord,
     selectedRecord,
     state,
+    togglePreviewFilter,
   } = useCalendarState(sections.map((section) => section.monthStart.slice(0, 7)))
   const [modeSwapVersion, setModeSwapVersion] = React.useState(0)
   const [isModeSwitching, setIsModeSwitching] = React.useState(false)
-  const [modeLabel, setModeLabel] = React.useState<ContentType | null>(null)
   const [sheetLaunchLift, setSheetLaunchLift] = React.useState(0)
   const [promptIndex, setPromptIndex] = React.useState(() =>
     Math.floor(Math.random() * dockPrompts.length)
   )
   const modeTimerRef = React.useRef<number | null>(null)
   const previousOpenRef = React.useRef<boolean | null>(null)
+  const [, startPreviewTransition] = React.useTransition()
 
   const openTodayEditor = React.useCallback((lift = 0) => {
     setSheetLaunchLift(lift)
@@ -116,11 +116,10 @@ export function CalendarApp() {
   }, [selectedRecord])
 
   const handleCyclePreview = React.useCallback(() => {
-    const nextMode = cyclePreviewMode(state.activePreviewType, state.previewFilter)
-
-    advancePreviewMode()
+    startPreviewTransition(() => {
+      advancePreviewMode()
+    })
     setModeSwapVersion((current) => current + 1)
-    setModeLabel(nextMode)
     setIsModeSwitching(true)
 
     if (modeTimerRef.current !== null) {
@@ -131,7 +130,13 @@ export function CalendarApp() {
       setIsModeSwitching(false)
       modeTimerRef.current = null
     }, 320)
-  }, [advancePreviewMode, state.activePreviewType, state.previewFilter])
+  }, [advancePreviewMode, startPreviewTransition])
+
+  const handleTogglePreviewFilter = React.useCallback((contentType: ContentType) => {
+    startPreviewTransition(() => {
+      togglePreviewFilter(contentType)
+    })
+  }, [startPreviewTransition, togglePreviewFilter])
 
   if (isInitialLoading) {
     return (
@@ -178,8 +183,10 @@ export function CalendarApp() {
     <main className="min-h-dvh bg-[var(--calendar-app-bg)] text-foreground">
       <CalendarHeader
         activeMonthLabel={activeMonthLabel}
-        modeLabel={formatModeLabel(modeLabel)}
-        showModeLabel={Boolean(modeLabel && isModeSwitching)}
+        activePreviewLabel={formatModeLabel(state.activePreviewType)}
+        onCyclePreview={handleCyclePreview}
+        onTogglePreviewFilter={handleTogglePreviewFilter}
+        previewFilter={state.previewFilter}
       />
 
       <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
@@ -249,7 +256,6 @@ export function CalendarApp() {
                 key={section.key}
                 activePreviewType={state.activePreviewType}
                 modeSwapVersion={modeSwapVersion}
-                onCyclePreview={handleCyclePreview}
                 onOpenDay={(date) => {
                   setSheetLaunchLift(0)
                   openDay(date)

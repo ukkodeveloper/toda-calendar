@@ -4,8 +4,7 @@
 stateDiagram-v2
     [*] --> MonthIdle
     MonthIdle --> TapDetected: User taps day
-    TapDetected --> OpeningSheet: Single tap confirmed
-    TapDetected --> MonthIdle: Double tap rerouted
+    TapDetected --> OpeningSheet: Tap confirmed within touch slop
     OpeningSheet --> SheetOpen: Presentation complete
     SheetOpen --> SheetClosing: Cancel, Done, backdrop, or drag
     SheetClosing --> MonthIdle

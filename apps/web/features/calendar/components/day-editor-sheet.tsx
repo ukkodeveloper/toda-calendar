@@ -27,6 +27,7 @@ import {
   getDockHandoffFrame,
   getFloatingSheetDetents,
 } from "../utils/sheet-detents"
+import { calendarInteractionUi } from "../utils/interactions"
 import { DoodleCanvas } from "./doodle-canvas"
 import { PhotoEditor } from "./photo-editor"
 import { TextEditor } from "./text-editor"
@@ -528,7 +529,7 @@ export function DayEditorSheet({
               {contentStage === "peek" ? (
                 <LayoutGroup>
                   <div
-                    className="mt-[10px] grid grid-cols-3 gap-[4px] bg-black/[0.045] p-[4px]"
+                    className="mt-[10px] grid grid-cols-3 gap-2 bg-black/[0.045] p-[4px]"
                     style={{ borderRadius: floatingSheetUi.segmentContainerRadius }}
                   >
                     {editorTabs.map((tab) => (
@@ -540,6 +541,7 @@ export function DayEditorSheet({
                           activeTab === tab.value ? "text-foreground" : "text-foreground/46"
                         )}
                         style={{
+                          minHeight: calendarInteractionUi.minTouchTarget,
                           height: floatingSheetUi.segmentHeight,
                           borderRadius: floatingSheetUi.segmentRadius,
                           fontSize: 12,

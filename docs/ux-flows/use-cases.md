@@ -59,7 +59,7 @@ These use cases are rewritten to match the reset PRD in [docs/product/prd.md](..
 - **Actors**: User
 - **Preconditions**: At least one preview type is enabled in the filter.
 - **Main Flow**:
-  1. User double taps within the month grid or taps the visible preview control in the top bar.
+  1. User taps the visible preview control in the top bar.
   2. System reads the enabled preview types.
   3. System advances the global active preview mode to the next enabled type.
   4. System updates visible day cells to show only that preview type where content exists.
@@ -89,5 +89,5 @@ These use cases are rewritten to match the reset PRD in [docs/product/prd.md](..
   3. If reduced motion is enabled, system simplifies transitions while preserving clarity.
   4. If text size increases, system keeps controls legible without overlapping or truncating critical content.
 - **Alternative Flows**:
-  - If the user cannot discover the double-tap gesture, the top-bar preview control provides an explicit alternative.
+  - If the user is on a touch device, the top-bar preview control remains the primary non-hidden path for changing preview mode.
 - **Postconditions**: The core calendar flow remains usable without relying on hidden gestures or decorative motion.
