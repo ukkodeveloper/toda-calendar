@@ -3,7 +3,6 @@
 import {
   animate,
   motion,
-  useDragControls,
   useMotionValue,
   useReducedMotion,
   useTransform,
@@ -29,7 +28,6 @@ export function ClosedJournalDock({
   prompt,
 }: ClosedJournalDockProps) {
   const reducedMotion = useReducedMotion()
-  const dragControls = useDragControls()
   const x = useMotionValue(0)
   const y = useMotionValue(0)
   const [viewportWidth, setViewportWidth] = React.useState(393)
@@ -122,7 +120,6 @@ export function ClosedJournalDock({
   return (
     <motion.div
       drag
-      dragControls={dragControls}
       dragConstraints={{
         top: -Math.max(180, dockDetents.gestureRange * 2),
         right: Math.max(72, viewportWidth * 0.48),
@@ -130,7 +127,6 @@ export function ClosedJournalDock({
         left: -Math.max(72, viewportWidth * 0.48),
       }}
       dragElastic={0.14}
-      dragListener={false}
       dragMomentum={false}
       onDragEnd={handleDragEnd}
       className="pointer-events-auto fixed z-40 overflow-hidden text-foreground shadow-[var(--calendar-sheet-shadow)] backdrop-blur-[28px] backdrop-saturate-[1.35]"
@@ -148,6 +144,8 @@ export function ClosedJournalDock({
         y,
         backgroundColor: "var(--calendar-sheet-surface)",
         boxShadow: "var(--calendar-sheet-shadow), var(--calendar-sheet-inner-shadow)",
+        touchAction: "none",
+        overscrollBehavior: "none",
       }}
       initial={reducedMotion ? { opacity: 1 } : { y: 18, opacity: 0 }}
       animate={reducedMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
@@ -169,19 +167,14 @@ export function ClosedJournalDock({
       </div>
 
       <div className="relative z-10 flex h-full flex-col px-[16px] pt-[8px] pb-[max(14px,env(safe-area-inset-bottom))]">
-        <button
-          type="button"
-          aria-label="Drag journal drawer"
-          className="flex w-full items-center justify-center rounded-full active:cursor-grabbing"
+        <div
+          aria-hidden="true"
+          className="flex w-full items-center justify-center rounded-full"
           style={{
             height: floatingSheetUi.handleTouchHeight,
-            touchAction: "none",
             WebkitTapHighlightColor: "transparent",
             WebkitUserSelect: "none",
             userSelect: "none",
-          }}
-          onPointerDown={(event) => {
-            dragControls.start(event)
           }}
         >
           <motion.span
@@ -193,17 +186,21 @@ export function ClosedJournalDock({
             }}
             style={{ backgroundColor: "var(--calendar-sheet-handle)" }}
           />
-        </button>
+        </div>
         <motion.div
           style={{ opacity: promptOpacity }}
           className="mt-[8px] flex flex-1 items-center justify-center"
         >
           <button
             type="button"
+            data-dock-action="open"
             className="min-w-0 max-w-[288px] rounded-full px-[14px] py-[8px] text-center outline-none focus-visible:ring-2 focus-visible:ring-[var(--calendar-accent)]/30"
             style={{
               backgroundColor: "var(--calendar-sheet-pill)",
               minHeight: calendarInteractionUi.minTouchTarget,
+            }}
+            onPointerDown={(event) => {
+              event.stopPropagation()
             }}
             onClick={() => onOpenToday(0)}
           >
