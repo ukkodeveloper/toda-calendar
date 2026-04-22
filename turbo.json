@@ -1,11 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["PORT"],
   "ui": "tui",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "out/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]

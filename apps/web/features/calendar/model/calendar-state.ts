@@ -14,7 +14,9 @@ import {
 
 export type CalendarState = {
   activePreviewType: ContentType
+  lastRecordMutationDate: string | null
   recordsByDate: Record<string, CalendarDayRecord>
+  recordsVersion: number
   previewFilter: PreviewFilterState
   selectedDate: string | null
 }
@@ -88,7 +90,9 @@ export function sanitizeDayRecord(record: CalendarDayRecord) {
 export function createInitialCalendarState(records: CalendarDayRecord[]): CalendarState {
   return {
     activePreviewType: "photo",
+    lastRecordMutationDate: null,
     recordsByDate: normalizeCalendarRecords(records),
+    recordsVersion: 0,
     previewFilter: createDefaultPreviewFilter(),
     selectedDate: null,
   }
@@ -144,7 +148,9 @@ export function calendarReducer(state: CalendarState, action: CalendarAction): C
 
     return {
       ...state,
+      lastRecordMutationDate: action.date,
       recordsByDate: nextRecords,
+      recordsVersion: state.recordsVersion + 1,
     }
   }
 

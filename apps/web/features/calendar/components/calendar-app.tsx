@@ -62,10 +62,10 @@ export function CalendarApp() {
   const reducedMotion = useReducedMotion()
   const {
     activeMonthLabel,
-    bottomSentinelRef,
+    bottomSpacerHeight,
     registerSection,
     sections,
-    topSentinelRef,
+    topSpacerHeight,
   } = useMonthRange()
   const {
     advancePreviewMode,
@@ -89,6 +89,13 @@ export function CalendarApp() {
     setSheetLaunchLift(lift)
     openDay(toIsoDate(new Date()))
   }, [openDay])
+  const handleOpenDay = React.useCallback(
+    (date: string) => {
+      setSheetLaunchLift(0)
+      openDay(date)
+    },
+    [openDay]
+  )
 
   React.useEffect(() => {
     return () => {
@@ -139,9 +146,11 @@ export function CalendarApp() {
       />
 
       <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
-        <div ref={topSentinelRef} className="h-px" />
-
         <div className="relative">
+          {topSpacerHeight > 0 ? (
+            <div aria-hidden="true" style={{ height: topSpacerHeight }} />
+          ) : null}
+
           <AnimatePresence initial={false}>
             {isModeSwitching && !reducedMotion ? (
               <motion.div
@@ -204,22 +213,23 @@ export function CalendarApp() {
               <CalendarMonthSection
                 key={section.key}
                 activePreviewType={state.activePreviewType}
+                lastRecordMutationDate={state.lastRecordMutationDate}
                 modeSwapVersion={modeSwapVersion}
                 onCyclePreview={handleCyclePreview}
-                onOpenDay={(date) => {
-                  setSheetLaunchLift(0)
-                  openDay(date)
-                }}
+                onOpenDay={handleOpenDay}
                 registerSection={registerSection}
                 recordsByDate={state.recordsByDate}
+                recordsVersion={state.recordsVersion}
                 selectedDate={state.selectedDate}
                 section={section}
               />
             ))}
           </LayoutGroup>
-        </div>
 
-        <div ref={bottomSentinelRef} className="h-8" />
+          {bottomSpacerHeight > 0 ? (
+            <div aria-hidden="true" style={{ height: bottomSpacerHeight }} />
+          ) : null}
+        </div>
       </div>
 
       <AnimatePresence initial={false}>

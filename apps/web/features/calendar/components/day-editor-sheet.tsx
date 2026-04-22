@@ -101,7 +101,7 @@ export function DayEditorSheet({
   }, [])
 
   React.useEffect(() => {
-    if (typeof window === "undefined") {
+    if (!open || typeof window === "undefined") {
       return
     }
 
@@ -130,7 +130,7 @@ export function DayEditorSheet({
       window.visualViewport?.removeEventListener("resize", syncViewport)
       window.visualViewport?.removeEventListener("scroll", syncViewport)
     }
-  }, [])
+  }, [open])
 
   React.useEffect(() => {
     setDraft((current) => {

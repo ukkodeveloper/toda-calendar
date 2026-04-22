@@ -122,7 +122,16 @@ function DayPreview({
   )
 }
 
-export function CalendarDayCell({
+const MemoizedDayPreview = React.memo(
+  DayPreview,
+  (previousProps, nextProps) =>
+    previousProps.activePreviewType === nextProps.activePreviewType &&
+    previousProps.modeSwapVersion === nextProps.modeSwapVersion &&
+    previousProps.record === nextProps.record &&
+    previousProps.revealDelay === nextProps.revealDelay
+)
+
+function CalendarDayCellComponent({
   activePreviewType,
   day,
   isSelected,
@@ -168,7 +177,7 @@ export function CalendarDayCell({
       onPointerUp={gesture.onPointerUp}
     >
       {hasVisiblePreview ? (
-        <DayPreview
+        <MemoizedDayPreview
           activePreviewType={activePreviewType}
           modeSwapVersion={modeSwapVersion}
           record={record}
@@ -321,3 +330,16 @@ export function CalendarDayCell({
     </motion.button>
   )
 }
+
+export const CalendarDayCell = React.memo(
+  CalendarDayCellComponent,
+  (previousProps, nextProps) =>
+    previousProps.activePreviewType === nextProps.activePreviewType &&
+    previousProps.day === nextProps.day &&
+    previousProps.isSelected === nextProps.isSelected &&
+    previousProps.modeSwapVersion === nextProps.modeSwapVersion &&
+    previousProps.onCyclePreview === nextProps.onCyclePreview &&
+    previousProps.onOpenDay === nextProps.onOpenDay &&
+    previousProps.record === nextProps.record &&
+    previousProps.revealDelay === nextProps.revealDelay
+)

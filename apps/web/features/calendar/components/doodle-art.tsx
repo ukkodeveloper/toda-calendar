@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { motion } from "framer-motion"
 
 import { motionTokens } from "@workspace/ui/lib/motion"
@@ -104,7 +105,18 @@ export function DoodleArt({
   strokes,
   stretch = false,
 }: DoodleArtProps) {
-  const playback = getStrokePlayback(strokes)
+  const playback = React.useMemo(() => getStrokePlayback(strokes), [strokes])
+  const renderedStrokes = React.useMemo(
+    () =>
+      strokes.map((stroke, index) => ({
+        animation: playback[index],
+        color: stroke.color,
+        key: `${stroke.color}-${index}`,
+        path: toPath(stroke.points),
+        width: stroke.width,
+      })),
+    [playback, strokes]
+  )
 
   return (
     <svg
@@ -113,15 +125,14 @@ export function DoodleArt({
       fill="none"
       preserveAspectRatio={stretch ? "none" : "xMidYMid meet"}
     >
-      {strokes.map((stroke, index) => {
-        const path = toPath(stroke.points)
-        const animation = playback[index]
+      {renderedStrokes.map((stroke) => {
+        const animation = stroke.animation
 
         if (animatePlayback && animation) {
           return (
             <motion.path
-              key={`${stroke.color}-${index}`}
-              d={path}
+              key={stroke.key}
+              d={stroke.path}
               initial={{ opacity: 1, pathLength: 0 }}
               animate={{ opacity: 1, pathLength: 1 }}
               stroke={stroke.color}
@@ -139,8 +150,8 @@ export function DoodleArt({
 
         return (
           <path
-            key={`${stroke.color}-${index}`}
-            d={path}
+            key={stroke.key}
+            d={stroke.path}
             stroke={stroke.color}
             strokeLinecap="round"
             strokeLinejoin="round"
