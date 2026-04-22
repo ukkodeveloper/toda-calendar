@@ -3,6 +3,8 @@
 import { AnimatePresence, LayoutGroup } from "framer-motion"
 import * as React from "react"
 
+import { cn } from "@workspace/ui/lib/utils"
+
 import { CalendarHeader } from "@/components/calendar/calendar-header"
 import { ClosedJournalDock } from "@/components/calendar/closed-journal-dock"
 import { useMonthRange } from "../hooks/use-month-range"
@@ -56,6 +58,7 @@ export function CalendarApp() {
     Math.floor(Math.random() * dockPrompts.length)
   )
   const previousOpenRef = React.useRef<boolean | null>(null)
+  const isEditorOpen = Boolean(selectedRecord)
 
   const openTodayEditor = React.useCallback((lift = 0) => {
     setSheetLaunchLift(lift)
@@ -119,41 +122,46 @@ export function CalendarApp() {
 
   return (
     <main className="min-h-dvh bg-[var(--calendar-app-bg)] text-foreground">
-      <CalendarHeader activeMonthLabel={activeMonthLabel} />
+      <div
+        aria-hidden={isEditorOpen}
+        className={cn("relative", isEditorOpen && "pointer-events-none")}
+      >
+        <CalendarHeader activeMonthLabel={activeMonthLabel} />
 
-      <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
-        <div ref={topSentinelRef} className="h-px" />
+        <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
+          <div ref={topSentinelRef} className="h-px" />
 
-        <div className="relative">
-          <LayoutGroup id="calendar-selection-badge">
-            {sections.map((section) => (
-              <CalendarMonthSection
-                key={section.key}
-                onOpenDay={(date) => {
-                  setSheetLaunchLift(0)
-                  openDay(date)
-                }}
-                registerSection={registerSection}
-                recordsByDate={state.recordsByDate}
-                selectedDate={state.selectedDate}
-                section={section}
-              />
-            ))}
-          </LayoutGroup>
+          <div className="relative">
+            <LayoutGroup id="calendar-selection-badge">
+              {sections.map((section) => (
+                <CalendarMonthSection
+                  key={section.key}
+                  onOpenDay={(date) => {
+                    setSheetLaunchLift(0)
+                    openDay(date)
+                  }}
+                  registerSection={registerSection}
+                  recordsByDate={state.recordsByDate}
+                  selectedDate={state.selectedDate}
+                  section={section}
+                />
+              ))}
+            </LayoutGroup>
+          </div>
+
+          <div ref={bottomSentinelRef} className="h-8" />
         </div>
 
-        <div ref={bottomSentinelRef} className="h-8" />
+        <AnimatePresence initial={false}>
+          {!selectedRecord ? (
+            <ClosedJournalDock
+              key="closed-journal-dock"
+              onOpenToday={openTodayEditor}
+              prompt={dockPrompts[promptIndex] ?? dockPrompts[0]}
+            />
+          ) : null}
+        </AnimatePresence>
       </div>
-
-      <AnimatePresence initial={false}>
-        {!selectedRecord ? (
-          <ClosedJournalDock
-            key="closed-journal-dock"
-            onOpenToday={openTodayEditor}
-            prompt={dockPrompts[promptIndex] ?? dockPrompts[0]}
-          />
-        ) : null}
-      </AnimatePresence>
 
       <DayEditorSheet
         initialLift={sheetLaunchLift}
