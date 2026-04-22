@@ -6,7 +6,7 @@ import type {
   MonthLayer,
   SlotType,
 } from "./models.js"
-import { listLocalDatesForMonth } from "./local-date.js"
+import { listLocalDatesForMonthGrid } from "./local-date.js"
 import { slotOrder } from "./models.js"
 
 export type TextSlotPatch = {
@@ -58,11 +58,12 @@ export function buildMonthViewCells(
 ) {
   const recordsByDate = new Map(records.map((record) => [record.localDate, record]))
 
-  return listLocalDatesForMonth(month).map((localDate) => {
+  return listLocalDatesForMonthGrid(month).map((localDate) => {
     const record = recordsByDate.get(localDate)
 
     return {
       hasContent: Boolean(record && record.slots.length > 0),
+      isCurrentMonth: localDate.slice(0, 7) === month,
       localDate,
       preview: record ? toMonthCellPreview(record, layer) : null,
     }

@@ -1,6 +1,4 @@
 import type { CalendarRepository, UpsertDayRecordInput } from "../../application/ports/calendar-repository.js"
-import { getMonthKeyFromLocalDate } from "../../domain/local-date.js"
-
 import { JsonFileStore } from "./file-store.js"
 
 export class FileCalendarRepository implements CalendarRepository {
@@ -22,9 +20,14 @@ export class FileCalendarRepository implements CalendarRepository {
   }
 
   async findCalendarById(ownerUserId: string, calendarId: string) {
-    const calendars = await this.listCalendars(ownerUserId)
+    const state = await this.store.read()
 
-    return calendars.find((calendar) => calendar.id === calendarId) ?? null
+    return (
+      state.calendars.find(
+        (calendar) =>
+          calendar.ownerUserId === ownerUserId && calendar.id === calendarId
+      ) ?? null
+    )
   }
 
   async findDayRecord(ownerUserId: string, calendarId: string, localDate: string) {
@@ -58,7 +61,12 @@ export class FileCalendarRepository implements CalendarRepository {
       )
   }
 
-  async listDayRecordsForMonth(ownerUserId: string, calendarId: string, month: string) {
+  async listDayRecordsForDateRange(
+    ownerUserId: string,
+    calendarId: string,
+    startLocalDate: string,
+    endLocalDate: string
+  ) {
     const state = await this.store.read()
 
     return state.dayRecords
@@ -66,7 +74,8 @@ export class FileCalendarRepository implements CalendarRepository {
         (record) =>
           record.ownerUserId === ownerUserId &&
           record.calendarId === calendarId &&
-          getMonthKeyFromLocalDate(record.localDate) === month
+          record.localDate >= startLocalDate &&
+          record.localDate <= endLocalDate
       )
       .sort((left, right) => left.localDate.localeCompare(right.localDate))
   }

@@ -17,10 +17,11 @@ export interface CalendarRepository {
   findDayRecord(ownerUserId: string, calendarId: string, localDate: string): Promise<DayRecord | null>
   getCurrentUser(): Promise<UserProfile>
   listCalendars(ownerUserId: string): Promise<CalendarSummary[]>
-  listDayRecordsForMonth(
+  listDayRecordsForDateRange(
     ownerUserId: string,
     calendarId: string,
-    month: string
+    startLocalDate: string,
+    endLocalDate: string
   ): Promise<DayRecord[]>
   upsertDayRecord(input: UpsertDayRecordInput): Promise<DayRecord>
 }

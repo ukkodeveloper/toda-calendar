@@ -84,6 +84,7 @@ const monthViewDoodlePreviewSchema = z.object({
 
 export const monthViewCellSchema = z.object({
   hasContent: z.boolean(),
+  isCurrentMonth: z.boolean(),
   localDate: localDateSchema,
   preview: z
     .union([

@@ -74,6 +74,49 @@ describe("API routes", () => {
     expect(getResponse.json()).toEqual(patchResponse.json())
   })
 
+  it("returns a six-week month grid so clients can render the visible range consistently", async () => {
+    const { app, calendarId } = await createApp()
+
+    await app.inject({
+      method: "PATCH",
+      payload: {
+        text: {
+          body: "Visible from the leading week.",
+        },
+      },
+      url: `/v1/calendars/${calendarId}/day-records/2026-03-29`,
+    })
+
+    const response = await app.inject({
+      method: "GET",
+      url: `/v1/calendars/${calendarId}/month-view?month=2026-04&layer=TEXT`,
+    })
+    const body = response.json()
+
+    expect(response.statusCode).toBe(200)
+    expect(body).toMatchObject({
+      layer: "TEXT",
+      month: "2026-04",
+    })
+    expect(body.cells).toHaveLength(42)
+    expect(body.cells[0]).toEqual({
+      hasContent: true,
+      isCurrentMonth: false,
+      localDate: "2026-03-29",
+      preview: {
+        body: "Visible from the leading week.",
+        title: null,
+        type: "TEXT",
+      },
+    })
+    expect(body.cells.at(-1)).toEqual({
+      hasContent: false,
+      isCurrentMonth: false,
+      localDate: "2026-05-09",
+      preview: null,
+    })
+  })
+
   it("returns 404 when the requested calendar does not belong to the current user", async () => {
     const { app } = await createApp()
 
