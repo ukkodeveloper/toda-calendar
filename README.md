@@ -88,6 +88,11 @@ import { Button } from "@workspace/ui/components/button";
 ## Notes for ChatGPT and Codex
 
 - Start with `AGENTS.md` for repo-specific editing guidance.
+- For non-trivial development work, use the default AI workflow in [docs/ai/pipeline.md](/Users/kimyoukwon/.codex/worktrees/378e/toda-calendar/docs/ai/pipeline.md).
+- For sprint-scoped feature work, use [docs/ai/sprint-workflow.md](/Users/kimyoukwon/.codex/worktrees/378e/toda-calendar/docs/ai/sprint-workflow.md).
+- For mobile-driven remote sprint work, use [docs/ai/remote-mobile-workflow.md](/Users/kimyoukwon/.codex/worktrees/378e/toda-calendar/docs/ai/remote-mobile-workflow.md).
+- Durable AI workflow context lives in [docs/ai/repo-context.md](/Users/kimyoukwon/.codex/worktrees/378e/toda-calendar/docs/ai/repo-context.md), [docs/ai/ownership-map.md](/Users/kimyoukwon/.codex/worktrees/378e/toda-calendar/docs/ai/ownership-map.md), and [docs/ai/verification-matrix.md](/Users/kimyoukwon/.codex/worktrees/378e/toda-calendar/docs/ai/verification-matrix.md).
+- Sprint-local feature docs live under [docs/sprints/README.md](/Users/kimyoukwon/.codex/worktrees/378e/toda-calendar/docs/sprints/README.md).
 - The current product surface is the web app, so most feature work should begin in `apps/web`.
 - Shared UI work belongs in `packages/ui`.
 

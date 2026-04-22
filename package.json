@@ -8,6 +8,8 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",
+    "preview:vercel": "bash ./scripts/remote/vercel-preview.sh",
+    "remote:doctor": "bash ./scripts/remote/doctor.sh",
     "typecheck": "turbo typecheck",
     "test": "turbo test"
   },
