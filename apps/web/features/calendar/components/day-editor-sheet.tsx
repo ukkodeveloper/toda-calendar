@@ -41,7 +41,6 @@ const editorTabs: Array<{ value: ContentType; label: string }> = [
 type SheetStage = "peek" | "expanded"
 
 type DayEditorSheetProps = {
-  activePreviewType: ContentType
   initialLift?: number
   onOpenChange: (open: boolean) => void
   onSave: (record: CalendarDayRecord) => Promise<void> | void
@@ -50,7 +49,6 @@ type DayEditorSheetProps = {
 }
 
 export function DayEditorSheet({
-  activePreviewType,
   initialLift = 0,
   onOpenChange,
   onSave,
@@ -63,7 +61,9 @@ export function DayEditorSheet({
   const y = useMotionValue(0)
   const [mounted, setMounted] = React.useState(false)
   const [draft, setDraft] = React.useState<EditorDraft | null>(record)
-  const [activeTab, setActiveTab] = React.useState<ContentType>(activePreviewType)
+  const [activeTab, setActiveTab] = React.useState<ContentType>(
+    record?.currentPreviewType ?? "photo"
+  )
   const [stage, setStage] = React.useState<SheetStage>("peek")
   const [contentStage, setContentStage] = React.useState<SheetStage>("peek")
   const [isDrawing, setIsDrawing] = React.useState(false)
@@ -143,13 +143,13 @@ export function DayEditorSheet({
     })
 
     if (record) {
-      setActiveTab(activePreviewType)
+      setActiveTab(record.currentPreviewType)
       setStage("peek")
       setContentStage("peek")
       x.set(0)
       y.set(0)
     }
-  }, [activePreviewType, record, x, y])
+  }, [record, x, y])
 
   React.useEffect(() => {
     if (!open) {

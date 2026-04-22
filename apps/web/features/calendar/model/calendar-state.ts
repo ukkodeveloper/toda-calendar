@@ -28,7 +28,7 @@ export type CalendarAction =
   | { type: "cycle-preview-mode" }
   | { type: "toggle-filter"; contentType: ContentType }
 
-const TEXT_MAX_LENGTH = 20
+const TEXT_MAX_LENGTH = 8
 
 function clampTextValue(value?: string) {
   return value?.trim().slice(0, TEXT_MAX_LENGTH)

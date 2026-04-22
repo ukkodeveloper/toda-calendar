@@ -4,7 +4,7 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import type { CalendarTextSlot } from "../model/types"
 
-const TEXT_MAX_LENGTH = 20
+const TEXT_MAX_LENGTH = 8
 
 type TextEditorProps = {
   label?: string
@@ -38,8 +38,8 @@ export function TextEditor({
           className={cn(
             "h-full w-full resize-none overflow-hidden bg-transparent outline-none placeholder:text-foreground/28",
             compact
-              ? "px-4 pt-10 pb-8 text-[14px] leading-5"
-              : "px-4 pt-4 pb-8 text-[15px] leading-6"
+              ? "px-4 pt-10 pb-11 text-[14px] leading-5"
+              : "px-4 pt-4 pb-10 text-[15px] leading-6"
           )}
           maxLength={TEXT_MAX_LENGTH}
           onChange={(event) =>

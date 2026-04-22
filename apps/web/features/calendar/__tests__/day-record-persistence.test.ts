@@ -48,7 +48,7 @@ test("createDayRecordPatch returns a sparse transport-shaped patch", () => {
     currentPreviewType: "text",
     text: {
       type: "text",
-      body: "Held onto a gentler afternoon.",
+      body: "Gentle dusk note.",
     },
     doodle: undefined,
   })
@@ -58,7 +58,7 @@ test("createDayRecordPatch returns a sparse transport-shaped patch", () => {
       payload: null,
     },
     phrase: {
-      text: "Held onto a gentler ",
+      text: "Gentle d",
     },
   })
 })
@@ -78,7 +78,7 @@ test("applyDayRecordPatch preserves untouched slots and updates the preferred pr
     "2026-04-21",
     {
       phrase: {
-        text: "Left one short line for the evening.",
+        text: "Soft rain note.",
       },
     },
     "text",
@@ -89,7 +89,7 @@ test("applyDayRecordPatch preserves untouched slots and updates the preferred pr
     ...baseRecord,
     currentPreviewType: "text",
     text: {
-      body: "Left one short line ",
+      body: "Soft rai",
       title: undefined,
       type: "text",
     },

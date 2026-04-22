@@ -78,7 +78,7 @@ export function DoodleCanvas({
 }: DoodleCanvasProps) {
   const surfaceRef = React.useRef<SVGSVGElement | null>(null)
   const [activeStroke, setActiveStroke] = React.useState<CalendarDoodleStroke | null>(null)
-  const [isEditing, setIsEditing] = React.useState(() => !(slot?.strokes.length ?? 0))
+  const [isEditing, setIsEditing] = React.useState(false)
   const reducedMotion = useReducedMotion()
   const compact = mode === "expanded"
   const stageMaxWidth = compact ? 196 : 220
@@ -97,7 +97,7 @@ export function DoodleCanvas({
 
   React.useEffect(() => {
     if (!slot?.strokes.length) {
-      setIsEditing(true)
+      setIsEditing(false)
     }
   }, [slot?.strokes.length])
 
@@ -108,13 +108,14 @@ export function DoodleCanvas({
 
     previousRecordKeyRef.current = recordKey
     setActiveStroke(null)
-    setIsEditing(!(slot?.strokes.length ?? 0))
+    setIsEditing(false)
     strokeStartRef.current = null
     activePointerIdRef.current = null
     onDrawingChange?.(false)
   }, [onDrawingChange, recordKey, slot?.strokes.length])
 
   const isLockedPreview = hasCommittedStrokes && !isEditing
+  const isCanvasInteractive = isEditing
 
   function pointFromEvent(event: React.PointerEvent<SVGSVGElement>): DoodlePoint | null {
     const rect = surfaceRef.current?.getBoundingClientRect()
@@ -130,7 +131,7 @@ export function DoodleCanvas({
   }
 
   function handlePointerDown(event: React.PointerEvent<SVGSVGElement>) {
-    if (isLockedPreview || !event.isPrimary) {
+    if (isLockedPreview || !isCanvasInteractive || !event.isPrimary) {
       return
     }
 
@@ -169,6 +170,7 @@ export function DoodleCanvas({
   function handlePointerMove(event: React.PointerEvent<SVGSVGElement>) {
     if (
       isLockedPreview ||
+      !isCanvasInteractive ||
       !event.isPrimary ||
       activePointerIdRef.current !== event.pointerId
     ) {
@@ -238,7 +240,7 @@ export function DoodleCanvas({
 
   function clearDoodle() {
     setActiveStroke(null)
-    setIsEditing(true)
+    setIsEditing(false)
     activePointerIdRef.current = null
     onDrawingChange?.(false)
     onChange(undefined)
@@ -282,13 +284,10 @@ export function DoodleCanvas({
           </div>
         ) : null}
 
-        {!hasPreviewStrokes && !isLockedPreview ? (
+        {!hasPreviewStrokes ? (
           <>
             <div className="pointer-events-none absolute inset-0 opacity-90">
               <DoodleArt className="h-full w-full" stretch strokes={GUIDE_STROKES} />
-            </div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-4 text-center text-[12px] font-medium text-foreground/32">
-              Sketch a sleepy cat face
             </div>
           </>
         ) : null}
@@ -304,7 +303,7 @@ export function DoodleCanvas({
           preserveAspectRatio="none"
           className="absolute inset-0 h-full w-full touch-none"
           fill="none"
-          style={{ pointerEvents: isLockedPreview ? "none" : "auto" }}
+          style={{ pointerEvents: isLockedPreview || !isCanvasInteractive ? "none" : "auto" }}
           onPointerCancel={commitStroke}
           onPointerDown={handlePointerDown}
           onPointerLeave={commitStroke}
@@ -315,6 +314,38 @@ export function DoodleCanvas({
         </svg>
 
         <AnimatePresence initial={false}>
+          {!hasPreviewStrokes && !isEditing ? (
+            <motion.div
+              className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/18 via-black/6 to-transparent px-3 pb-3 pt-9"
+              initial={
+                reducedMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.95 }
+              }
+              animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={
+                reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.985 }
+              }
+              transition={
+                reducedMotion
+                  ? { duration: motionTokens.duration.instant }
+                  : motionTokens.intent.selectionFlow
+              }
+            >
+              <motion.button
+                type="button"
+                aria-label="Start sketching"
+                className="pointer-events-auto inline-flex min-h-11 rounded-full bg-white/84 px-4 py-2 text-[11px] font-semibold tracking-[-0.01em] text-foreground/68 shadow-[0_10px_22px_rgba(15,23,42,0.1)] backdrop-blur-[14px] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                whileTap={reducedMotion ? undefined : { scale: 0.97 }}
+                transition={motionTokens.intent.touchFeedback}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setIsEditing(true)
+                }}
+              >
+                Start sketch
+              </motion.button>
+            </motion.div>
+          ) : null}
+
           {isLockedPreview ? (
             <motion.div
               className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/26 via-black/10 to-transparent px-3 pb-3 pt-7"

@@ -7,16 +7,14 @@ import Image from "next/image"
 import { motionTokens } from "@workspace/ui/lib/motion"
 import { cn } from "@workspace/ui/lib/utils"
 
-import type { CalendarDayRecord, CalendarGridDay, ContentType } from "../model/types"
+import type { CalendarDayRecord, CalendarGridDay } from "../model/types"
 import { useDayCellGesture } from "../hooks/use-day-cell-gesture"
 import { resolveVisiblePreviewType } from "../utils/preview"
 import { DoodleArt } from "./doodle-art"
 
 type CalendarDayCellProps = {
-  activePreviewType: ContentType
   day: CalendarGridDay
   isSelected: boolean
-  modeSwapVersion: number
   onOpenDay: (date: string) => void
   record?: CalendarDayRecord
   revealDelay?: number
@@ -29,19 +27,15 @@ function trimLabel(value: string, max = 54) {
 }
 
 function DayPreview({
-  activePreviewType,
-  modeSwapVersion,
   record,
   revealDelay = 0,
 }: {
-  activePreviewType: ContentType
-  modeSwapVersion: number
   record?: CalendarDayRecord
   revealDelay?: number
 }) {
   const reducedMotion = useReducedMotion()
   const visibleType = record
-    ? resolveVisiblePreviewType(record, activePreviewType, {
+    ? resolveVisiblePreviewType(record, record.currentPreviewType, {
         photo: true,
         doodle: true,
         text: true,
@@ -56,7 +50,7 @@ function DayPreview({
       )
     )
 
-  const previewKey = `${modeSwapVersion}:${activePreviewType}:${visibleType ?? "empty"}`
+  const previewKey = `${record?.currentPreviewType ?? "empty"}:${visibleType ?? "empty"}`
 
   return (
     <div className="absolute inset-0 overflow-hidden rounded-none">
@@ -114,8 +108,8 @@ function DayPreview({
           ) : null}
 
           {visibleType === "text" && record?.text ? (
-            <div className="flex h-full items-start px-1.5 py-1">
-              <p className="line-clamp-4 text-[0.78rem] font-medium leading-[1rem] tracking-[-0.02em] text-foreground/74">
+            <div className="flex h-full items-end px-2 pb-1.5 pt-7">
+              <p className="line-clamp-2 break-keep text-[0.7rem] font-semibold leading-[0.9rem] tracking-[-0.02em] text-foreground/74">
                 {trimLabel(record.text.title?.trim() || record.text.body.trim() || "Note")}
               </p>
             </div>
@@ -127,17 +121,15 @@ function DayPreview({
 }
 
 export function CalendarDayCell({
-  activePreviewType,
   day,
   isSelected,
-  modeSwapVersion,
   onOpenDay,
   record,
   revealDelay = 0,
 }: CalendarDayCellProps) {
   const reducedMotion = useReducedMotion()
   const visibleType = record
-    ? resolveVisiblePreviewType(record, activePreviewType, {
+    ? resolveVisiblePreviewType(record, record.currentPreviewType, {
         photo: true,
         doodle: true,
         text: true,
@@ -174,12 +166,7 @@ export function CalendarDayCell({
       onPointerUp={gesture.onPointerUp}
     >
       {hasVisiblePreview ? (
-        <DayPreview
-          activePreviewType={activePreviewType}
-          modeSwapVersion={modeSwapVersion}
-          record={record}
-          revealDelay={revealDelay}
-        />
+        <DayPreview record={record} revealDelay={revealDelay} />
       ) : null}
 
       <AnimatePresence initial={false}>
@@ -224,7 +211,7 @@ export function CalendarDayCell({
 
       <div className="pointer-events-none absolute left-1.5 top-1.5 z-[2]">
         <motion.div
-          className="relative flex h-[28px] w-[28px] items-center justify-center"
+          className="relative grid h-[24px] w-[24px] place-items-center"
           initial={false}
           animate={
             reducedMotion
@@ -240,7 +227,7 @@ export function CalendarDayCell({
           <AnimatePresence initial={false}>
             {isToday && isSelected ? (
               <motion.span
-                className="absolute -inset-[2px] rounded-full bg-[var(--calendar-date-selected-halo)]"
+                className="absolute -inset-px rounded-full bg-[var(--calendar-date-selected-halo)]"
                 initial={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
                 animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94 }}
@@ -300,7 +287,7 @@ export function CalendarDayCell({
 
           <motion.span
             className={cn(
-              "relative z-10 flex h-[28px] w-[28px] items-center justify-center text-[12px] font-semibold tracking-[-0.02em] tabular-nums",
+              "relative z-10 grid h-full w-full place-items-center text-center text-[11px] font-semibold leading-none tracking-[-0.01em] tabular-nums",
               isSelected
                 ? "text-white"
                 : isToday
