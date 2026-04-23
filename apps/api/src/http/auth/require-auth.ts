@@ -5,10 +5,10 @@ import type { AuthenticatedUser } from "../../domain/authenticated-user.js"
 import { AuthRequiredError } from "../../domain/auth-errors.js"
 import { getBearerToken } from "./get-bearer-token.js"
 
-const DEVELOPMENT_FALLBACK_ACCESS_TOKEN = "dev:web-local-user:web@example.com"
+const PUBLIC_MOCK_ACCESS_TOKEN = "dev:public-calendar:public@toda.local"
 
 type RequireAuthOptions = {
-  allowDevelopmentFallbackAuth?: boolean
+  allowPublicFallbackAuth?: boolean
 }
 
 declare module "fastify" {
@@ -25,7 +25,7 @@ export function createRequireAuth(
     void reply
     const accessToken =
       getBearerToken(request.headers.authorization) ??
-      resolveDevelopmentFallbackAccessToken(request, options)
+      resolvePublicFallbackAccessToken(options)
 
     if (!accessToken) {
       throw new AuthRequiredError()
@@ -35,41 +35,10 @@ export function createRequireAuth(
   }
 }
 
-function resolveDevelopmentFallbackAccessToken(
-  request: FastifyRequest,
-  options: RequireAuthOptions
-) {
-  if (!options.allowDevelopmentFallbackAuth) {
+function resolvePublicFallbackAccessToken(options: RequireAuthOptions) {
+  if (!options.allowPublicFallbackAuth) {
     return null
   }
 
-  if (!isLoopbackHostname(request.hostname)) {
-    return null
-  }
-
-  const origin = request.headers.origin
-
-  if (origin && !isLoopbackOrigin(origin)) {
-    return null
-  }
-
-  return DEVELOPMENT_FALLBACK_ACCESS_TOKEN
-}
-
-function isLoopbackOrigin(origin: string | string[]) {
-  const value = Array.isArray(origin) ? origin[0] : origin
-
-  if (!value) {
-    return false
-  }
-
-  try {
-    return isLoopbackHostname(new URL(value).hostname)
-  } catch {
-    return false
-  }
-}
-
-function isLoopbackHostname(hostname: string) {
-  return hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1"
+  return PUBLIC_MOCK_ACCESS_TOKEN
 }

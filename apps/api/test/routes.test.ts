@@ -18,7 +18,7 @@ afterEach(async () => {
 })
 
 describe("API routes", () => {
-  it("keeps health public while protecting product routes", async () => {
+  it("keeps health public while allowing public calendar access in mock mode", async () => {
     const { app } = await createApp()
 
     const healthResponse = await app.inject({
@@ -26,10 +26,6 @@ describe("API routes", () => {
       url: "/health",
     })
     const meResponse = await app.inject({
-      headers: {
-        host: "calendar.example.com",
-        origin: "https://calendar.example.com",
-      },
       method: "GET",
       url: "/v1/me",
     })
@@ -38,34 +34,33 @@ describe("API routes", () => {
     expect(healthResponse.json()).toEqual({
       status: "ok",
     })
-    expect(meResponse.statusCode).toBe(401)
+    expect(meResponse.statusCode).toBe(200)
     expect(meResponse.json()).toMatchObject({
-      error: {
-        code: "AUTH_REQUIRED",
-        message: "Authentication is required",
-      },
-    })
-  })
-
-  it("bootstraps a local mock user for development requests without a bearer token", async () => {
-    const { app } = await createApp()
-    const response = await app.inject({
-      headers: {
-        host: "127.0.0.1:3030",
-        origin: "http://localhost:3000",
-      },
-      method: "GET",
-      url: "/v1/me",
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toMatchObject({
       defaultCalendarId: expect.any(String),
       user: {
         displayName: null,
         id: expect.any(String),
         locale: "en",
         timezone: "Asia/Seoul",
+      },
+    })
+  })
+
+  it("still protects product routes when public access is disabled", async () => {
+    const { app } = await createApp({
+      allowPublicAccess: false,
+    })
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/me",
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "AUTH_REQUIRED",
+        message: "Authentication is required",
       },
     })
   })
@@ -242,9 +237,10 @@ describe("API routes", () => {
   })
 })
 
-async function createApp() {
+async function createApp(options: { allowPublicAccess?: boolean } = {}) {
   const directory = await mkdtemp(join(tmpdir(), "toda-api-routes-"))
   const { app } = await buildApiApp({
+    allowPublicAccess: options.allowPublicAccess,
     env: {
       dataFilePath: join(directory, "store.json"),
       host: "127.0.0.1",

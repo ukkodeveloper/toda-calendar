@@ -14,6 +14,7 @@ import { FileCalendarRepository } from "./infrastructure/persistence/file-calend
 import { JsonFileStore } from "./infrastructure/persistence/file-store.js"
 
 export type BuildApiAppOptions = {
+  allowPublicAccess?: boolean
   env?: Partial<ApiEnv>
   logger?: boolean
 }
@@ -77,7 +78,7 @@ export async function buildApiApp(options: BuildApiAppOptions = {}) {
   })
 
   await registerRoutes(app, authContextService, service, {
-    allowDevelopmentFallbackAuth: env.authMode === "mock",
+    allowPublicFallbackAuth: options.allowPublicAccess ?? env.authMode === "mock",
   })
 
   return {

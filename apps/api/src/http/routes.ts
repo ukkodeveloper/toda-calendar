@@ -31,7 +31,7 @@ type MonthViewQuery = z.infer<typeof getMonthViewQuerySchema>
 type DayRecordsQuery = z.infer<typeof listDayRecordsQuerySchema>
 type PatchDayRecordBody = z.infer<typeof patchDayRecordBodySchema>
 type RegisterRoutesOptions = {
-  allowDevelopmentFallbackAuth?: boolean
+  allowPublicFallbackAuth?: boolean
 }
 
 export async function registerRoutes(
@@ -41,7 +41,7 @@ export async function registerRoutes(
   options: RegisterRoutesOptions = {}
 ) {
   const requireAuth = createRequireAuth(authContextService, {
-    allowDevelopmentFallbackAuth: options.allowDevelopmentFallbackAuth,
+    allowPublicFallbackAuth: options.allowPublicFallbackAuth,
   })
 
   app.get("/health", async () => ({
