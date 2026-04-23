@@ -1,20 +1,26 @@
 "use client"
 
-import * as React from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import Image from "next/image"
 
 import { motionTokens } from "@workspace/ui/lib/motion"
 import { cn } from "@workspace/ui/lib/utils"
 
-import type { CalendarDayRecord, CalendarGridDay } from "../model/types"
+import { appCopy } from "@/lib/copy"
+import type {
+  CalendarDayRecord,
+  CalendarGridDay,
+  ContentType,
+} from "../model/types"
 import { useDayCellGesture } from "../hooks/use-day-cell-gesture"
 import { resolveVisiblePreviewType } from "../utils/preview"
 import { DoodleArt } from "./doodle-art"
 
 type CalendarDayCellProps = {
+  activePreviewType: ContentType
   day: CalendarGridDay
   isSelected: boolean
+  onAdvancePreviewMode: () => void
   onOpenDay: (date: string) => void
   record?: CalendarDayRecord
   revealDelay?: number
@@ -27,15 +33,17 @@ function trimLabel(value: string, max = 54) {
 }
 
 function DayPreview({
+  activePreviewType,
   record,
   revealDelay = 0,
 }: {
+  activePreviewType: ContentType
   record?: CalendarDayRecord
   revealDelay?: number
 }) {
   const reducedMotion = useReducedMotion()
   const visibleType = record
-    ? resolveVisiblePreviewType(record, record.currentPreviewType, {
+    ? resolveVisiblePreviewType(record, activePreviewType, {
         photo: true,
         doodle: true,
         text: true,
@@ -50,7 +58,7 @@ function DayPreview({
       )
     )
 
-  const previewKey = `${record?.currentPreviewType ?? "empty"}:${visibleType ?? "empty"}`
+  const previewKey = `${activePreviewType}:${visibleType ?? "empty"}`
 
   return (
     <div className="absolute inset-0 overflow-hidden rounded-none">
@@ -110,7 +118,11 @@ function DayPreview({
           {visibleType === "text" && record?.text ? (
             <div className="flex h-full items-end px-2 pb-1.5 pt-7">
               <p className="line-clamp-2 break-keep text-[0.7rem] font-semibold leading-[0.9rem] tracking-[-0.02em] text-foreground/74">
-                {trimLabel(record.text.title?.trim() || record.text.body.trim() || "Note")}
+                {trimLabel(
+                  record.text.title?.trim() ||
+                    record.text.body.trim() ||
+                    appCopy.component.dayCell.noteFallback
+                )}
               </p>
             </div>
           ) : null}
@@ -121,15 +133,17 @@ function DayPreview({
 }
 
 export function CalendarDayCell({
+  activePreviewType,
   day,
   isSelected,
+  onAdvancePreviewMode,
   onOpenDay,
   record,
   revealDelay = 0,
 }: CalendarDayCellProps) {
   const reducedMotion = useReducedMotion()
   const visibleType = record
-    ? resolveVisiblePreviewType(record, record.currentPreviewType, {
+    ? resolveVisiblePreviewType(record, activePreviewType, {
         photo: true,
         doodle: true,
         text: true,
@@ -139,6 +153,7 @@ export function CalendarDayCell({
   const hasVisiblePreview = Boolean(visibleType)
   const showDateBadgeSurface = hasVisiblePreview || isSelected || isToday
   const gesture = useDayCellGesture({
+    onDoublePress: onAdvancePreviewMode,
     onPress: () => {
       if (day.date) {
         onOpenDay(day.date)
@@ -153,9 +168,11 @@ export function CalendarDayCell({
   return (
     <motion.button
       type="button"
+      data-calendar-date={day.date}
+      data-calendar-interactive="true"
       whileTap={reducedMotion ? undefined : { scale: 0.985 }}
       transition={motionTokens.spring.press}
-      aria-label={`${day.date}. Open the day editor.`}
+      aria-label={`${day.date}. ${appCopy.component.dayCell.openDayAriaSuffix}`}
       className="relative w-full touch-manipulation rounded-none bg-transparent px-0 py-0 text-left outline-none"
       style={{ aspectRatio: dayCellAspectRatio }}
       onKeyDown={gesture.onKeyDown}
@@ -166,7 +183,11 @@ export function CalendarDayCell({
       onPointerUp={gesture.onPointerUp}
     >
       {hasVisiblePreview ? (
-        <DayPreview record={record} revealDelay={revealDelay} />
+        <DayPreview
+          activePreviewType={activePreviewType}
+          record={record}
+          revealDelay={revealDelay}
+        />
       ) : null}
 
       <AnimatePresence initial={false}>

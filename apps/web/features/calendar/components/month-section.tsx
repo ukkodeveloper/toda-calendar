@@ -2,10 +2,16 @@
 
 import { cn } from "@workspace/ui/lib/utils"
 
-import type { CalendarDayRecord, MonthSection as MonthSectionType } from "../model/types"
+import type {
+  CalendarDayRecord,
+  ContentType,
+  MonthSection as MonthSectionType,
+} from "../model/types"
 import { CalendarDayCell } from "./day-cell"
 
 type CalendarMonthSectionProps = {
+  activePreviewType: ContentType
+  onAdvancePreviewMode: () => void
   onOpenDay: (date: string) => void
   recordsByDate: Record<string, CalendarDayRecord>
   registerSection: (key: string, node: HTMLElement | null) => void
@@ -14,6 +20,8 @@ type CalendarMonthSectionProps = {
 }
 
 export function CalendarMonthSection({
+  activePreviewType,
+  onAdvancePreviewMode,
   onOpenDay,
   recordsByDate,
   registerSection,
@@ -37,8 +45,10 @@ export function CalendarMonthSection({
             {week.map((day, dayIndex) => (
               <CalendarDayCell
                 key={day.date ?? `${section.key}-${weekIndex}-${dayIndex}`}
+                activePreviewType={activePreviewType}
                 day={day}
                 isSelected={selectedDate === day.date}
+                onAdvancePreviewMode={onAdvancePreviewMode}
                 onOpenDay={onOpenDay}
                 record={day.date ? recordsByDate[day.date] : undefined}
                 revealDelay={0.018 + 0.004 * (dayIndex % 2)}

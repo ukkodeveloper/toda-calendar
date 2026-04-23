@@ -1,4 +1,5 @@
 import { AUTH_ERROR_COPY, type AuthUiErrorCode } from "@/lib/auth/errors"
+import { appCopy } from "@/lib/copy"
 import { APP_AUTH_PROVIDERS } from "@/lib/auth/providers"
 
 import { SocialLoginButton } from "./social-login-button"
@@ -26,21 +27,24 @@ export function SocialLoginPanel({
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-foreground/45">
-                Sign In
+                {appCopy.component.socialLoginPanel.eyebrow}
               </p>
               <h2
                 id="social-login-title"
                 className="mt-1 text-lg font-semibold tracking-[-0.04em] text-foreground"
               >
-                Three entry points, one calm timeline.
+                {appCopy.component.socialLoginPanel.title}
               </h2>
             </div>
             <div className="rounded-full border border-white/55 bg-white/62 px-3 py-1 text-[0.68rem] font-medium tracking-[0.08em] text-foreground/56 uppercase">
-              MVP
+              {appCopy.component.socialLoginPanel.badge}
             </div>
           </div>
 
-          <nav aria-label="Social sign in" className="space-y-3">
+          <nav
+            aria-label={appCopy.component.socialLoginPanel.navAriaLabel}
+            className="space-y-3"
+          >
             {APP_AUTH_PROVIDERS.map((provider) => (
               <SocialLoginButton
                 key={provider.id}
@@ -67,15 +71,14 @@ export function SocialLoginPanel({
             ) : (
               <p className="text-sm leading-6 text-foreground/64">
                 {authReady
-                  ? "Toda owns the route contract and the API boundary. The provider only brokers the OAuth handshake."
-                  : "OAuth wiring is pending. Add the public Supabase env vars first, then these same buttons will hand off to the real provider flow."}
+                  ? appCopy.component.socialLoginPanel.defaultReadyMessage
+                  : appCopy.component.socialLoginPanel.defaultWaitingMessage}
               </p>
             )}
           </div>
 
           <p className="mt-4 px-1 text-[0.78rem] leading-5 text-foreground/46">
-            By continuing, you agree to the Toda Calendar terms and privacy
-            policy.
+            {appCopy.component.socialLoginPanel.agreement}
           </p>
         </div>
       </div>

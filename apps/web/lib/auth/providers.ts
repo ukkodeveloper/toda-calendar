@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { appCopy } from "@/lib/copy"
+
 export const appAuthProviderSchema = z.enum(["kakao", "apple", "google"])
 
 export type AppAuthProvider = z.infer<typeof appAuthProviderSchema>
@@ -13,22 +15,16 @@ export type AppAuthProviderDefinition = {
 
 export const APP_AUTH_PROVIDERS: readonly AppAuthProviderDefinition[] = [
   {
-    actionLabel: "Continue with Kakao",
-    description: "The fastest entry for Korea-first usage.",
+    ...appCopy.auth.providers.kakao,
     id: "kakao",
-    mark: "K",
   },
   {
-    actionLabel: "Continue with Apple",
-    description: "A private, low-friction path for calm journaling.",
+    ...appCopy.auth.providers.apple,
     id: "apple",
-    mark: "A",
   },
   {
-    actionLabel: "Continue with Google",
-    description: "A familiar fallback for cross-device continuity.",
+    ...appCopy.auth.providers.google,
     id: "google",
-    mark: "G",
   },
 ] as const
 

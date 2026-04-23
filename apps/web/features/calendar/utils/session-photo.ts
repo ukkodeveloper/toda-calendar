@@ -1,3 +1,4 @@
+import { appCopy } from "@/lib/copy"
 import type { CalendarPhotoSlot } from "../model/types"
 
 type RevokeObjectUrl = (value: string) => void
@@ -12,7 +13,7 @@ function normalizePhotoAlt(name: string) {
     return withoutExtension
   }
 
-  return "Selected photo"
+  return appCopy.common.selectedPhotoAlt
 }
 
 export function createSessionPhotoSlot(

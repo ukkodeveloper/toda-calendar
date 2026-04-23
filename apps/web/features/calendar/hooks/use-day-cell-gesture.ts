@@ -4,11 +4,15 @@ import * as React from "react"
 
 import { exceedsTapSlop, isActivationKey } from "../utils/interactions"
 
+const DOUBLE_PRESS_DELAY_MS = 240
+
 type UseDayCellGestureProps = {
+  onDoublePress?: () => void
   onPress: () => void
 }
 
 export function useDayCellGesture({
+  onDoublePress,
   onPress,
 }: UseDayCellGestureProps) {
   const pointerRef = React.useRef<{
@@ -17,6 +21,25 @@ export function useDayCellGesture({
     startX: number
     startY: number
   } | null>(null)
+  const pressTimerRef = React.useRef<number | null>(null)
+  const lastPressRef = React.useRef<{
+    time: number
+    x: number
+    y: number
+  } | null>(null)
+
+  const clearPressTimer = React.useCallback(() => {
+    if (pressTimerRef.current !== null) {
+      window.clearTimeout(pressTimerRef.current)
+      pressTimerRef.current = null
+    }
+  }, [])
+
+  React.useEffect(() => {
+    return () => {
+      clearPressTimer()
+    }
+  }, [clearPressTimer])
 
   function resetPointer() {
     pointerRef.current = null
@@ -60,7 +83,44 @@ export function useDayCellGesture({
       return
     }
 
-    onPress()
+    if (!onDoublePress) {
+      onPress()
+      return
+    }
+
+    const now = Date.now()
+    const point = {
+      x: event.clientX,
+      y: event.clientY,
+    }
+    const lastPress = lastPressRef.current
+
+    if (
+      lastPress &&
+      now - lastPress.time <= DOUBLE_PRESS_DELAY_MS &&
+      !exceedsTapSlop(
+        { x: lastPress.x, y: lastPress.y },
+        point,
+        24
+      )
+    ) {
+      clearPressTimer()
+      lastPressRef.current = null
+      onDoublePress()
+      return
+    }
+
+    lastPressRef.current = {
+      time: now,
+      ...point,
+    }
+
+    clearPressTimer()
+    pressTimerRef.current = window.setTimeout(() => {
+      lastPressRef.current = null
+      pressTimerRef.current = null
+      onPress()
+    }, DOUBLE_PRESS_DELAY_MS)
   }
 
   function onPointerCancel() {
@@ -82,6 +142,8 @@ export function useDayCellGesture({
       return
     }
 
+    clearPressTimer()
+    lastPressRef.current = null
     event.preventDefault()
     onPress()
   }

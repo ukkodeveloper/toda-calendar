@@ -16,6 +16,7 @@ import { createPortal } from "react-dom"
 import { motionTokens } from "@workspace/ui/lib/motion"
 import { cn } from "@workspace/ui/lib/utils"
 
+import { appCopy } from "@/lib/copy"
 import type { CalendarDayRecord, ContentType, EditorDraft } from "../model/types"
 import {
   createSessionPhotoSlot,
@@ -33,9 +34,9 @@ import { PhotoEditor } from "./photo-editor"
 import { TextEditor } from "./text-editor"
 
 const editorTabs: Array<{ value: ContentType; label: string }> = [
-  { value: "photo", label: "Photo" },
-  { value: "doodle", label: "Sketch" },
-  { value: "text", label: "Text" },
+  { value: "photo", label: appCopy.component.dayEditorSheet.tabs.photo },
+  { value: "doodle", label: appCopy.component.dayEditorSheet.tabs.doodle },
+  { value: "text", label: appCopy.component.dayEditorSheet.tabs.text },
 ]
 
 type SheetStage = "peek" | "expanded"
@@ -378,7 +379,7 @@ export function DayEditorSheet({
         <div className="fixed inset-0 z-50">
           <motion.button
             type="button"
-            aria-label="Close editor"
+            aria-label={appCopy.component.dayEditorSheet.closeEditorAriaLabel}
             className="absolute inset-0 bg-[color:var(--sheet-backdrop)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -478,7 +479,7 @@ export function DayEditorSheet({
               <div className="flex justify-center">
                 <button
                   type="button"
-                  aria-label="Drag editor"
+                  aria-label={appCopy.component.dayEditorSheet.dragEditorAriaLabel}
                   className={cn(
                     "flex w-full cursor-grab items-center justify-center rounded-full active:cursor-grabbing",
                     isDrawing && "cursor-default"
@@ -517,12 +518,12 @@ export function DayEditorSheet({
                   }}
                 >
                   {record
-                    ? new Intl.DateTimeFormat("en-US", {
+                    ? new Intl.DateTimeFormat(appCopy.common.locale, {
                         weekday: "short",
                         month: "long",
                         day: "numeric",
                       }).format(parseIsoDate(record.date))
-                    : "Edit day"}
+                    : appCopy.component.dayEditorSheet.emptyTitle}
                 </h2>
               </div>
 
@@ -613,7 +614,7 @@ export function DayEditorSheet({
                   <div className="grid h-full min-h-0 grid-cols-2 grid-rows-[auto_minmax(0,1fr)] gap-3">
                     <section className="min-h-0">
                       <PhotoEditor
-                        label="Photo"
+                        label={appCopy.component.dayEditorSheet.tabs.photo}
                         mode="expanded"
                         onSelectFile={(file) => updatePhoto(createSessionPhotoSlot(file))}
                         slot={draft.photo}
@@ -621,7 +622,7 @@ export function DayEditorSheet({
                     </section>
                     <section className="min-h-0">
                       <DoodleCanvas
-                        label="Sketch"
+                        label={appCopy.component.dayEditorSheet.tabs.doodle}
                         mode="expanded"
                         onChange={updateDoodle}
                         onDrawingChange={setIsDrawing}
@@ -632,7 +633,7 @@ export function DayEditorSheet({
 
                     <section className="col-span-2 min-h-0">
                       <TextEditor
-                        label="Text"
+                        label={appCopy.component.dayEditorSheet.tabs.text}
                         mode="expanded"
                         onChange={updateText}
                         slot={draft.text}

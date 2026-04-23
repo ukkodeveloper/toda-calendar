@@ -2,6 +2,7 @@
 
 import * as React from "react"
 
+import { appCopy } from "@/lib/copy"
 import { createApiCalendarRecordRepository } from "../data/api-calendar-record-repository"
 import {
   calendarReducer,
@@ -16,7 +17,7 @@ function toErrorMessage(error: unknown) {
     return error.message
   }
 
-  return "The calendar could not connect to the API."
+  return appCopy.page.calendar.error.fallbackDescription
 }
 
 export function useCalendarState(months: string[]) {

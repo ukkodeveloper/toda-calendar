@@ -30,13 +30,19 @@ type DayRecordParams = z.infer<typeof dayRecordParamsSchema>
 type MonthViewQuery = z.infer<typeof getMonthViewQuerySchema>
 type DayRecordsQuery = z.infer<typeof listDayRecordsQuerySchema>
 type PatchDayRecordBody = z.infer<typeof patchDayRecordBodySchema>
+type RegisterRoutesOptions = {
+  allowDevelopmentFallbackAuth?: boolean
+}
 
 export async function registerRoutes(
   app: FastifyInstance,
   authContextService: AuthContextService,
-  service: CalendarService
+  service: CalendarService,
+  options: RegisterRoutesOptions = {}
 ) {
-  const requireAuth = createRequireAuth(authContextService)
+  const requireAuth = createRequireAuth(authContextService, {
+    allowDevelopmentFallbackAuth: options.allowDevelopmentFallbackAuth,
+  })
 
   app.get("/health", async () => ({
     status: "ok",

@@ -15,8 +15,8 @@ import {
 const INITIAL_MONTHS_BEFORE = 2
 const INITIAL_MONTHS_AFTER = 5
 const CHUNK_SIZE = 4
-const MONTH_TOP_OFFSET = 84
-const ACTIVE_MONTH_OFFSET = 120
+const MONTH_TOP_OFFSET = 110
+const ACTIVE_MONTH_OFFSET = 146
 
 export function useMonthRange(anchorDate = new Date()) {
   const topSentinelRef = React.useRef<HTMLDivElement | null>(null)
@@ -60,19 +60,24 @@ export function useMonthRange(anchorDate = new Date()) {
       return
     }
 
+    const todayCell =
+      typeof document === "undefined"
+        ? null
+        : document.querySelector<HTMLElement>(`[data-calendar-date='${todayKey}']`)
     const currentMonthSection = sectionRefs.current.get(currentMonthKey)
+    const initialTarget = todayCell ?? currentMonthSection
 
-    if (!currentMonthSection || typeof window === "undefined") {
+    if (!initialTarget || typeof window === "undefined") {
       return
     }
 
     window.scrollTo({
-      top: Math.max(currentMonthSection.offsetTop - MONTH_TOP_OFFSET, 0),
+      top: Math.max(initialTarget.offsetTop - MONTH_TOP_OFFSET, 0),
       behavior: "auto",
     })
     setActiveMonthKey(currentMonthKey)
     hasInitialScrollRef.current = true
-  }, [currentMonthKey, monthStarts])
+  }, [currentMonthKey, monthStarts, todayKey])
 
   const prependMonths = useEffectEvent(() => {
     if (typeof window === "undefined") {

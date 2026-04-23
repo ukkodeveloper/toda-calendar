@@ -1,4 +1,5 @@
 import type { AppAuthProviderDefinition } from "@/lib/auth/providers"
+import { appCopy } from "@/lib/copy"
 
 type SocialLoginButtonProps = {
   authReady: boolean
@@ -60,7 +61,9 @@ export function SocialLoginButton({
         aria-hidden="true"
         className="text-lg font-medium tracking-[-0.04em] opacity-55"
       >
-        {authReady ? "->" : "…"}
+        {authReady
+          ? appCopy.component.socialLoginButton.readyTrailingMark
+          : appCopy.component.socialLoginButton.disabledTrailingMark}
       </span>
     </>
   )

@@ -1,6 +1,7 @@
 import type { DayRecord, PatchDayRecordBody } from "@workspace/contracts"
 
 import { getMe, listMonthDayRecords, patchDayRecord } from "@/lib/api/client"
+import { appCopy } from "@/lib/copy"
 
 import { sanitizeDayRecord } from "../model/calendar-state"
 import type {
@@ -41,7 +42,7 @@ function toWebRecord(
     if (slot.type === "PHOTO") {
       nextRecord.photo = {
         type: "photo",
-        alt: slot.alt ?? "Photo",
+        alt: slot.alt ?? appCopy.common.photoFallbackAlt,
         assetId: `persisted:${dayRecord.localDate}`,
         source: "seed",
         src: slot.assetUrl,

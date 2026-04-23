@@ -26,6 +26,10 @@ describe("API routes", () => {
       url: "/health",
     })
     const meResponse = await app.inject({
+      headers: {
+        host: "calendar.example.com",
+        origin: "https://calendar.example.com",
+      },
       method: "GET",
       url: "/v1/me",
     })
@@ -39,6 +43,29 @@ describe("API routes", () => {
       error: {
         code: "AUTH_REQUIRED",
         message: "Authentication is required",
+      },
+    })
+  })
+
+  it("bootstraps a local mock user for development requests without a bearer token", async () => {
+    const { app } = await createApp()
+    const response = await app.inject({
+      headers: {
+        host: "127.0.0.1:3030",
+        origin: "http://localhost:3000",
+      },
+      method: "GET",
+      url: "/v1/me",
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toMatchObject({
+      defaultCalendarId: expect.any(String),
+      user: {
+        displayName: null,
+        id: expect.any(String),
+        locale: "en",
+        timezone: "Asia/Seoul",
       },
     })
   })

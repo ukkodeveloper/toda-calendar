@@ -4,9 +4,14 @@ import * as React from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 
 import { motionTokens } from "@workspace/ui/lib/motion"
+import { appCopy } from "@/lib/copy"
 import type { CalendarDoodleSlot, CalendarDoodleStroke, DoodlePoint } from "../model/types"
 import { calendarInteractionUi } from "../utils/interactions"
 import { DoodleArt } from "./doodle-art"
+import {
+  EditorActionButton,
+  EditorSurface,
+} from "./editor-chrome"
 
 type DoodleCanvasProps = {
   label?: string
@@ -331,22 +336,16 @@ export function DoodleCanvas({
 
   return (
     <div className="flex h-full min-h-0 items-center justify-center">
-      <div
-        className="relative w-full overflow-hidden rounded-[26px] bg-white/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_18px_32px_rgba(15,23,42,0.08)]"
+      <EditorSurface
+        className="w-full"
+        label={label}
+        mode={mode}
         style={{
           maxHeight: "100%",
           maxWidth: stageMaxWidth,
           aspectRatio: `${aspectRatio}`,
         }}
       >
-        {label ? (
-          <div className="pointer-events-none absolute top-3 left-3 z-[1]">
-            <div className="rounded-full bg-white/76 px-2.5 py-1 text-[11px] font-semibold tracking-[-0.01em] text-foreground/56 backdrop-blur-[12px]">
-              {label}
-            </div>
-          </div>
-        ) : null}
-
         {!hasPreviewStrokes ? (
           <>
             <div className="pointer-events-none absolute inset-0 opacity-90">
@@ -397,19 +396,22 @@ export function DoodleCanvas({
                   : motionTokens.intent.selectionFlow
               }
             >
-              <motion.button
-                type="button"
-                aria-label="Start sketching"
-                className="pointer-events-auto inline-flex min-h-11 rounded-full bg-white/84 px-4 py-2 text-[11px] font-semibold tracking-[-0.01em] text-foreground/68 shadow-[0_10px_22px_rgba(15,23,42,0.1)] backdrop-blur-[14px] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              <motion.div
+                className="pointer-events-auto flex min-h-11 items-center"
                 whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                 transition={motionTokens.intent.touchFeedback}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  setIsEditing(true)
-                }}
               >
-                Start sketch
-              </motion.button>
+                <EditorActionButton
+                  aria-label={appCopy.component.doodleCanvas.startAriaLabel}
+                  className="pointer-events-auto"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setIsEditing(true)
+                  }}
+                >
+                  {appCopy.component.doodleCanvas.buttons.start}
+                </EditorActionButton>
+              </motion.div>
             </motion.div>
           ) : null}
 
@@ -429,19 +431,22 @@ export function DoodleCanvas({
                   : motionTokens.intent.selectionFlow
               }
             >
-              <motion.button
-                type="button"
-                aria-label="Edit sketch"
-                className="pointer-events-auto inline-flex min-h-11 rounded-full bg-white/80 px-4 py-2 text-[11px] font-semibold tracking-[-0.01em] text-foreground/68 shadow-[0_10px_22px_rgba(15,23,42,0.1)] backdrop-blur-[14px] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              <motion.div
+                className="pointer-events-auto flex min-h-11 items-center"
                 whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                 transition={motionTokens.intent.touchFeedback}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  setIsEditing(true)
-                }}
               >
-                Edit sketch
-              </motion.button>
+                <EditorActionButton
+                  aria-label={appCopy.component.doodleCanvas.editAriaLabel}
+                  className="pointer-events-auto"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setIsEditing(true)
+                  }}
+                >
+                  {appCopy.component.doodleCanvas.buttons.edit}
+                </EditorActionButton>
+              </motion.div>
             </motion.div>
           ) : null}
         </AnimatePresence>
@@ -467,40 +472,41 @@ export function DoodleCanvas({
                 className="pointer-events-auto flex items-center gap-2"
                 style={{ minHeight: calendarInteractionUi.minTouchTarget }}
               >
-                <motion.button
-                  type="button"
-                  aria-label="Clear sketch"
-                  className="inline-flex min-h-11 rounded-full bg-white/8 px-[3px] py-[3px] shadow-[0_10px_24px_rgba(15,23,42,0.12)] backdrop-blur-[10px] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                <motion.div
                   whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                   transition={motionTokens.intent.touchFeedback}
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    clearDoodle()
-                  }}
                 >
-                  <span className="rounded-full bg-white/82 px-4 py-2 text-[11px] font-semibold tracking-[-0.01em] text-foreground/64">
-                    Clear
-                  </span>
-                </motion.button>
+                  <EditorActionButton
+                    aria-label={appCopy.component.doodleCanvas.clearAriaLabel}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      clearDoodle()
+                    }}
+                  >
+                    {appCopy.component.doodleCanvas.buttons.clear}
+                  </EditorActionButton>
+                </motion.div>
 
-                <motion.button
-                  type="button"
-                  aria-label="Finish sketch editing"
-                  className="inline-flex min-h-11 rounded-full bg-[linear-gradient(180deg,rgba(255,110,100,0.98)_0%,rgba(255,59,48,0.98)_100%)] px-4 py-2 text-[11px] font-semibold tracking-[-0.01em] text-white shadow-[0_12px_24px_rgba(255,59,48,0.24),inset_0_1px_0_rgba(255,255,255,0.32)] outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                <motion.div
                   whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                   transition={motionTokens.intent.touchFeedback}
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    finishEditing()
-                  }}
                 >
-                  Done
-                </motion.button>
+                  <EditorActionButton
+                    aria-label={appCopy.component.doodleCanvas.finishAriaLabel}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      finishEditing()
+                    }}
+                    tone="accent"
+                  >
+                    {appCopy.component.doodleCanvas.buttons.done}
+                  </EditorActionButton>
+                </motion.div>
               </div>
             </motion.div>
           ) : null}
         </AnimatePresence>
-      </div>
+      </EditorSurface>
     </div>
   )
 }

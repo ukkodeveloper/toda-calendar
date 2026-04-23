@@ -76,7 +76,9 @@ export async function buildApiApp(options: BuildApiAppOptions = {}) {
     })
   })
 
-  await registerRoutes(app, authContextService, service)
+  await registerRoutes(app, authContextService, service, {
+    allowDevelopmentFallbackAuth: env.authMode === "mock",
+  })
 
   return {
     app,

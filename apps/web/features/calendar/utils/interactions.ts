@@ -12,7 +12,7 @@ type Point = {
 export function exceedsTapSlop(
   start: Point,
   end: Point,
-  slop = calendarInteractionUi.tapSlop
+  slop: number = calendarInteractionUi.tapSlop
 ) {
   return Math.hypot(end.x - start.x, end.y - start.y) > slop
 }

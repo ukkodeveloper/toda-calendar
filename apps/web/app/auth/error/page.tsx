@@ -4,6 +4,7 @@ import {
   AUTH_ERROR_COPY,
   toAuthUiErrorCode,
 } from "@/lib/auth/errors"
+import { appCopy } from "@/lib/copy"
 import {
   buildLoginPath,
   getFirstQueryValue,
@@ -26,9 +27,8 @@ export default async function AuthErrorPage({
   const copy = code
     ? AUTH_ERROR_COPY[code]
     : {
-        description:
-          "The auth flow stopped on an unexpected edge. Head back to login and try again.",
-        title: "Authentication ran into a rough edge",
+        description: appCopy.page.authError.fallbackDescription,
+        title: appCopy.page.authError.fallbackTitle,
       }
 
   return (
@@ -38,7 +38,7 @@ export default async function AuthErrorPage({
         className="w-full max-w-[30rem] rounded-[2rem] border border-white/60 bg-white/72 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur-2xl sm:p-8"
       >
         <p className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-foreground/48">
-          Auth Error
+          {appCopy.page.authError.eyebrow}
         </p>
         <h1
           id="auth-error-title"
@@ -52,7 +52,7 @@ export default async function AuthErrorPage({
 
         {code ? (
           <p className="mt-5 rounded-full border border-white/60 bg-white/72 px-3 py-1.5 text-xs font-medium tracking-[0.12em] text-foreground/45 uppercase">
-            Code: {code}
+            {appCopy.page.authError.codeLabel}: {code}
           </p>
         ) : null}
 
@@ -61,13 +61,13 @@ export default async function AuthErrorPage({
             href={buildLoginPath({ next: nextPath })}
             className="inline-flex min-h-12 items-center justify-center rounded-full bg-foreground px-5 text-sm font-medium text-white transition-opacity hover:opacity-92 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]/50"
           >
-            Back to login
+            {appCopy.page.authError.backToLogin}
           </Link>
           <Link
             href="/"
             className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/65 bg-white/78 px-5 text-sm font-medium text-foreground transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]/50"
           >
-            Return home
+            {appCopy.page.authError.returnHome}
           </Link>
         </div>
       </section>
