@@ -28,6 +28,10 @@ export const APP_AUTH_PROVIDERS: readonly AppAuthProviderDefinition[] = [
   },
 ] as const
 
+export const PRIMARY_OAUTH_PROVIDERS = APP_AUTH_PROVIDERS.filter(
+  (provider) => provider.id === "apple" || provider.id === "google"
+)
+
 const supabaseProviderMap = {
   apple: "apple",
   google: "google",

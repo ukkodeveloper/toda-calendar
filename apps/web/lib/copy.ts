@@ -71,6 +71,12 @@ export const appCopy = {
       returnHome: "Return home",
     },
     calendar: {
+      backupPrompt: {
+        description:
+          "로그인하면 재설치해도 지금 달력을 다시 가져오고, 다른 기기에서도 바로 이어서 쓸 수 있어요.",
+        later: "나중에",
+        title: "이제 이 달력을 백업해둘까요?",
+      },
       dockPrompts: [
         "Give today one small memory.",
         "Catch one quiet moment before the day fades.",
@@ -95,31 +101,54 @@ export const appCopy = {
     login: {
       badge: "Toda Calendar",
       description:
-        "Sign in to keep your month, memories, and editing state together. The screen stays light, but the auth boundary is explicit and ready for a provider swap later.",
+        "로그인하면 캘린더를 잃지 않고, 재설치 뒤에도 다시 가져오고, 다른 기기에서도 그대로 이어서 쓸 수 있어요.",
       featureCards: [
         {
-          body: "Your month view, day editing flow, and API boundary stay under Toda ownership.",
-          title: "Route-first auth",
+          body: "앱을 먼저 써보다가, 필요할 때만 계정을 연결할 수 있어요.",
+          title: "늦은 로그인",
         },
         {
-          body: "The login surface is server-led, mobile-first, and shaped around a fixed safe-area panel.",
-          title: "Calm entry",
+          body: "로그인 뒤에는 서버를 기준으로 백업과 복구 흐름을 가져가요.",
+          title: "안전한 복구",
         },
         {
-          body: "Supabase can be swapped later because the UI only knows Toda routes and provider enums.",
-          title: "Swappable broker",
+          body: "Google, Apple 같은 provider가 늘어나도 Toda user 기준 구조는 그대로 유지돼요.",
+          title: "확장 가능한 계정 구조",
         },
       ],
       highlightsAriaLabel: "Login highlights",
-      title: "Start your calm calendar",
+      title: "내 캘린더를 안전하게 이어 쓰기",
+    },
+    settings: {
+      accountGuestBody:
+        "로그인하면 이 기기에 있는 일정 흐름을 백업하고, 새 기기에서도 그대로 이어서 볼 수 있어요.",
+      accountGuestCta: "로그인하고 백업 시작",
+      accountGuestTitle: "아직 백업이 연결되지 않았어요",
+      accountLoggedInBody:
+        "이 기기 로그아웃 후에도 로컬 일정과 캐시는 남고, 서버 동기화만 멈춰요.",
+      accountLoggedInTitle: "이 기기에서 계정 연결됨",
+      backToCalendar: "캘린더로 돌아가기",
+      backupBody:
+        "Toda는 서버를 기준 원본으로 두고, 이 기기에는 캐시와 오프라인 대응 데이터를 남겨둬요.",
+      backupTitle: "백업 및 동기화",
+      logoutConfirmDescription:
+        "이 기기에서 로그인 상태가 해제돼요. 저장된 일정은 그대로 볼 수 있어요.",
+      logoutConfirmTitle: "로그아웃하시겠어요?",
+      logoutCta: "로그아웃",
+      runtimePending:
+        "이 빌드는 OAuth 연결 준비 전 상태예요. 설정 화면만 먼저 확인할 수 있어요.",
+      title: "설정",
     },
   },
   component: {
     calendarHeader: {
       previewModeAriaLabel:
         "Month preview mode control. Double tap to cycle visible previews.",
+      settingsAriaLabel: "Open settings",
       weekdayRowAriaLabel: "Days of the week",
-      signOut: "Sign out",
+    },
+    settingsPage: {
+      closeConfirm: "취소",
     },
     dayCell: {
       noteFallback: "Note",
@@ -162,12 +191,12 @@ export const appCopy = {
         "By continuing, you agree to the Toda Calendar terms and privacy policy.",
       badge: "MVP",
       defaultReadyMessage:
-        "Toda owns the route contract and the API boundary. The provider only brokers the OAuth handshake.",
+        "Google이나 Apple로 연결하면 지금 기기 데이터 백업과 새 기기 복구를 바로 시작할 수 있어요.",
       defaultWaitingMessage:
         "OAuth wiring is pending. Add the public Supabase env vars first, then these same buttons will hand off to the real provider flow.",
       eyebrow: "Sign In",
       navAriaLabel: "Social sign in",
-      title: "Three entry points, one calm timeline.",
+      title: "백업과 복구를 연결해둘까요?",
     },
     textEditor: {
       placeholder: "Write",

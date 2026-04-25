@@ -5,6 +5,7 @@ import * as React from "react"
 
 import { cn } from "@workspace/ui/lib/utils"
 
+import { BackupPromptSheet } from "@/components/auth/backup-prompt-sheet"
 import { CalendarHeader } from "@/components/calendar/calendar-header"
 import type { AppSession } from "@/lib/auth/app-session"
 import { appCopy } from "@/lib/copy"
@@ -18,6 +19,7 @@ import { DayEditorSheet } from "./day-editor-sheet"
 
 const dockPrompts = appCopy.page.calendar.dockPrompts
 const SURFACE_DOUBLE_TAP_MS = 320
+const BACKUP_PROMPT_STORAGE_KEY = "toda.oauth.backup-prompt-shown.v1"
 
 function getNextPromptIndex(current: number) {
   if (dockPrompts.length <= 1) {
@@ -76,10 +78,12 @@ export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
   const [promptIndex, setPromptIndex] = React.useState(() =>
     Math.floor(Math.random() * dockPrompts.length)
   )
+  const [isBackupPromptOpen, setIsBackupPromptOpen] = React.useState(false)
+  const [pendingBackupPrompt, setPendingBackupPrompt] = React.useState(false)
   const previousOpenRef = React.useRef<boolean | null>(null)
   const isEditorOpen = Boolean(selectedRecord)
-  const showAuthActions =
-    session?.runtime === "configured" && session.isAuthenticated
+  const isConfiguredRuntime = session?.runtime === "configured"
+  const showAuthActions = isConfiguredRuntime && session.isAuthenticated
   const sessionLabel =
     session?.identity?.email ?? appCopy.page.calendar.sessionFallbackLabel
   const surfacePointerRef = React.useRef<{
@@ -189,6 +193,38 @@ export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
     }
   }, [selectedRecord])
 
+  React.useEffect(() => {
+    if (!pendingBackupPrompt) {
+      return
+    }
+
+    if (!isConfiguredRuntime || showAuthActions) {
+      setPendingBackupPrompt(false)
+      return
+    }
+
+    if (selectedRecord) {
+      return
+    }
+
+    setIsBackupPromptOpen(true)
+    setPendingBackupPrompt(false)
+  }, [isConfiguredRuntime, pendingBackupPrompt, selectedRecord, showAuthActions])
+
+  const handleSaveDayRecord = React.useCallback(
+    async (record: Parameters<typeof saveDayRecord>[0]) => {
+      await saveDayRecord(record)
+
+      if (!isConfiguredRuntime || showAuthActions || hasShownBackupPrompt()) {
+        return
+      }
+
+      markBackupPromptShown()
+      setPendingBackupPrompt(true)
+    },
+    [isConfiguredRuntime, saveDayRecord, showAuthActions]
+  )
+
   if (isInitialLoading) {
     return (
       <main className="flex min-h-dvh items-center justify-center bg-[var(--calendar-app-bg)] px-6 text-center text-foreground">
@@ -244,8 +280,9 @@ export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
           activeMonthLabel={activeMonthLabel}
           activePreviewType={state.activePreviewType}
           onAdvancePreviewMode={advancePreviewMode}
+          settingsHref="/settings"
           sessionLabel={sessionLabel}
-          showAuthActions={showAuthActions}
+          showSessionLabel={showAuthActions}
         />
 
         <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+5.95rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
@@ -292,12 +329,43 @@ export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
             closeEditor()
           }
         }}
-        onSave={saveDayRecord}
+        onSave={handleSaveDayRecord}
         open={Boolean(selectedRecord)}
         record={selectedRecord}
       />
+
+      <BackupPromptSheet
+        authReady={isConfiguredRuntime}
+        nextPath="/"
+        onOpenChange={setIsBackupPromptOpen}
+        open={isBackupPromptOpen}
+      />
     </main>
   )
+}
+
+function hasShownBackupPrompt() {
+  if (typeof window === "undefined") {
+    return true
+  }
+
+  try {
+    return window.localStorage.getItem(BACKUP_PROMPT_STORAGE_KEY) === "true"
+  } catch {
+    return false
+  }
+}
+
+function markBackupPromptShown() {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  try {
+    window.localStorage.setItem(BACKUP_PROMPT_STORAGE_KEY, "true")
+  } catch {
+    // Ignore storage failures and continue with the in-memory flow.
+  }
 }
 
 function isInteractiveTapTarget(target: EventTarget | null) {

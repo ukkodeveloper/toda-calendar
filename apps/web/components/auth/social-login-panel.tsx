@@ -1,6 +1,6 @@
 import { AUTH_ERROR_COPY, type AuthUiErrorCode } from "@/lib/auth/errors"
 import { appCopy } from "@/lib/copy"
-import { APP_AUTH_PROVIDERS } from "@/lib/auth/providers"
+import { PRIMARY_OAUTH_PROVIDERS } from "@/lib/auth/providers"
 
 import { SocialLoginButton } from "./social-login-button"
 
@@ -45,7 +45,7 @@ export function SocialLoginPanel({
             aria-label={appCopy.component.socialLoginPanel.navAriaLabel}
             className="space-y-3"
           >
-            {APP_AUTH_PROVIDERS.map((provider) => (
+            {PRIMARY_OAUTH_PROVIDERS.map((provider) => (
               <SocialLoginButton
                 key={provider.id}
                 authReady={authReady}
