@@ -34,17 +34,31 @@ function getNextPromptIndex(current: number) {
 }
 
 type CalendarAppProps = {
+  initialDate?: string | null
   session?: AppSession
 }
 
-export function CalendarApp({ session }: CalendarAppProps) {
+export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
+  const today = React.useMemo(() => new Date(), [])
+  const anchorDate = React.useMemo(() => {
+    if (!initialDate) {
+      return today
+    }
+
+    const [year, month, day] = initialDate.split("-").map(Number)
+    return new Date(year ?? 0, (month ?? 1) - 1, day ?? 1)
+  }, [initialDate, today])
   const {
     activeMonthLabel,
     bottomSentinelRef,
     registerSection,
     sections,
     topSentinelRef,
-  } = useMonthRange()
+  } = useMonthRange({
+    anchorDate,
+    initialFocusDate: anchorDate,
+    todayDate: today,
+  })
   const {
     advancePreviewMode,
     closeEditor,
@@ -55,7 +69,9 @@ export function CalendarApp({ session }: CalendarAppProps) {
     saveDayRecord,
     selectedRecord,
     state,
-  } = useCalendarState(sections.map((section) => section.monthStart.slice(0, 7)))
+  } = useCalendarState(sections.map((section) => section.monthStart.slice(0, 7)), {
+    initialSelectedDate: initialDate,
+  })
   const [sheetLaunchLift, setSheetLaunchLift] = React.useState(0)
   const [promptIndex, setPromptIndex] = React.useState(() =>
     Math.floor(Math.random() * dockPrompts.length)

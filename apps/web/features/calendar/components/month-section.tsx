@@ -44,13 +44,13 @@ export function CalendarMonthSection({
           >
             {week.map((day, dayIndex) => (
               <CalendarDayCell
-                key={day.date ?? `${section.key}-${weekIndex}-${dayIndex}`}
+                key={day.date}
                 activePreviewType={activePreviewType}
                 day={day}
                 isSelected={selectedDate === day.date}
                 onAdvancePreviewMode={onAdvancePreviewMode}
                 onOpenDay={onOpenDay}
-                record={day.date ? recordsByDate[day.date] : undefined}
+                record={recordsByDate[day.date]}
                 revealDelay={0.018 + 0.004 * (dayIndex % 2)}
               />
             ))}

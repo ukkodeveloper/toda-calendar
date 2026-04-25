@@ -62,6 +62,25 @@ export function monthKey(date: Date) {
   return toIsoDate(startOfMonth(date))
 }
 
+export function resolveCalendarEntryDate(
+  value: string | null | undefined,
+  fallbackDate = new Date()
+) {
+  if (!value || !isValidIsoDate(value)) {
+    return {
+      anchorDate: fallbackDate,
+      selectedDate: null,
+    }
+  }
+
+  const parsed = parseIsoDate(value)
+
+  return {
+    anchorDate: parsed,
+    selectedDate: toIsoDate(parsed),
+  }
+}
+
 export function createInitialMonthRange(anchor: Date, before: number, after: number) {
   const keys: string[] = []
 
@@ -108,10 +127,15 @@ export function expandMonthRange(
   return [...monthStarts, ...nextKeys]
 }
 
-function createGridDay(date: Date, todayKey: string): CalendarGridDay {
+function createGridDay(
+  date: Date,
+  monthStart: Date,
+  todayKey: string
+): CalendarGridDay {
   return {
     date: toIsoDate(date),
     dayNumber: date.getDate(),
+    isCurrentMonth: date.getMonth() === monthStart.getMonth(),
     isPlaceholder: false,
     isToday: toIsoDate(date) === todayKey,
   }
@@ -119,36 +143,14 @@ function createGridDay(date: Date, todayKey: string): CalendarGridDay {
 
 export function buildMonthSection(monthStartKey: string, todayKey: string): MonthSection {
   const monthStart = parseIsoDate(monthStartKey)
-  const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0)
   const leadingBlanks = monthStart.getDay()
-  const totalDays = monthEnd.getDate()
-  const trailingBlanks = (7 - ((leadingBlanks + totalDays) % 7)) % 7
-  const totalCells = leadingBlanks + totalDays + trailingBlanks
   const weeks: CalendarGridDay[][] = []
   const cells: CalendarGridDay[] = []
+  const gridStart = addDays(monthStart, -leadingBlanks)
+  const totalCells = 42
 
-  for (let index = 0; index < leadingBlanks; index += 1) {
-    cells.push({
-      date: null,
-      dayNumber: null,
-      isPlaceholder: true,
-      isToday: false,
-    })
-  }
-
-  for (let day = 1; day <= totalDays; day += 1) {
-    cells.push(
-      createGridDay(new Date(monthStart.getFullYear(), monthStart.getMonth(), day), todayKey)
-    )
-  }
-
-  for (let index = 0; index < trailingBlanks; index += 1) {
-    cells.push({
-      date: null,
-      dayNumber: null,
-      isPlaceholder: true,
-      isToday: false,
-    })
+  for (let index = 0; index < totalCells; index += 1) {
+    cells.push(createGridDay(addDays(gridStart, index), monthStart, todayKey))
   }
 
   for (let index = 0; index < totalCells; index += 7) {

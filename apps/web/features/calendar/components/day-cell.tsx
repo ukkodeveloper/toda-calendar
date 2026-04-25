@@ -150,6 +150,7 @@ export function CalendarDayCell({
       })
     : null
   const isToday = day.isToday
+  const isOutsideMonth = !day.isCurrentMonth
   const hasVisiblePreview = Boolean(visibleType)
   const showDateBadgeSurface = hasVisiblePreview || isSelected || isToday
   const gesture = useDayCellGesture({
@@ -160,10 +161,6 @@ export function CalendarDayCell({
       }
     },
   })
-
-  if (day.isPlaceholder || !day.date || !day.dayNumber) {
-    return <div className="w-full" style={{ aspectRatio: dayCellAspectRatio }} />
-  }
 
   return (
     <motion.button
@@ -313,6 +310,8 @@ export function CalendarDayCell({
                 ? "text-white"
                 : isToday
                   ? "text-[var(--calendar-accent)]"
+                : isOutsideMonth
+                  ? "text-foreground/28"
                 : showDateBadgeSurface
                   ? "text-[color:var(--calendar-date-text-strong)]"
                   : "text-[var(--calendar-muted-label)]"

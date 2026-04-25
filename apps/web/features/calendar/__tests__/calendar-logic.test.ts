@@ -12,6 +12,7 @@ import {
   createInitialMonthRange,
   expandMonthRange,
   parseIsoDate,
+  resolveCalendarEntryDate,
   toIsoDate,
 } from "../utils/date"
 import {
@@ -158,15 +159,18 @@ test("expandMonthRange prepends and appends month keys", () => {
   assert.equal(withFuture[withFuture.length - 1], "2026-07-01")
 })
 
-test("buildMonthSection creates a 7-column month grid", () => {
+test("buildMonthSection creates a fixed 42-cell month grid with adjacent month dates", () => {
   const section = buildMonthSection("2026-04-01", "2026-04-21")
 
-  assert.equal(section.weeks.length > 3, true)
+  assert.equal(section.weeks.length, 6)
   assert.equal(section.weeks[0]?.length, 7)
   assert.equal(section.monthLabel, "April 2026")
-  assert.equal(section.weeks[0]?.[0]?.isPlaceholder, true)
-  assert.equal(section.weeks[0]?.[0]?.date, null)
+  assert.equal(section.weeks.flat().length, 42)
+  assert.equal(section.weeks[0]?.[0]?.date, "2026-03-29")
+  assert.equal(section.weeks[0]?.[0]?.isCurrentMonth, false)
   assert.equal(section.weeks[0]?.[3]?.date, "2026-04-01")
+  assert.equal(section.weeks[0]?.[3]?.isCurrentMonth, true)
+  assert.equal(section.weeks[5]?.[6]?.date, "2026-05-09")
 })
 
 test("parseIsoDate round-trips valid local dates", () => {
@@ -176,6 +180,20 @@ test("parseIsoDate round-trips valid local dates", () => {
 
 test("parseIsoDate rejects impossible local dates", () => {
   assert.throws(() => parseIsoDate("2026-02-30"), /Invalid local date/)
+})
+
+test("resolveCalendarEntryDate keeps a valid shared date", () => {
+  const resolved = resolveCalendarEntryDate("2026-04-21", new Date(2026, 3, 1))
+
+  assert.equal(toIsoDate(resolved.anchorDate), "2026-04-21")
+  assert.equal(resolved.selectedDate, "2026-04-21")
+})
+
+test("resolveCalendarEntryDate falls back safely on invalid shared dates", () => {
+  const resolved = resolveCalendarEntryDate("2026-02-30", new Date(2026, 3, 1))
+
+  assert.equal(toIsoDate(resolved.anchorDate), "2026-04-01")
+  assert.equal(resolved.selectedDate, null)
 })
 
 test("calendarReducer prevents disabling the last filter type", () => {

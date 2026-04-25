@@ -20,14 +20,21 @@ function toErrorMessage(error: unknown) {
   return appCopy.page.calendar.error.fallbackDescription
 }
 
-export function useCalendarState(months: string[]) {
+type UseCalendarStateOptions = {
+  initialSelectedDate?: string | null
+}
+
+export function useCalendarState(
+  months: string[],
+  { initialSelectedDate = null }: UseCalendarStateOptions = {}
+) {
   const [repository] = React.useState(() =>
     createApiCalendarRecordRepository()
   )
   const [state, dispatch] = React.useReducer(
     calendarReducer,
     undefined,
-    () => createInitialCalendarState([])
+    () => createInitialCalendarState([], initialSelectedDate)
   )
   const [calendarId, setCalendarId] = React.useState<string | null>(null)
   const [error, setError] = React.useState<string | null>(null)
@@ -46,6 +53,9 @@ export function useCalendarState(months: string[]) {
     let cancelled = false
 
     dispatch({ type: "reset-records" })
+    if (initialSelectedDate) {
+      dispatch({ type: "open-editor", date: initialSelectedDate })
+    }
     pendingMonthsRef.current.clear()
     setCalendarId(null)
     setLoadedMonths([])
@@ -77,7 +87,7 @@ export function useCalendarState(months: string[]) {
     return () => {
       cancelled = true
     }
-  }, [reloadToken, repository])
+  }, [initialSelectedDate, reloadToken, repository])
 
   React.useEffect(() => {
     if (!calendarId) {

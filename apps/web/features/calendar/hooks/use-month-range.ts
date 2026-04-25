@@ -18,7 +18,17 @@ const CHUNK_SIZE = 4
 const MONTH_TOP_OFFSET = 110
 const ACTIVE_MONTH_OFFSET = 146
 
-export function useMonthRange(anchorDate = new Date()) {
+type UseMonthRangeOptions = {
+  anchorDate?: Date
+  initialFocusDate?: Date
+  todayDate?: Date
+}
+
+export function useMonthRange({
+  anchorDate = new Date(),
+  initialFocusDate = anchorDate,
+  todayDate = new Date(),
+}: UseMonthRangeOptions = {}) {
   const topSentinelRef = React.useRef<HTMLDivElement | null>(null)
   const bottomSentinelRef = React.useRef<HTMLDivElement | null>(null)
   const sectionRefs = React.useRef(new Map<string, HTMLElement>())
@@ -34,7 +44,8 @@ export function useMonthRange(anchorDate = new Date()) {
     )
   )
   const [activeMonthKey, setActiveMonthKey] = React.useState(currentMonthKey)
-  const todayKey = toIsoDate(anchorDate)
+  const todayKey = toIsoDate(todayDate)
+  const initialFocusDateKey = toIsoDate(initialFocusDate)
   const sections = React.useMemo(
     () => monthStarts.map((monthStart) => buildMonthSection(monthStart, todayKey)),
     [monthStarts, todayKey]
@@ -60,12 +71,14 @@ export function useMonthRange(anchorDate = new Date()) {
       return
     }
 
-    const todayCell =
+    const initialFocusCell =
       typeof document === "undefined"
         ? null
-        : document.querySelector<HTMLElement>(`[data-calendar-date='${todayKey}']`)
+        : document.querySelector<HTMLElement>(
+            `[data-calendar-date='${initialFocusDateKey}']`
+          )
     const currentMonthSection = sectionRefs.current.get(currentMonthKey)
-    const initialTarget = todayCell ?? currentMonthSection
+    const initialTarget = initialFocusCell ?? currentMonthSection
 
     if (!initialTarget || typeof window === "undefined") {
       return
@@ -77,7 +90,7 @@ export function useMonthRange(anchorDate = new Date()) {
     })
     setActiveMonthKey(currentMonthKey)
     hasInitialScrollRef.current = true
-  }, [currentMonthKey, monthStarts, todayKey])
+  }, [currentMonthKey, initialFocusDateKey, monthStarts])
 
   const prependMonths = useEffectEvent(() => {
     if (typeof window === "undefined") {

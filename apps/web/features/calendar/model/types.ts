@@ -55,8 +55,9 @@ export type CalendarDayRecord = {
 export type EditorDraft = CalendarDayRecord
 
 export type CalendarGridDay = {
-  date: string | null
-  dayNumber: number | null
+  date: string
+  dayNumber: number
+  isCurrentMonth: boolean
   isPlaceholder: boolean
   isToday: boolean
 }

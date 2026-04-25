@@ -87,12 +87,15 @@ export function sanitizeDayRecord(record: CalendarDayRecord) {
   }
 }
 
-export function createInitialCalendarState(records: CalendarDayRecord[]): CalendarState {
+export function createInitialCalendarState(
+  records: CalendarDayRecord[],
+  selectedDate: string | null = null
+): CalendarState {
   return {
     activePreviewType: "photo",
     recordsByDate: normalizeCalendarRecords(records),
     previewFilter: createDefaultPreviewFilter(),
-    selectedDate: null,
+    selectedDate,
   }
 }
 
