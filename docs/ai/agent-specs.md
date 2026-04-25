@@ -19,7 +19,8 @@ sequentially in one thread when delegation is unnecessary.
 
 | Agent | Type / model / reasoning | Primary skills | Purpose |
 | --- | --- | --- | --- |
-| `sprint-orchestrator` | `default`, `gpt-5.4`, `high` | `toda-sprint-workflow`, `senior-project-owner`, design skills as needed | Leads discovery, keeps the master sprint doc current, drives design/technical freeze, and routes delivery |
+| `sprint-orchestrator` | `default`, `gpt-5.4`, `high` | `toda-sprint-workflow`, `senior-project-owner`, `toda-lean-design-pack` as needed | Leads discovery, keeps the master sprint doc current, drives design/technical freeze, and routes delivery |
+| `design-pack-builder` | `worker`, `gpt-5.4`, `high` | `toda-lean-design-pack`, `ux-flow-designer`, `toss-apple-mobile-design`, `ui-ux-pro-max` | Produces sprint-local flows, clickable wireframes, and visual/motion direction for ambiguous core paths, then updates `UX Decisions` for demo handoff |
 | `demo-markup-builder` | `worker`, `gpt-5.4`, `medium` | `toda-demo-markup` | Builds the markup-only prototype in `apps/demo` or the sprint-local fallback |
 | `preview-reporter` | `default`, `gpt-5.4-mini`, `medium` | `toda-preview-reporter` | Creates Vercel preview links, checks readiness, and returns a compact mobile review note |
 | `mobile-feedback-curator` | `default`, `gpt-5.4`, `medium-high` | `toda-mobile-feedback-intake` | Converts mobile feedback into lean sprint doc updates and implementation deltas |
@@ -73,6 +74,26 @@ Must include:
 - target screen list capped at `3` to `5`
 - the current demo review round (`1` or `2`)
 
+### Sprint Orchestrator -> Design Pack Builder
+
+Must include:
+
+- approved discovery and PRD-lite summary
+- the ambiguous core paths only, not the full feature map
+- current non-goals and scope exclusions
+- sprint-local artifact target path
+- the specific demo risks the design pack must de-risk
+
+### Design Pack Builder -> Demo Builder
+
+Must include:
+
+- approved screen inventory and wireframe links
+- the interaction contract and important state changes
+- visual/material direction and motion notes
+- content tone guidance
+- accessibility constraints and unresolved questions
+
 ## Role Notes
 
 ### Orchestrator
@@ -116,3 +137,10 @@ Must include:
 - Owns the single sprint master document under `docs/sprints/<sprint-id>/`.
 - Uses only two manual checkpoints by default: discovery alignment and demo review.
 - Keeps design output lean and limited to ambiguous core paths.
+
+### Design Pack Builder
+
+- Owns the Lean Design Pack stage after discovery alignment.
+- Keeps artifacts sprint-local and limited to the smallest set that unblocks demo work.
+- Treats wireframes as clarification artifacts, not production UI.
+- Updates `UX Decisions` with only the durable decisions that should survive into demo and technical freeze.

@@ -8,6 +8,7 @@
 - For non-trivial development work, default to `docs/ai/pipeline.md`.
 - For sprint-scoped feature work, start with `docs/ai/sprint-workflow.md`.
 - For remote/mobile sprint operation, also read `docs/ai/remote-mobile-workflow.md`.
+- For Discord-driven remote sprint operation, also read `docs/ai/discord-remote-workflow.md`.
 - Prefer entering through the `toda-dev-pipeline` skill, then route to the appropriate domain owner skill.
 - Prefer entering sprint-scoped feature work through the `toda-sprint-workflow` skill.
 - Treat `docs/ai/repo-context.md`, `docs/ai/ownership-map.md`, `docs/ai/verification-matrix.md`, and `docs/ai/escalation-policy.md` as required workflow context, not optional references.
@@ -121,6 +122,8 @@ These observations are based on the current branch and should be re-checked if t
 - Read `docs/ai/repo-context.md`, `docs/ai/ownership-map.md`, `docs/ai/verification-matrix.md`, and `docs/ai/pipeline.md` before making workflow or cross-workspace decisions.
 - If the task is feature- or sprint-scoped, also read `docs/ai/sprint-workflow.md` and `docs/sprints/README.md`.
 - If the task will be driven from mobile while the desktop executes, also read `docs/ai/remote-mobile-workflow.md`.
+- If the task will be driven from Discord, also read `docs/ai/discord-remote-workflow.md` and `docs/integrations/discord-setup.md`.
+- For hands-on Discord operation, also check `docs/integrations/discord-usage.md`.
 - For non-trivial implementation work, prefer entering through the `toda-dev-pipeline` skill and then route to the appropriate domain owner.
 - For sprint-scoped feature work, prefer entering through the `toda-sprint-workflow` skill first.
 - Start by locating the narrowest workspace affected by the task.

@@ -87,7 +87,15 @@ Gate:
 
 ### 1. Lean Design Pack
 
-Primary skills:
+Primary agent:
+
+- `design-pack-builder`
+
+Primary skill:
+
+- `toda-lean-design-pack`
+
+Underlying skill stack:
 
 - `ux-flow-designer`
 - `toss-apple-mobile-design`
@@ -100,8 +108,10 @@ Output:
 
 Rules:
 
+- keep the design pack scoped to the smallest set of ambiguous paths that can unblock the demo
 - do not map the entire feature if it is already obvious
 - generate flows and wireframes only for the paths that are genuinely ambiguous, risky, or easy to misbuild
+- prefer `3` to `5` screens unless the sprint explicitly needs a wider pass
 - keep design output sprint-local unless it becomes a durable shared pattern
 
 ### 2. Demo Markup Review

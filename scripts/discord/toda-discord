@@ -1,0 +1,252 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+LABEL="com.toda.discord-bridge"
+SOURCE_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE_PATH" ]; do
+  SOURCE_DIR="$(cd -P "$(dirname "$SOURCE_PATH")" && pwd)"
+  SOURCE_PATH="$(readlink "$SOURCE_PATH")"
+  [[ "$SOURCE_PATH" != /* ]] && SOURCE_PATH="$SOURCE_DIR/$SOURCE_PATH"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE_PATH")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+LOG_DIR="$REPO_ROOT/.data/discord-bridge"
+STDOUT_LOG="$LOG_DIR/stdout.log"
+STDERR_LOG="$LOG_DIR/stderr.log"
+SUPERVISOR_PID_FILE="$LOG_DIR/supervisor.pid"
+STOP_FILE="$LOG_DIR/stop"
+HEALTH_FILE="$LOG_DIR/health.json"
+PLIST_PATH="$HOME/Library/LaunchAgents/$LABEL.plist"
+INSTALL_DIR="$HOME/.config/toda-discord"
+RUN_SCRIPT="$INSTALL_DIR/run-bridge.sh"
+TSX_BIN="$REPO_ROOT/apps/discord-bridge/node_modules/.bin/tsx"
+BRIDGE_ENTRY="$REPO_ROOT/apps/discord-bridge/src/index.ts"
+HEALTHCHECK_SCRIPT="$REPO_ROOT/apps/discord-bridge/src/health-check.ts"
+
+mkdir -p "$LOG_DIR" "$HOME/Library/LaunchAgents" "$INSTALL_DIR"
+
+cleanup_legacy_launchd() {
+  if launchctl print "gui/$UID/$LABEL" >/dev/null 2>&1; then
+    launchctl bootout "gui/$UID" "$PLIST_PATH" >/dev/null 2>&1 || true
+  fi
+
+  rm -f "$PLIST_PATH"
+}
+
+write_runner_script() {
+  cat >"$RUN_SCRIPT" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$REPO_ROOT"
+LOG_DIR="$LOG_DIR"
+SUPERVISOR_PID_FILE="$SUPERVISOR_PID_FILE"
+STOP_FILE="$STOP_FILE"
+TSX_BIN="$TSX_BIN"
+BRIDGE_ENTRY="$BRIDGE_ENTRY"
+export TODA_REPO_ROOT="$REPO_ROOT"
+
+mkdir -p "\$LOG_DIR"
+rm -f "\$STOP_FILE"
+echo \$\$ >"\$SUPERVISOR_PID_FILE"
+
+child_pid=""
+
+cleanup() {
+  if [[ -n "\$child_pid" ]]; then
+    kill "\$child_pid" >/dev/null 2>&1 || true
+    wait "\$child_pid" 2>/dev/null || true
+  fi
+
+  rm -f "\$SUPERVISOR_PID_FILE"
+}
+
+trap cleanup EXIT
+trap 'touch "\$STOP_FILE"; exit 0' INT TERM
+
+while true; do
+  nohup "\$TSX_BIN" "\$BRIDGE_ENTRY" >>"$STDOUT_LOG" 2>>"$STDERR_LOG" </dev/null &
+  child_pid=\$!
+  wait "\$child_pid" || true
+  child_pid=""
+
+  if [[ -f "\$STOP_FILE" ]]; then
+    break
+  fi
+
+  printf '[supervisor %s] bridge exited unexpectedly; restarting in 2s\n' "\$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$STDOUT_LOG"
+  sleep 2
+done
+EOF
+
+  chmod +x "$RUN_SCRIPT"
+}
+
+read_supervisor_pid() {
+  if [[ ! -f "$SUPERVISOR_PID_FILE" ]]; then
+    return 1
+  fi
+
+  cat "$SUPERVISOR_PID_FILE"
+}
+
+is_running() {
+  local pid
+
+  if ! pid="$(read_supervisor_pid)"; then
+    return 1
+  fi
+
+  kill -0 "$pid" >/dev/null 2>&1
+}
+
+start_service() {
+  cleanup_legacy_launchd
+
+  if [[ ! -x "$TSX_BIN" ]]; then
+    echo "discord bridge runner not found: $TSX_BIN"
+    exit 1
+  fi
+
+  if is_running; then
+    echo "toda-discord is already running. supervisor_pid=$(read_supervisor_pid)"
+    return
+  fi
+
+  rm -f "$SUPERVISOR_PID_FILE" "$STOP_FILE" "$HEALTH_FILE"
+  touch "$STDOUT_LOG" "$STDERR_LOG"
+
+  nohup "$RUN_SCRIPT" >>"$STDOUT_LOG" 2>>"$STDERR_LOG" </dev/null &
+  disown || true
+
+  for _ in $(seq 1 20); do
+    if is_running; then
+      echo "toda-discord started."
+      return
+    fi
+
+    sleep 0.2
+  done
+
+  echo "toda-discord failed to start. check logs:"
+  tail -n 20 "$STDERR_LOG" || true
+  exit 1
+}
+
+stop_service() {
+  cleanup_legacy_launchd
+
+  if ! is_running; then
+    rm -f "$SUPERVISOR_PID_FILE" "$STOP_FILE"
+    echo "toda-discord is not running."
+    return
+  fi
+
+  local pid
+  pid="$(read_supervisor_pid)"
+  touch "$STOP_FILE"
+  kill "$pid" >/dev/null 2>&1 || true
+
+  for _ in $(seq 1 20); do
+    if ! kill -0 "$pid" >/dev/null 2>&1; then
+      break
+    fi
+    sleep 0.2
+  done
+
+  if kill -0 "$pid" >/dev/null 2>&1; then
+    kill -9 "$pid" >/dev/null 2>&1 || true
+  fi
+
+  rm -f "$SUPERVISOR_PID_FILE" "$STOP_FILE"
+  echo "toda-discord stopped."
+}
+
+status_service() {
+  cleanup_legacy_launchd
+
+  if ! is_running; then
+    rm -f "$SUPERVISOR_PID_FILE"
+    echo "status=stopped"
+    echo "label=$LABEL"
+    echo "supervisor_pid=none"
+    echo "stdout_log=$STDOUT_LOG"
+    echo "stderr_log=$STDERR_LOG"
+    return
+  fi
+
+  echo "status=running"
+  echo "label=$LABEL"
+  echo "supervisor_pid=$(read_supervisor_pid)"
+  echo "stdout_log=$STDOUT_LOG"
+  echo "stderr_log=$STDERR_LOG"
+  if [[ -x "$TSX_BIN" ]]; then
+    TODA_REPO_ROOT="$REPO_ROOT" "$TSX_BIN" "$HEALTHCHECK_SCRIPT" || true
+  fi
+}
+
+logs_service() {
+  touch "$STDOUT_LOG" "$STDERR_LOG"
+  tail -n 50 -f "$STDOUT_LOG" "$STDERR_LOG"
+}
+
+install_command() {
+  chmod +x "$REPO_ROOT/scripts/discord/toda-discord"
+  write_runner_script
+  ln -sf "$REPO_ROOT/scripts/discord/toda-discord" /opt/homebrew/bin/toda-discord
+  cleanup_legacy_launchd
+  echo "toda-discord command installed at /opt/homebrew/bin/toda-discord"
+}
+
+usage() {
+  cat <<'EOF'
+Usage: toda-discord <command>
+
+Commands:
+  install   Install the global command and refresh the background runner script
+  start     Start the Discord bridge background worker
+  stop      Stop the Discord bridge background worker
+  restart   Restart the Discord bridge background worker
+  status    Show service status and bridge health
+  health    Run the bridge health check
+  logs      Tail bridge logs
+EOF
+}
+
+command_name="${1:-start}"
+
+case "$command_name" in
+  install)
+    install_command
+    ;;
+  start)
+    install_command
+    start_service
+    ;;
+  stop)
+    stop_service
+    ;;
+  restart)
+    install_command
+    stop_service || true
+    start_service
+    ;;
+  status)
+    status_service
+    ;;
+  health)
+    if [[ ! -x "$TSX_BIN" ]]; then
+      echo "health check runner not found: $TSX_BIN"
+      exit 1
+    fi
+    TODA_REPO_ROOT="$REPO_ROOT" "$TSX_BIN" "$HEALTHCHECK_SCRIPT"
+    ;;
+  logs)
+    logs_service
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac

@@ -30,6 +30,28 @@ const sampleRecord: CalendarDayRecord = {
     alt: "Sample",
     source: "seed",
   },
+  doodle: {
+    type: "doodle",
+    strokes: [
+      {
+        color: "#5B4636",
+        width: 3,
+        points: [
+          { x: 22, y: 72 },
+          { x: 20, y: 44 },
+          { x: 28, y: 24 },
+          { x: 38, y: 18 },
+          { x: 44, y: 30 },
+          { x: 56, y: 30 },
+          { x: 62, y: 18 },
+          { x: 72, y: 24 },
+          { x: 80, y: 44 },
+          { x: 78, y: 72 },
+          { x: 22, y: 72 },
+        ],
+      },
+    ],
+  },
   text: {
     type: "text",
     body: "Hello",
