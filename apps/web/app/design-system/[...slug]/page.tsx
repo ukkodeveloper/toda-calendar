@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { redirect } from "next/navigation"
 
 import { DesignSystemDemo } from "../design-system-demo"
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 type DesignSystemPageProps = {
   params: Promise<{
-    slug?: string[]
+    slug: string[]
   }>
 }
 
@@ -18,5 +19,9 @@ export default async function DesignSystemPage({
 }: DesignSystemPageProps) {
   const { slug } = await params
 
-  return <DesignSystemDemo routeSegments={slug ?? []} />
+  if (slug.join("/") === "examples/mobile-reference-screens") {
+    redirect("/design-system/examples/social-dm")
+  }
+
+  return <DesignSystemDemo routeSegments={slug} />
 }

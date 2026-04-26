@@ -18,10 +18,6 @@ import { AnimatedNumber } from "@workspace/ui/components/animated-number"
 import { AppBar } from "@workspace/ui/components/app-bar"
 import { Avatar } from "@workspace/ui/components/avatar"
 import { Badge } from "@workspace/ui/components/badge"
-import {
-  BottomTabBar,
-  type BottomTabItem,
-} from "@workspace/ui/components/bottom-tab-bar"
 import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
 import { Button } from "@workspace/ui/components/button"
 import { ChatBubble } from "@workspace/ui/components/chat-bubble"
@@ -37,7 +33,6 @@ import { Grid } from "@workspace/ui/components/grid"
 import { IconButton } from "@workspace/ui/components/icon-button"
 import { ListItem } from "@workspace/ui/components/list-item"
 import { MessageInput } from "@workspace/ui/components/message-input"
-import { MetricCard } from "@workspace/ui/components/metric-card"
 import { NoticeBanner } from "@workspace/ui/components/notice-banner"
 import { PageHeader } from "@workspace/ui/components/page-header"
 import { PillTabs } from "@workspace/ui/components/pill-tabs"
@@ -55,6 +50,7 @@ import {
 } from "@workspace/ui/components/three-stage-sheet-preview"
 import { Text } from "@workspace/ui/components/text"
 import { TokenSwatch } from "@workspace/ui/components/token-swatch"
+import { ValueCard } from "@workspace/ui/components/value-card"
 import { todaDesignSystem } from "@workspace/ui/lib/design-system"
 import { motionTokens } from "@workspace/ui/lib/motion"
 import { cn } from "@workspace/ui/lib/utils"
@@ -74,10 +70,9 @@ type ComponentId =
   | "pill-tabs"
   | "notice-banner"
   | "list-item"
-  | "metric-card"
+  | "value-card"
   | "animated-number"
   | "action-grid"
-  | "bottom-tab-bar"
   | "floating-action-button"
   | "chat-bubble"
   | "message-input"
@@ -150,7 +145,8 @@ const componentItems: ComponentItem[] = [
   {
     id: "cluster",
     category: "Foundation",
-    description: "가로 버튼 묶음, 칩 그룹, 보조 정보를 감싸는 프리미티브입니다.",
+    description:
+      "가로 버튼 묶음, 칩 그룹, 보조 정보를 감싸는 프리미티브입니다.",
     status: "사용 가능",
     title: "Cluster",
     variantAxes: ["gap", "align", "justify"],
@@ -190,7 +186,8 @@ const componentItems: ComponentItem[] = [
   {
     id: "app-bar",
     category: "Navigation",
-    description: "큰 타이틀, 중앙 타이틀, 뒤로가기와 도구 버튼을 담는 상단 바입니다.",
+    description:
+      "큰 타이틀, 중앙 타이틀, 뒤로가기와 도구 버튼을 담는 상단 바입니다.",
     status: "사용 가능",
     title: "AppBar",
     variantAxes: ["size", "align", "accessory"],
@@ -198,7 +195,8 @@ const componentItems: ComponentItem[] = [
   {
     id: "page-header",
     category: "Navigation",
-    description: "화면별 대표 제목, 인라인 메타, 우측 도구를 묶는 상단 헤더입니다.",
+    description:
+      "화면별 대표 제목, 인라인 메타, 우측 도구를 묶는 상단 헤더입니다.",
     status: "사용 가능",
     title: "PageHeader",
     variantAxes: ["size", "align", "meta", "accessory"],
@@ -212,17 +210,10 @@ const componentItems: ComponentItem[] = [
     variantAxes: ["variant", "size", "state", "badge"],
   },
   {
-    id: "bottom-tab-bar",
-    category: "Navigation",
-    description: "모바일 하단 주요 목적지를 고정하는 탭바입니다.",
-    status: "사용 가능",
-    title: "BottomTabBar",
-    variantAxes: ["selected", "badge", "floating"],
-  },
-  {
     id: "notice-banner",
     category: "Feedback",
-    description: "공지, 안내, 권한 요청을 한 줄 또는 두 줄로 보여주는 배너입니다.",
+    description:
+      "공지, 안내, 권한 요청을 한 줄 또는 두 줄로 보여주는 배너입니다.",
     status: "사용 가능",
     title: "NoticeBanner",
     variantAxes: ["tone", "size", "accessory"],
@@ -236,12 +227,12 @@ const componentItems: ComponentItem[] = [
     variantAxes: ["density", "leading", "meta", "trailing"],
   },
   {
-    id: "metric-card",
+    id: "value-card",
     category: "Data Display",
-    description: "계좌, 잔액, 지표처럼 짧은 수치 정보를 담는 카드입니다.",
+    description: "라벨, 값, 보조 설명을 중립 슬롯으로 담는 값 카드입니다.",
     status: "사용 가능",
-    title: "MetricCard",
-    variantAxes: ["size", "tone"],
+    title: "ValueCard",
+    variantAxes: ["size", "tone", "slot"],
   },
   {
     id: "animated-number",
@@ -358,7 +349,8 @@ const componentItems: ComponentItem[] = [
   {
     id: "example-pages",
     category: "Examples",
-    description: "이미지 시안 계열의 화면을 디자인 시스템 컴포넌트만으로 조립합니다.",
+    description:
+      "이미지 시안 계열의 화면을 디자인 시스템 컴포넌트만으로 조립합니다.",
     status: "패턴",
     title: "ExamplePages",
     variantAxes: ["page", "density", "composition"],
@@ -421,18 +413,34 @@ const previewDays: CalendarPreviewDay[] = [
   { day: 31, isCurrentMonth: false },
   { day: 1, isCurrentMonth: true, preview: { style: "wash", label: "샘플 A" } },
   { day: 2, isCurrentMonth: true },
-  { day: 3, isCurrentMonth: true, preview: { style: "lines", label: "샘플 B" } },
+  {
+    day: 3,
+    isCurrentMonth: true,
+    preview: { style: "lines", label: "샘플 B" },
+  },
   { day: 4, isCurrentMonth: true },
-  { day: 5, isCurrentMonth: true, preview: { style: "stroke", label: "샘플 C" } },
+  {
+    day: 5,
+    isCurrentMonth: true,
+    preview: { style: "stroke", label: "샘플 C" },
+  },
   { day: 6, isCurrentMonth: true },
   { day: 7, isCurrentMonth: true, preview: { style: "wash", label: "샘플 D" } },
   { day: 8, isCurrentMonth: true },
   { day: 9, isCurrentMonth: true },
-  { day: 10, isCurrentMonth: true, preview: { style: "lines", label: "샘플 E" } },
+  {
+    day: 10,
+    isCurrentMonth: true,
+    preview: { style: "lines", label: "샘플 E" },
+  },
   { day: 11, isCurrentMonth: true },
   { day: 12, isCurrentMonth: true },
   { day: 13, isCurrentMonth: true, isToday: true },
-  { day: 14, isCurrentMonth: true, preview: { style: "stroke", label: "샘플 F" } },
+  {
+    day: 14,
+    isCurrentMonth: true,
+    preview: { style: "stroke", label: "샘플 F" },
+  },
   { day: 15, isCurrentMonth: true },
   {
     day: 16,
@@ -441,17 +449,37 @@ const previewDays: CalendarPreviewDay[] = [
     preview: { style: "wash", label: "선택 샘플" },
   },
   { day: 17, isCurrentMonth: true },
-  { day: 18, isCurrentMonth: true, preview: { style: "lines", label: "샘플 G" } },
+  {
+    day: 18,
+    isCurrentMonth: true,
+    preview: { style: "lines", label: "샘플 G" },
+  },
   { day: 19, isCurrentMonth: true },
-  { day: 20, isCurrentMonth: true, preview: { style: "wash", label: "샘플 H" } },
+  {
+    day: 20,
+    isCurrentMonth: true,
+    preview: { style: "wash", label: "샘플 H" },
+  },
   { day: 21, isCurrentMonth: true },
   { day: 22, isCurrentMonth: true },
-  { day: 23, isCurrentMonth: true, preview: { style: "stroke", label: "샘플 I" } },
+  {
+    day: 23,
+    isCurrentMonth: true,
+    preview: { style: "stroke", label: "샘플 I" },
+  },
   { day: 24, isCurrentMonth: true },
   { day: 25, isCurrentMonth: true },
-  { day: 26, isCurrentMonth: true, preview: { style: "lines", label: "샘플 J" } },
+  {
+    day: 26,
+    isCurrentMonth: true,
+    preview: { style: "lines", label: "샘플 J" },
+  },
   { day: 27, isCurrentMonth: true },
-  { day: 28, isCurrentMonth: true, preview: { style: "wash", label: "샘플 K" } },
+  {
+    day: 28,
+    isCurrentMonth: true,
+    preview: { style: "wash", label: "샘플 K" },
+  },
   { day: 29, isCurrentMonth: true },
   { day: 30, isCurrentMonth: true },
   { day: 1, isCurrentMonth: false },
@@ -467,7 +495,14 @@ const spacingItems = todaDesignSystem.foundations.spacing.map((item) => ({
 const colorItems = todaDesignSystem.foundations.color
 
 const textVariants = ["display", "title", "body", "label", "caption"] as const
-const textTones = ["primary", "secondary", "muted", "accent", "success", "danger"] as const
+const textTones = [
+  "primary",
+  "secondary",
+  "muted",
+  "accent",
+  "success",
+  "danger",
+] as const
 const textAligns = ["start", "center", "end"] as const
 const gaps = ["xs", "sm", "md", "lg", "xl"] as const
 const gridGaps = ["xs", "sm", "md", "lg"] as const
@@ -480,7 +515,13 @@ const badgeSizes = ["sm", "md", "lg"] as const
 const avatarSizes = ["xs", "sm", "md", "lg", "xl"] as const
 const avatarShapes = ["circle", "rounded", "squircle"] as const
 const avatarTones = ["neutral", "accent", "success", "danger"] as const
-const buttonVariants = ["default", "secondary", "outline", "ghost", "destructive"] as const
+const buttonVariants = [
+  "default",
+  "secondary",
+  "outline",
+  "ghost",
+  "destructive",
+] as const
 const buttonSizes = ["sm", "default", "lg"] as const
 const appBarSizes = ["compact", "regular", "large"] as const
 const appBarAligns = ["start", "center"] as const
@@ -491,7 +532,7 @@ const pillSizes = ["sm", "md", "lg"] as const
 const bannerTones = ["neutral", "accent", "warning", "success"] as const
 const bannerSizes = ["sm", "md", "lg"] as const
 const listDensities = ["compact", "regular", "roomy"] as const
-const metricSizes = ["sm", "md", "lg"] as const
+const valueCardSizes = ["sm", "md", "lg"] as const
 const animatedNumberSamples = [
   "88,888",
   "8,663",
@@ -510,6 +551,11 @@ const examplePages = [
   "my-dashboard",
   "chat-list",
   "chat-thread",
+  "social-dm",
+  "calendar-toolbar",
+  "commerce-category",
+  "store-home",
+  "social-feed",
   "finance-home",
   "community-feed",
 ] as const
@@ -548,19 +594,43 @@ const examplePageItems: Record<
   },
   "chat-list": {
     title: "채팅 목록",
-    description: "필터 탭, 공지 배너, 대화 목록이 함께 움직이는 목록 화면입니다.",
+    description:
+      "필터 탭, 공지 배너, 대화 목록이 함께 움직이는 목록 화면입니다.",
   },
   "chat-thread": {
     title: "채팅 상세",
     description: "상단 액션 탭과 메시지 입력 흐름을 확인하는 대화 화면입니다.",
   },
+  "social-dm": {
+    title: "소셜 DM",
+    description:
+      "검색, 빈 메시지 상태, 추천 계정, 알림 배너를 조합한 DM 홈입니다.",
+  },
+  "calendar-toolbar": {
+    title: "캘린더 툴바",
+    description:
+      "월간 달력 구현이 아니라 우측 상단 보기 전환과 multi-select 메뉴를 검증합니다.",
+  },
+  "commerce-category": {
+    title: "커머스 카테고리",
+    description: "상단 카테고리 탭, 필터 칩, 상품 그리드 밀도를 확인합니다.",
+  },
+  "store-home": {
+    title: "스토어 홈",
+    description: "검색, 프로모션 배너, 바로가기 그리드, 큐레이션을 조합합니다.",
+  },
+  "social-feed": {
+    title: "소셜 피드",
+    description: "작성자 행, 미디어 영역, 반응 액션, 하단 탭을 확인합니다.",
+  },
   "finance-home": {
     title: "금융 홈",
-    description: "헤더 메타, 숫자 애니메이션, 지표 카드가 들어간 투자 홈입니다.",
+    description: "헤더 메타, 숫자 애니메이션, 값 카드가 들어간 투자 홈입니다.",
   },
   "community-feed": {
     title: "커뮤니티 피드",
-    description: "상단 탭, 필터 칩, 피드 목록, 플로팅 액션을 조합한 화면입니다.",
+    description:
+      "상단 탭, 필터 칩, 피드 목록, 플로팅 액션을 조합한 화면입니다.",
   },
 }
 const iconSizes = ["sm", "md"] as const
@@ -575,7 +645,9 @@ const sheetStages: Array<{ value: SheetStage; label: string }> = [
   { value: "medium", label: "중간" },
   { value: "expanded", label: "확장" },
 ]
-const segmentOptions: Array<SegmentedControlOption<"first" | "second" | "third">> = [
+const segmentOptions: Array<
+  SegmentedControlOption<"first" | "second" | "third">
+> = [
   { value: "first", label: "첫 번째" },
   { value: "second", label: "두 번째" },
   { value: "third", label: "세 번째" },
@@ -584,6 +656,9 @@ type PillDemoValue = "all" | "selling" | "buying" | "events"
 type CommunitySectionValue = "life" | "club" | "cafe" | "apt"
 type CommunityFilterValue = "recommend" | "popular" | "info" | "food"
 type ChatActionValue = "gift" | "board" | "schedule" | "challenge"
+type CalendarControlValue = "compact" | "stacked" | "details" | "list"
+type CommerceCategoryValue = "outer" | "setup" | "innerwear" | "homewear"
+type StoreSectionValue = "today" | "curation" | "ranking"
 
 const pillDemoOptions: Array<{
   value: PillDemoValue
@@ -620,22 +695,185 @@ const chatActionOptions: Array<{ value: ChatActionValue; label: string }> = [
   { value: "schedule", label: "일정" },
   { value: "challenge", label: "챌린지" },
 ]
-const bottomNavigationItems: Array<
-  BottomTabItem<"home" | "community" | "map" | "chats" | "profile">
-> = [
-  { value: "home", label: "Home", icon: <Glyph label="H" /> },
-  { value: "community", label: "Community", icon: <Glyph label="C" /> },
-  { value: "map", label: "Map", icon: <Glyph label="M" /> },
-  { value: "chats", label: "Chats", icon: <Glyph label="T" />, badge: 43 },
-  { value: "profile", label: "My", icon: <Glyph label="P" /> },
+const calendarControlOptions: Array<{
+  value: CalendarControlValue
+  label: string
+  description?: string
+}> = [
+  {
+    value: "compact",
+    label: "Compact",
+    description: "일정 제목을 최소 밀도로 접습니다.",
+  },
+  {
+    value: "stacked",
+    label: "Stacked",
+    description: "같은 날짜 안의 일정을 층으로 쌓습니다.",
+  },
+  {
+    value: "details",
+    label: "Details",
+    description: "제목과 시간을 함께 보여줍니다.",
+  },
+  {
+    value: "list",
+    label: "List",
+    description: "선택한 날짜를 목록으로 전환합니다.",
+  },
 ]
+const calendarSegmentOptions: Array<
+  SegmentedControlOption<CalendarControlValue>
+> = calendarControlOptions.map(({ label, value }) => ({ label, value }))
+const commerceCategoryOptions: Array<{
+  value: CommerceCategoryValue
+  label: string
+}> = [
+  { value: "outer", label: "아우터" },
+  { value: "setup", label: "셋업" },
+  { value: "innerwear", label: "이너웨어" },
+  { value: "homewear", label: "홈웨어" },
+]
+const storeSectionOptions: Array<{ value: StoreSectionValue; label: string }> =
+  [
+    { value: "today", label: "오늘" },
+    { value: "curation", label: "큐레이션" },
+    { value: "ranking", label: "랭킹" },
+  ]
 const actionGridItems: ActionGridItem[] = [
-  { id: "meet", label: "Meet ups", icon: <Avatar size="sm" shape="rounded">M</Avatar> },
-  { id: "market", label: "Marketplace", icon: <Avatar size="sm" shape="rounded">S</Avatar> },
-  { id: "cafe", label: "Cafe", icon: <Avatar size="sm" shape="rounded">C</Avatar> },
-  { id: "jobs", label: "Jobs", icon: <Avatar size="sm" shape="rounded">J</Avatar> },
-  { id: "property", label: "Property", icon: <Avatar size="sm" shape="rounded">P</Avatar> },
-  { id: "walk", label: "Walks", icon: <Avatar size="sm" shape="rounded">W</Avatar> },
+  {
+    id: "meet",
+    label: "Meet ups",
+    icon: (
+      <Avatar size="sm" shape="rounded">
+        M
+      </Avatar>
+    ),
+  },
+  {
+    id: "market",
+    label: "Marketplace",
+    icon: (
+      <Avatar size="sm" shape="rounded">
+        S
+      </Avatar>
+    ),
+  },
+  {
+    id: "cafe",
+    label: "Cafe",
+    icon: (
+      <Avatar size="sm" shape="rounded">
+        C
+      </Avatar>
+    ),
+  },
+  {
+    id: "jobs",
+    label: "Jobs",
+    icon: (
+      <Avatar size="sm" shape="rounded">
+        J
+      </Avatar>
+    ),
+  },
+  {
+    id: "property",
+    label: "Property",
+    icon: (
+      <Avatar size="sm" shape="rounded">
+        P
+      </Avatar>
+    ),
+  },
+  {
+    id: "walk",
+    label: "Walks",
+    icon: (
+      <Avatar size="sm" shape="rounded">
+        W
+      </Avatar>
+    ),
+  },
+]
+const commerceProducts = [
+  {
+    brand: "챔피온",
+    color: "sage",
+    discount: "10%",
+    likes: "199",
+    name: "라이트웨이트 나일론 윈드브레이커",
+    price: "98,100",
+  },
+  {
+    brand: "시에라디자인",
+    color: "silver",
+    discount: "20%",
+    likes: "620",
+    name: "마가타 초경량 윈드 자켓",
+    price: "175,200",
+  },
+  {
+    brand: "세터",
+    color: "black",
+    discount: "60%",
+    likes: "358",
+    name: "로렌 스몰 로고 후드 집업",
+    price: "55,600",
+  },
+  {
+    brand: "컬럼비아",
+    color: "navy",
+    discount: "57%",
+    likes: "140",
+    name: "남성 클레어몬트 재킷",
+    price: "54,830",
+  },
+  {
+    brand: "챔피온",
+    color: "mist",
+    discount: "15%",
+    likes: "280",
+    name: "시어 나일론 윈드브레이커",
+    price: "92,650",
+  },
+  {
+    brand: "해브해드",
+    color: "charcoal",
+    discount: "",
+    likes: "92",
+    name: "City Worker Field Jacket",
+    price: "169,000",
+  },
+]
+const storeShortcutItems: ActionGridItem[] = [
+  { id: "deal", label: "오늘끝딜", icon: <StoreBadge label="11" tone="red" /> },
+  {
+    id: "mart",
+    label: "컬리N마트",
+    icon: <StoreBadge label="N" tone="green" />,
+  },
+  { id: "look", label: "노크잇", icon: <StoreBadge label="L" tone="coral" /> },
+  {
+    id: "member",
+    label: "멤버십데이",
+    icon: <StoreBadge label="3%" tone="blue" />,
+  },
+  {
+    id: "rank",
+    label: "스토어랭킹",
+    icon: <StoreBadge label="TOP" tone="cream" />,
+  },
+  {
+    id: "travel",
+    label: "N여행날딜",
+    icon: <StoreBadge label="A" tone="violet" />,
+  },
+  { id: "ship", label: "N배송", icon: <StoreBadge label="N" tone="teal" /> },
+  {
+    id: "live",
+    label: "쇼핑라이브",
+    icon: <StoreBadge label="LIVE" tone="red" />,
+  },
 ]
 const examplePageComponentMap: Record<ExamplePage, ComponentId[]> = {
   "service-menu": [
@@ -669,10 +907,27 @@ const examplePageComponentMap: Record<ExamplePage, ComponentId[]> = {
     "message-input",
     "icon-button",
   ],
+  "social-dm": [
+    "app-bar",
+    "action-grid",
+    "list-item",
+    "avatar",
+    "notice-banner",
+  ],
+  "calendar-toolbar": [
+    "app-bar",
+    "segmented-control",
+    "icon-button",
+    "menu-checkbox",
+    "surface",
+  ],
+  "commerce-category": ["page-header", "pill-tabs", "grid", "badge"],
+  "store-home": ["app-bar", "action-grid", "pill-tabs", "grid"],
+  "social-feed": ["app-bar", "avatar", "icon-button"],
   "finance-home": [
     "page-header",
     "notice-banner",
-    "metric-card",
+    "value-card",
     "animated-number",
     "grid",
     "list-item",
@@ -700,7 +955,9 @@ function isExamplePage(value: string | undefined): value is ExamplePage {
 function isFoundationComponentId(
   componentId: ComponentId
 ): componentId is (typeof foundationComponentIds)[number] {
-  return (foundationComponentIds as readonly ComponentId[]).includes(componentId)
+  return (foundationComponentIds as readonly ComponentId[]).includes(
+    componentId
+  )
 }
 
 function isPatternComponentId(
@@ -791,7 +1048,10 @@ function getRouteState(routeSegments: string[]): {
   }
 }
 
-function getDesignSystemPath(componentId: ComponentId, examplePage: ExamplePage) {
+function getDesignSystemPath(
+  componentId: ComponentId,
+  examplePage: ExamplePage
+) {
   if (componentId === "example-pages") {
     return `/design-system/examples/${examplePage}`
   }
@@ -922,7 +1182,7 @@ type PillSize = (typeof pillSizes)[number]
 type BannerTone = (typeof bannerTones)[number]
 type BannerSize = (typeof bannerSizes)[number]
 type ListDensity = (typeof listDensities)[number]
-type MetricSize = (typeof metricSizes)[number]
+type ValueCardSize = (typeof valueCardSizes)[number]
 type AnimatedNumberSample = (typeof animatedNumberSamples)[number]
 type ActionGridColumns = (typeof actionGridColumns)[number]
 type FabSize = (typeof fabSizes)[number]
@@ -933,9 +1193,15 @@ type MessageInputSize = (typeof messageInputSizes)[number]
 type ExamplePage = (typeof examplePages)[number]
 type ButtonVariant = NonNullable<React.ComponentProps<typeof Button>["variant"]>
 type ButtonSize = NonNullable<React.ComponentProps<typeof Button>["size"]>
-type SurfaceVariant = NonNullable<React.ComponentProps<typeof Surface>["variant"]>
-type SurfacePadding = NonNullable<React.ComponentProps<typeof Surface>["padding"]>
-type CalendarDensity = NonNullable<React.ComponentProps<typeof CalendarPreview>["density"]>
+type SurfaceVariant = NonNullable<
+  React.ComponentProps<typeof Surface>["variant"]
+>
+type SurfacePadding = NonNullable<
+  React.ComponentProps<typeof Surface>["padding"]
+>
+type CalendarDensity = NonNullable<
+  React.ComponentProps<typeof CalendarPreview>["density"]
+>
 
 type DesignSystemDemoProps = {
   routeSegments?: string[]
@@ -952,10 +1218,12 @@ export function DesignSystemDemo({
     () => getRouteState(routeKey ? routeKey.split("/") : []),
     [routeKey]
   )
-  const [activeComponentId, setActiveComponentId] =
-    React.useState<ComponentId>(routedState.componentId)
-  const [activeSection, setActiveSection] =
-    React.useState<DesignNavSection>(routedState.section)
+  const [activeComponentId, setActiveComponentId] = React.useState<ComponentId>(
+    routedState.componentId
+  )
+  const [activeSection, setActiveSection] = React.useState<DesignNavSection>(
+    routedState.section
+  )
   const [componentSearch, setComponentSearch] = React.useState("")
   const [textVariant, setTextVariant] = React.useState<TextVariant>("title")
   const [textTone, setTextTone] = React.useState<TextTone>("primary")
@@ -979,13 +1247,13 @@ export function DesignSystemDemo({
     React.useState<PageHeaderAlign>("start")
   const [pillVariant, setPillVariant] = React.useState<PillVariant>("chip")
   const [pillSize, setPillSize] = React.useState<PillSize>("md")
-  const [pillValue, setPillValue] =
-    React.useState<"all" | "selling" | "buying" | "events">("all")
+  const [pillValue, setPillValue] = React.useState<
+    "all" | "selling" | "buying" | "events"
+  >("all")
   const [bannerTone, setBannerTone] = React.useState<BannerTone>("warning")
   const [bannerSize, setBannerSize] = React.useState<BannerSize>("md")
-  const [listDensity, setListDensity] =
-    React.useState<ListDensity>("regular")
-  const [metricSize, setMetricSize] = React.useState<MetricSize>("md")
+  const [listDensity, setListDensity] = React.useState<ListDensity>("regular")
+  const [valueCardSize, setValueCardSize] = React.useState<ValueCardSize>("md")
   const [animatedNumberSample, setAnimatedNumberSample] =
     React.useState<AnimatedNumberSample>("88,888")
   const [actionGridColumn, setActionGridColumn] =
@@ -996,12 +1264,9 @@ export function DesignSystemDemo({
   const [chatSize, setChatSize] = React.useState<ChatSize>("md")
   const [messageInputSize, setMessageInputSize] =
     React.useState<MessageInputSize>("md")
-  const [bottomTabValue, setBottomTabValue] =
-    React.useState<"home" | "community" | "map" | "chats" | "profile">(
-      "chats"
-    )
-  const [examplePage, setExamplePage] =
-    React.useState<ExamplePage>(routedState.examplePage)
+  const [examplePage, setExamplePage] = React.useState<ExamplePage>(
+    routedState.examplePage
+  )
   const [buttonVariant, setButtonVariant] =
     React.useState<ButtonVariant>("default")
   const [buttonSize, setButtonSize] = React.useState<ButtonSize>("default")
@@ -1010,8 +1275,9 @@ export function DesignSystemDemo({
     React.useState<(typeof iconSizes)[number]>("md")
   const [segmentedSize, setSegmentedSize] =
     React.useState<(typeof segmentedSizes)[number]>("md")
-  const [segmentValue, setSegmentValue] =
-    React.useState<"first" | "second" | "third">("first")
+  const [segmentValue, setSegmentValue] = React.useState<
+    "first" | "second" | "third"
+  >("first")
   const [switchSize, setSwitchSize] =
     React.useState<(typeof switchSizes)[number]>("md")
   const [switchChecked, setSwitchChecked] = React.useState(true)
@@ -1142,7 +1408,6 @@ export function DesignSystemDemo({
                       badgeTone={badgeTone}
                       bannerSize={bannerSize}
                       bannerTone={bannerTone}
-                      bottomTabValue={bottomTabValue}
                       buttonDisabled={buttonDisabled}
                       buttonSize={buttonSize}
                       buttonVariant={buttonVariant}
@@ -1161,7 +1426,7 @@ export function DesignSystemDemo({
                       layoutAlign={layoutAlign}
                       layoutGap={layoutGap}
                       messageInputSize={messageInputSize}
-                      metricSize={metricSize}
+                      valueCardSize={valueCardSize}
                       onOpenBottomSheet={() => setIsBottomSheetOpen(true)}
                       pageHeaderAlign={pageHeaderAlign}
                       pageHeaderSize={pageHeaderSize}
@@ -1171,7 +1436,6 @@ export function DesignSystemDemo({
                       segmentValue={segmentValue}
                       segmentedSize={segmentedSize}
                       selectedOptions={selectedOptions}
-                      setBottomTabValue={setBottomTabValue}
                       setPillValue={setPillValue}
                       setSegmentValue={setSegmentValue}
                       surfacePadding={surfacePadding}
@@ -1223,7 +1487,7 @@ export function DesignSystemDemo({
             layoutAlign={layoutAlign}
             layoutGap={layoutGap}
             messageInputSize={messageInputSize}
-            metricSize={metricSize}
+            valueCardSize={valueCardSize}
             onNavigateComponent={navigateToComponent}
             onSelectExamplePage={navigateToExamplePage}
             pillSize={pillSize}
@@ -1260,7 +1524,7 @@ export function DesignSystemDemo({
             setLayoutAlign={setLayoutAlign}
             setLayoutGap={setLayoutGap}
             setMessageInputSize={setMessageInputSize}
-            setMetricSize={setMetricSize}
+            setValueCardSize={setValueCardSize}
             setPageHeaderAlign={setPageHeaderAlign}
             setPageHeaderSize={setPageHeaderSize}
             setPillSize={setPillSize}
@@ -1324,7 +1588,9 @@ function TopBar({ activeComponent }: { activeComponent: ComponentItem }) {
           <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
             Toda Mobile UI
           </p>
-          <h1 className="truncate text-lg font-semibold">{activeComponent.title}</h1>
+          <h1 className="truncate text-lg font-semibold">
+            {activeComponent.title}
+          </h1>
         </div>
         <StatusBadge status={activeComponent.status} />
       </div>
@@ -1417,7 +1683,7 @@ function ComponentSidebar({
                 key={section.id}
                 type="button"
                 className={cn(
-                  "relative min-h-10 rounded-[14px] px-3 text-left text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
+                  "relative min-h-10 rounded-[14px] px-3 text-left text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
                   selected
                     ? "text-foreground"
                     : "text-foreground/46 hover:text-foreground/72"
@@ -1449,7 +1715,7 @@ function ComponentSidebar({
         </label>
         <input
           id="design-system-component-search"
-          className="h-11 w-full rounded-full border border-black/[0.06] bg-white/72 px-4 text-sm font-medium text-foreground outline-none transition-shadow placeholder:text-foreground/32 focus:ring-2 focus:ring-[var(--ds-accent)]/25"
+          className="h-11 w-full rounded-full border border-black/[0.06] bg-white/72 px-4 text-sm font-medium text-foreground transition-shadow outline-none placeholder:text-foreground/32 focus:ring-2 focus:ring-[var(--ds-accent)]/25"
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder={`${activeSectionLabel} 검색`}
           type="search"
@@ -1513,11 +1779,11 @@ function ComponentSidebar({
                 key={group}
                 className="min-w-0 border-t border-black/[0.06] pt-4 first:border-t-0 first:pt-0"
               >
-              <p className="mb-1 px-2 text-[0.68rem] font-semibold tracking-normal text-foreground/38 uppercase">
-                {componentCategoryLabels[group]}
-              </p>
-              <div className="space-y-1">
-                {items.map((item) => {
+                <p className="mb-1 px-2 text-[0.68rem] font-semibold tracking-normal text-foreground/38 uppercase">
+                  {componentCategoryLabels[group]}
+                </p>
+                <div className="space-y-1">
+                  {items.map((item) => {
                     const selected = activeComponentId === item.id
 
                     return (
@@ -1556,7 +1822,7 @@ function ComponentSidebar({
                       </button>
                     )
                   })}
-              </div>
+                </div>
               </div>
             ))}
           </div>
@@ -1585,7 +1851,6 @@ function PreviewStage(props: {
   badgeTone: BadgeTone
   bannerSize: BannerSize
   bannerTone: BannerTone
-  bottomTabValue: "home" | "community" | "map" | "chats" | "profile"
   buttonDisabled: boolean
   buttonSize: ButtonSize
   buttonVariant: ButtonVariant
@@ -1604,7 +1869,7 @@ function PreviewStage(props: {
   layoutAlign: Align
   layoutGap: Gap
   messageInputSize: MessageInputSize
-  metricSize: MetricSize
+  valueCardSize: ValueCardSize
   onOpenBottomSheet: () => void
   pageHeaderAlign: PageHeaderAlign
   pageHeaderSize: PageHeaderSize
@@ -1614,9 +1879,6 @@ function PreviewStage(props: {
   segmentValue: "first" | "second" | "third"
   segmentedSize: "sm" | "md" | "lg"
   selectedOptions: Record<"alpha" | "beta" | "gamma", boolean>
-  setBottomTabValue: (
-    value: "home" | "community" | "map" | "chats" | "profile"
-  ) => void
   setPillValue: (value: "all" | "selling" | "buying" | "events") => void
   setSegmentValue: (value: "first" | "second" | "third") => void
   setSwitchChecked: (checked: boolean) => void
@@ -1662,33 +1924,32 @@ function PreviewStage(props: {
               transition={detailTransition}
             >
               <Stack gap="xl">
-              <div>
-                <Text variant="caption" tone="muted">
-                  2026.04.26
-                </Text>
-                <Text
-                  align={props.textAlign}
-                  tone={props.textTone}
-                  variant={props.textVariant}
-                  className="mt-2"
-                >
-                  오늘의 화면은 너무 많은 설명 없이도 읽혀야 합니다
-                </Text>
-              </div>
-              <Stack gap="md">
-                {["섹션 제목은 20px 안팎으로 단단하게", "본문은 15px 전후와 24px line-height", "캡션은 흐리지만 터치 영역은 줄이지 않기"].map(
-                  (label) => (
+                <div>
+                  <Text variant="caption" tone="muted">
+                    2026.04.26
+                  </Text>
+                  <Text
+                    align={props.textAlign}
+                    tone={props.textTone}
+                    variant={props.textVariant}
+                    className="mt-2"
+                  >
+                    오늘의 화면은 너무 많은 설명 없이도 읽혀야 합니다
+                  </Text>
+                </div>
+                <Stack gap="md">
+                  {[
+                    "섹션 제목은 20px 안팎으로 단단하게",
+                    "본문은 15px 전후와 24px line-height",
+                    "캡션은 흐리지만 터치 영역은 줄이지 않기",
+                  ].map((label) => (
                     <ListRow key={label} title={label} />
-                  )
-                )}
-              </Stack>
-              <Text
-                variant="caption"
-                tone="muted"
-              >
-                iOS 계열 화면에서는 글자 크기보다 줄 간격과 그룹 간 여백이
-                먼저 안정감을 만듭니다.
-              </Text>
+                  ))}
+                </Stack>
+                <Text variant="caption" tone="muted">
+                  iOS 계열 화면에서는 글자 크기보다 줄 간격과 그룹 간 여백이
+                  먼저 안정감을 만듭니다.
+                </Text>
               </Stack>
             </motion.div>
           </PhoneSection>
@@ -1711,7 +1972,11 @@ function PreviewStage(props: {
           <PhoneSection title="Color" description="표면과 의미 색상 토큰">
             <Grid columns="two" gap="sm" className="mt-8">
               {colorItems.map((item) => (
-                <TokenSwatch key={item.token} label={item.name} token={item.token} />
+                <TokenSwatch
+                  key={item.token}
+                  label={item.name}
+                  token={item.token}
+                />
               ))}
             </Grid>
           </PhoneSection>
@@ -1739,15 +2004,17 @@ function PreviewStage(props: {
               justify={props.clusterJustify}
               className="mt-8"
             >
-              {["Neutral", "Accent", "Success", "Danger"].map((label, index) => (
-                <Badge
-                  key={label}
-                  tone={badgeTones[index] ?? "neutral"}
-                  size={props.badgeSize}
-                >
-                  {label}
-                </Badge>
-              ))}
+              {["Neutral", "Accent", "Success", "Danger"].map(
+                (label, index) => (
+                  <Badge
+                    key={label}
+                    tone={badgeTones[index] ?? "neutral"}
+                    size={props.badgeSize}
+                  >
+                    {label}
+                  </Badge>
+                )
+              )}
             </Cluster>
           </PhoneSection>
         ) : null}
@@ -1756,7 +2023,11 @@ function PreviewStage(props: {
           <PhoneSection title="Grid" description="모바일 그리드 프리미티브">
             <Grid columns={props.columns} gap={props.gridGap} className="mt-8">
               {Array.from({ length: 6 }, (_, index) => (
-                <MetricTile key={index} label={`Item ${index + 1}`} value={`${index + 2}`} />
+                <GridPreviewTile
+                  key={index}
+                  label={`Item ${index + 1}`}
+                  value={`${index + 2}`}
+                />
               ))}
             </Grid>
           </PhoneSection>
@@ -1788,13 +2059,19 @@ function PreviewStage(props: {
                   </Badge>
                 }
               />
-              <ListRow title="보조 정보" description="배지는 본문을 대신하지 않습니다." />
+              <ListRow
+                title="보조 정보"
+                description="배지는 본문을 대신하지 않습니다."
+              />
             </Stack>
           </PhoneSection>
         ) : null}
 
         {activeComponentId === "avatar" ? (
-          <PhoneSection title="Avatar" description="프로필, 아이콘, 썸네일 자리">
+          <PhoneSection
+            title="Avatar"
+            description="프로필, 아이콘, 썸네일 자리"
+          >
             <Stack gap="xl" className="mt-8">
               <div className="flex min-h-28 items-center justify-center rounded-[28px] bg-white/62">
                 <Avatar
@@ -1880,8 +2157,7 @@ function PreviewStage(props: {
               title="토스증권"
               meta={
                 <span>
-                  나스닥 100 선물{" "}
-                  <AnimatedNumber value="27,435.00" />{" "}
+                  나스닥 100 선물 <AnimatedNumber value="27,435.00" />{" "}
                   <span className="text-[var(--ds-danger)]">+1.8%</span>
                 </span>
               }
@@ -1926,25 +2202,6 @@ function PreviewStage(props: {
           </PhoneSection>
         ) : null}
 
-        {activeComponentId === "bottom-tab-bar" ? (
-          <div className="-mx-5 -mt-5 flex min-h-full flex-col">
-            <div className="flex-1 px-5 pt-5">
-              <PhoneSection title="BottomTabBar" description="고정 하단 목적지">
-                <Stack gap="md" className="mt-8">
-                  <ListItem title="현재 화면" subtitle="하단 탭 선택이 현재 위치를 알려줍니다." />
-                  <ListItem title="알림 배지" subtitle="카운트와 dot 상태를 동시에 지원합니다." />
-                </Stack>
-              </PhoneSection>
-            </div>
-            <BottomTabBar
-              ariaLabel="하단 탭"
-              items={bottomNavigationItems}
-              value={props.bottomTabValue}
-              onValueChange={props.setBottomTabValue}
-            />
-          </div>
-        ) : null}
-
         {activeComponentId === "notice-banner" ? (
           <PhoneSection title="NoticeBanner" description="공지와 권한 요청">
             <Stack gap="lg" className="mt-8">
@@ -1953,22 +2210,36 @@ function PreviewStage(props: {
                 tone={props.bannerTone}
                 title="중요한 정보를 놓치지 않도록 알림을 켜보세요."
                 action="설정 보기"
-                leading={<Avatar shape="rounded" tone="accent">N</Avatar>}
+                leading={
+                  <Avatar shape="rounded" tone="accent">
+                    N
+                  </Avatar>
+                }
                 trailing={<span aria-hidden="true">›</span>}
               />
-              <ListItem title="아래 콘텐츠" subtitle="배너는 화면 흐름 안에서 한 덩어리로 읽힙니다." />
+              <ListItem
+                title="아래 콘텐츠"
+                subtitle="배너는 화면 흐름 안에서 한 덩어리로 읽힙니다."
+              />
             </Stack>
           </PhoneSection>
         ) : null}
 
         {activeComponentId === "list-item" ? (
-          <PhoneSection title="ListItem" description="메뉴, 채팅, 피드의 기본 행">
+          <PhoneSection
+            title="ListItem"
+            description="메뉴, 채팅, 피드의 기본 행"
+          >
             <Stack gap="none" className="mt-8">
               <ListItem
                 density={props.listDensity}
                 title="주식"
                 subtitle="조건주문 · 지정가 알림"
-                leading={<Avatar shape="rounded" tone="accent">A</Avatar>}
+                leading={
+                  <Avatar shape="rounded" tone="accent">
+                    A
+                  </Avatar>
+                }
                 meta="7개"
                 trailing={<span className="text-foreground/30">›</span>}
               />
@@ -1982,23 +2253,50 @@ function PreviewStage(props: {
                 density={props.listDensity}
                 title="알림"
                 subtitle="읽지 않은 항목이 있습니다."
-                leading={<Avatar shape="rounded" tone="danger">B</Avatar>}
+                leading={
+                  <Avatar shape="rounded" tone="danger">
+                    B
+                  </Avatar>
+                }
                 trailing={<Badge tone="accent">10+</Badge>}
               />
             </Stack>
           </PhoneSection>
         ) : null}
 
-        {activeComponentId === "metric-card" ? (
-          <PhoneSection title="MetricCard" description="짧은 수치 정보">
+        {activeComponentId === "value-card" ? (
+          <PhoneSection
+            title="ValueCard"
+            description="값을 담는 중립 슬롯 카드"
+          >
             <Grid columns="two" gap="md" className="mt-8">
-              <MetricCard size={props.metricSize} label="원화" value={<><AnimatedNumber value={14} />원</>} />
-              <MetricCard size={props.metricSize} label="달러" value={<><span>$</span><AnimatedNumber value="2,818" /></>} />
-              <MetricCard
-                size={props.metricSize}
-                label="내 투자"
-                value={<><span>$</span><AnimatedNumber value="8,663" /></>}
-                description="-3.4%"
+              <ValueCard
+                size={props.valueCardSize}
+                label="Label"
+                value="Value"
+                description="Supporting text"
+              />
+              <ValueCard
+                size={props.valueCardSize}
+                label="State"
+                value="Active"
+                trailing={<Badge tone="accent">Badge</Badge>}
+              />
+              <ValueCard
+                size={props.valueCardSize}
+                label="Count"
+                value={
+                  <>
+                    <AnimatedNumber value={24} />
+                    <span className="ml-1 text-foreground/48">items</span>
+                  </>
+                }
+                leading={
+                  <Avatar size="sm" shape="rounded" tone="accent">
+                    V
+                  </Avatar>
+                }
+                description="Optional leading and trailing slots"
                 className="col-span-2"
               />
             </Grid>
@@ -2012,18 +2310,26 @@ function PreviewStage(props: {
                 <Text variant="caption" tone="muted">
                   샘플 숫자
                 </Text>
-                <p className="mt-2 text-[2rem] font-semibold leading-9 tabular-nums text-foreground">
+                <p className="mt-2 text-[2rem] leading-9 font-semibold text-foreground tabular-nums">
                   <AnimatedNumber value={props.animatedNumberSample} />
                 </p>
               </div>
               <Stack gap="none">
                 <ListItem
                   title="잔액"
-                  trailing={<Text variant="label"><AnimatedNumber value="5,987.05" /></Text>}
+                  trailing={
+                    <Text variant="label">
+                      <AnimatedNumber value="5,987.05" />
+                    </Text>
+                  }
                 />
                 <ListItem
                   title="읽지 않은 메시지"
-                  trailing={<Badge tone="accent"><AnimatedNumber value="43" /></Badge>}
+                  trailing={
+                    <Badge tone="accent">
+                      <AnimatedNumber value="43" />
+                    </Badge>
+                  }
                 />
               </Stack>
             </Stack>
@@ -2048,15 +2354,17 @@ function PreviewStage(props: {
                 <ListRow title="동기화" description="안정적" />
               </Stack>
               <Stack gap="sm">
-                <Text tone="secondary">모바일 CTA는 화면 하단에서 명확해야 합니다.</Text>
-              <Button
-                disabled={props.buttonDisabled}
-                size={props.buttonSize}
-                type="button"
-                variant={props.buttonVariant}
-              >
-                주요 행동
-              </Button>
+                <Text tone="secondary">
+                  모바일 CTA는 화면 하단에서 명확해야 합니다.
+                </Text>
+                <Button
+                  disabled={props.buttonDisabled}
+                  size={props.buttonSize}
+                  type="button"
+                  variant={props.buttonVariant}
+                >
+                  주요 행동
+                </Button>
               </Stack>
             </div>
           </PhoneSection>
@@ -2075,8 +2383,14 @@ function PreviewStage(props: {
                 </IconButton>
               </Cluster>
               <Stack gap="md" className="mt-10">
-                <ListRow title="목록 항목" description="아이콘 버튼은 보조 행동에 둡니다." />
-                <ListRow title="상세 설정" description="작아도 터치 영역은 유지합니다." />
+                <ListRow
+                  title="목록 항목"
+                  description="아이콘 버튼은 보조 행동에 둡니다."
+                />
+                <ListRow
+                  title="상세 설정"
+                  description="작아도 터치 영역은 유지합니다."
+                />
               </Stack>
             </div>
           </PhoneSection>
@@ -2092,8 +2406,14 @@ function PreviewStage(props: {
                 value={props.segmentValue}
                 onValueChange={props.setSegmentValue}
               />
-              <ListRow title="첫 번째 화면" description="선택된 세그먼트에 따라 내용이 바뀝니다." />
-              <ListRow title="두 번째 화면" description="같은 깊이의 옵션만 세그먼트로 묶습니다." />
+              <ListRow
+                title="첫 번째 화면"
+                description="선택된 세그먼트에 따라 내용이 바뀝니다."
+              />
+              <ListRow
+                title="두 번째 화면"
+                description="같은 깊이의 옵션만 세그먼트로 묶습니다."
+              />
             </Stack>
           </PhoneSection>
         ) : null}
@@ -2113,17 +2433,29 @@ function PreviewStage(props: {
                   />
                 }
               />
-              <ListRow title="설명 텍스트" description="스위치는 저장 버튼 없이 상태가 바뀝니다." />
+              <ListRow
+                title="설명 텍스트"
+                description="스위치는 저장 버튼 없이 상태가 바뀝니다."
+              />
             </Stack>
           </PhoneSection>
         ) : null}
 
         {activeComponentId === "floating-action-button" ? (
           <div className="relative min-h-full">
-            <PhoneSection title="FloatingActionButton" description="화면 위 주요 행동">
+            <PhoneSection
+              title="FloatingActionButton"
+              description="화면 위 주요 행동"
+            >
               <Stack gap="md" className="mt-8">
-                <ListItem title="피드 콘텐츠" subtitle="기본 콘텐츠 위에 CTA가 떠 있습니다." />
-                <ListItem title="다음 콘텐츠" subtitle="주요 행동은 엄지 영역에 둡니다." />
+                <ListItem
+                  title="피드 콘텐츠"
+                  subtitle="기본 콘텐츠 위에 CTA가 떠 있습니다."
+                />
+                <ListItem
+                  title="다음 콘텐츠"
+                  subtitle="주요 행동은 엄지 영역에 둡니다."
+                />
               </Stack>
             </PhoneSection>
             <FloatingActionButton
@@ -2143,7 +2475,11 @@ function PreviewStage(props: {
               <ChatBubble side="incoming" size={props.chatSize} meta="10:30">
                 일정 보고 놀러오세요
               </ChatBubble>
-              <ChatBubble side={props.chatSide} size={props.chatSize} meta="10:32">
+              <ChatBubble
+                side={props.chatSide}
+                size={props.chatSize}
+                meta="10:32"
+              >
                 이번 주는 어렵고 다음 주에 볼게요
               </ChatBubble>
               <ChatBubble side="incoming" size={props.chatSize} meta="10:34">
@@ -2188,7 +2524,10 @@ function PreviewStage(props: {
                   표면 variant는 깊이와 재질만 표현합니다.
                 </Text>
               </Surface>
-              <ListRow title="기본 캔버스" description="일반 콘텐츠는 배경 위에 직접 놓습니다." />
+              <ListRow
+                title="기본 캔버스"
+                description="일반 콘텐츠는 배경 위에 직접 놓습니다."
+              />
             </Stack>
           </PhoneSection>
         ) : null}
@@ -2197,14 +2536,22 @@ function PreviewStage(props: {
           <PhoneSection title="BottomSheet" description="임시 하단 표면">
             <div className="mt-8 flex min-h-[37rem] flex-col justify-between">
               <Stack gap="md">
-                <ListRow title="현재 화면" description="시트가 열려도 맥락을 잃지 않습니다." />
-                <ListRow title="임시 작업" description="짧은 확인과 선택에 사용" />
+                <ListRow
+                  title="현재 화면"
+                  description="시트가 열려도 맥락을 잃지 않습니다."
+                />
+                <ListRow
+                  title="임시 작업"
+                  description="짧은 확인과 선택에 사용"
+                />
               </Stack>
               <Stack gap="sm">
-                <Text tone="secondary">프리뷰 안의 버튼으로 실제 시트를 열 수 있습니다.</Text>
-              <Button type="button" onClick={props.onOpenBottomSheet}>
-                시트 열기
-              </Button>
+                <Text tone="secondary">
+                  프리뷰 안의 버튼으로 실제 시트를 열 수 있습니다.
+                </Text>
+                <Button type="button" onClick={props.onOpenBottomSheet}>
+                  시트 열기
+                </Button>
               </Stack>
             </div>
           </PhoneSection>
@@ -2221,7 +2568,10 @@ function PreviewStage(props: {
         ) : null}
 
         {activeComponentId === "menu-checkbox" ? (
-          <PhoneSection title="MenuCheckboxGroup" description="메뉴형 다중 선택">
+          <PhoneSection
+            title="MenuCheckboxGroup"
+            description="메뉴형 다중 선택"
+          >
             <div className="mt-8 flex items-start justify-between">
               <div>
                 <Text variant="label">옵션 필터</Text>
@@ -2293,7 +2643,7 @@ function ControlsPanel(props: {
   layoutAlign: Align
   layoutGap: Gap
   messageInputSize: MessageInputSize
-  metricSize: MetricSize
+  valueCardSize: ValueCardSize
   onNavigateComponent: (componentId: ComponentId) => void
   onSelectExamplePage: (examplePage: ExamplePage) => void
   pageHeaderAlign: PageHeaderAlign
@@ -2332,7 +2682,7 @@ function ControlsPanel(props: {
   setLayoutAlign: (value: Align) => void
   setLayoutGap: (value: Gap) => void
   setMessageInputSize: (value: MessageInputSize) => void
-  setMetricSize: (value: MetricSize) => void
+  setValueCardSize: (value: ValueCardSize) => void
   setPageHeaderAlign: (value: PageHeaderAlign) => void
   setPageHeaderSize: (value: PageHeaderSize) => void
   setPillSize: (value: PillSize) => void
@@ -2370,168 +2720,397 @@ function ControlsPanel(props: {
       <ControlGroup>
         {props.activeComponentId === "typography" ? (
           <>
-            <ControlSegment label="Variant" options={textVariants} value={props.textVariant} onChange={props.setTextVariant} />
-            <ControlSegment label="Tone" options={textTones} value={props.textTone} onChange={props.setTextTone} />
-            <ControlSegment label="Align" options={textAligns} value={props.textAlign} onChange={props.setTextAlign} />
+            <ControlSegment
+              label="Variant"
+              options={textVariants}
+              value={props.textVariant}
+              onChange={props.setTextVariant}
+            />
+            <ControlSegment
+              label="Tone"
+              options={textTones}
+              value={props.textTone}
+              onChange={props.setTextTone}
+            />
+            <ControlSegment
+              label="Align"
+              options={textAligns}
+              value={props.textAlign}
+              onChange={props.setTextAlign}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "stack" ? (
           <>
-            <ControlSegment label="Gap" options={gaps} value={props.layoutGap} onChange={props.setLayoutGap} />
-            <ControlSegment label="Align" options={aligns} value={props.layoutAlign} onChange={props.setLayoutAlign} />
+            <ControlSegment
+              label="Gap"
+              options={gaps}
+              value={props.layoutGap}
+              onChange={props.setLayoutGap}
+            />
+            <ControlSegment
+              label="Align"
+              options={aligns}
+              value={props.layoutAlign}
+              onChange={props.setLayoutAlign}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "cluster" ? (
           <>
-            <ControlSegment label="Gap" options={gaps} value={props.layoutGap} onChange={props.setLayoutGap} />
-            <ControlSegment label="Align" options={aligns} value={props.layoutAlign} onChange={props.setLayoutAlign} />
-            <ControlSegment label="Justify" options={justifies} value={props.clusterJustify} onChange={props.setClusterJustify} />
+            <ControlSegment
+              label="Gap"
+              options={gaps}
+              value={props.layoutGap}
+              onChange={props.setLayoutGap}
+            />
+            <ControlSegment
+              label="Align"
+              options={aligns}
+              value={props.layoutAlign}
+              onChange={props.setLayoutAlign}
+            />
+            <ControlSegment
+              label="Justify"
+              options={justifies}
+              value={props.clusterJustify}
+              onChange={props.setClusterJustify}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "grid" ? (
           <>
-            <ControlSegment label="Columns" options={gridColumns} value={props.columns} onChange={props.setColumns} />
-            <ControlSegment label="Gap" options={gridGaps} value={props.gridGap} onChange={props.setGridGap} />
+            <ControlSegment
+              label="Columns"
+              options={gridColumns}
+              value={props.columns}
+              onChange={props.setColumns}
+            />
+            <ControlSegment
+              label="Gap"
+              options={gridGaps}
+              value={props.gridGap}
+              onChange={props.setGridGap}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "divider" ? (
-          <ControlSegment label="Inset" options={dividerInsets} value={props.dividerInset} onChange={props.setDividerInset} />
+          <ControlSegment
+            label="Inset"
+            options={dividerInsets}
+            value={props.dividerInset}
+            onChange={props.setDividerInset}
+          />
         ) : null}
 
         {props.activeComponentId === "badge" ? (
           <>
-            <ControlSegment label="Tone" options={badgeTones} value={props.badgeTone} onChange={props.setBadgeTone} />
-            <ControlSegment label="Size" options={badgeSizes} value={props.badgeSize} onChange={props.setBadgeSize} />
+            <ControlSegment
+              label="Tone"
+              options={badgeTones}
+              value={props.badgeTone}
+              onChange={props.setBadgeTone}
+            />
+            <ControlSegment
+              label="Size"
+              options={badgeSizes}
+              value={props.badgeSize}
+              onChange={props.setBadgeSize}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "avatar" ? (
           <>
-            <ControlSegment label="Size" options={avatarSizes} value={props.avatarSize} onChange={props.setAvatarSize} />
-            <ControlSegment label="Shape" options={avatarShapes} value={props.avatarShape} onChange={props.setAvatarShape} />
-            <ControlSegment label="Tone" options={avatarTones} value={props.avatarTone} onChange={props.setAvatarTone} />
+            <ControlSegment
+              label="Size"
+              options={avatarSizes}
+              value={props.avatarSize}
+              onChange={props.setAvatarSize}
+            />
+            <ControlSegment
+              label="Shape"
+              options={avatarShapes}
+              value={props.avatarShape}
+              onChange={props.setAvatarShape}
+            />
+            <ControlSegment
+              label="Tone"
+              options={avatarTones}
+              value={props.avatarTone}
+              onChange={props.setAvatarTone}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "app-bar" ? (
           <>
-            <ControlSegment label="Size" options={appBarSizes} value={props.appBarSize} onChange={props.setAppBarSize} />
-            <ControlSegment label="Align" options={appBarAligns} value={props.appBarAlign} onChange={props.setAppBarAlign} />
+            <ControlSegment
+              label="Size"
+              options={appBarSizes}
+              value={props.appBarSize}
+              onChange={props.setAppBarSize}
+            />
+            <ControlSegment
+              label="Align"
+              options={appBarAligns}
+              value={props.appBarAlign}
+              onChange={props.setAppBarAlign}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "page-header" ? (
           <>
-            <ControlSegment label="Size" options={pageHeaderSizes} value={props.pageHeaderSize} onChange={props.setPageHeaderSize} />
-            <ControlSegment label="Align" options={pageHeaderAligns} value={props.pageHeaderAlign} onChange={props.setPageHeaderAlign} />
+            <ControlSegment
+              label="Size"
+              options={pageHeaderSizes}
+              value={props.pageHeaderSize}
+              onChange={props.setPageHeaderSize}
+            />
+            <ControlSegment
+              label="Align"
+              options={pageHeaderAligns}
+              value={props.pageHeaderAlign}
+              onChange={props.setPageHeaderAlign}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "pill-tabs" ? (
           <>
-            <ControlSegment label="Variant" options={pillVariants} value={props.pillVariant} onChange={props.setPillVariant} />
-            <ControlSegment label="Size" options={pillSizes} value={props.pillSize} onChange={props.setPillSize} />
+            <ControlSegment
+              label="Variant"
+              options={pillVariants}
+              value={props.pillVariant}
+              onChange={props.setPillVariant}
+            />
+            <ControlSegment
+              label="Size"
+              options={pillSizes}
+              value={props.pillSize}
+              onChange={props.setPillSize}
+            />
           </>
-        ) : null}
-
-        {props.activeComponentId === "bottom-tab-bar" ? (
-          <p className="text-sm leading-6 text-foreground/58">
-            프리뷰의 하단 탭을 직접 눌러 선택 상태와 배지를 확인합니다.
-          </p>
         ) : null}
 
         {props.activeComponentId === "notice-banner" ? (
           <>
-            <ControlSegment label="Tone" options={bannerTones} value={props.bannerTone} onChange={props.setBannerTone} />
-            <ControlSegment label="Size" options={bannerSizes} value={props.bannerSize} onChange={props.setBannerSize} />
+            <ControlSegment
+              label="Tone"
+              options={bannerTones}
+              value={props.bannerTone}
+              onChange={props.setBannerTone}
+            />
+            <ControlSegment
+              label="Size"
+              options={bannerSizes}
+              value={props.bannerSize}
+              onChange={props.setBannerSize}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "list-item" ? (
-          <ControlSegment label="Density" options={listDensities} value={props.listDensity} onChange={props.setListDensity} />
+          <ControlSegment
+            label="Density"
+            options={listDensities}
+            value={props.listDensity}
+            onChange={props.setListDensity}
+          />
         ) : null}
 
-        {props.activeComponentId === "metric-card" ? (
-          <ControlSegment label="Size" options={metricSizes} value={props.metricSize} onChange={props.setMetricSize} />
+        {props.activeComponentId === "value-card" ? (
+          <ControlSegment
+            label="Size"
+            options={valueCardSizes}
+            value={props.valueCardSize}
+            onChange={props.setValueCardSize}
+          />
         ) : null}
 
         {props.activeComponentId === "animated-number" ? (
-          <ControlSegment label="Value" options={animatedNumberSamples} value={props.animatedNumberSample} onChange={props.setAnimatedNumberSample} />
+          <ControlSegment
+            label="Value"
+            options={animatedNumberSamples}
+            value={props.animatedNumberSample}
+            onChange={props.setAnimatedNumberSample}
+          />
         ) : null}
 
         {props.activeComponentId === "action-grid" ? (
-          <ControlSegment label="Columns" options={actionGridColumns} value={props.actionGridColumn} onChange={props.setActionGridColumn} />
+          <ControlSegment
+            label="Columns"
+            options={actionGridColumns}
+            value={props.actionGridColumn}
+            onChange={props.setActionGridColumn}
+          />
         ) : null}
 
         {props.activeComponentId === "button" ? (
           <>
-            <ControlSegment label="Variant" options={buttonVariants} value={props.buttonVariant} onChange={props.setButtonVariant} />
-            <ControlSegment label="Size" options={buttonSizes} value={props.buttonSize} onChange={props.setButtonSize} />
-            <ToggleControl checked={props.buttonDisabled} label="Disabled" onChange={props.setButtonDisabled} />
+            <ControlSegment
+              label="Variant"
+              options={buttonVariants}
+              value={props.buttonVariant}
+              onChange={props.setButtonVariant}
+            />
+            <ControlSegment
+              label="Size"
+              options={buttonSizes}
+              value={props.buttonSize}
+              onChange={props.setButtonSize}
+            />
+            <ToggleControl
+              checked={props.buttonDisabled}
+              label="Disabled"
+              onChange={props.setButtonDisabled}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "icon-button" ? (
-          <ControlSegment label="Size" options={iconSizes} value={props.iconButtonSize} onChange={props.setIconButtonSize} />
+          <ControlSegment
+            label="Size"
+            options={iconSizes}
+            value={props.iconButtonSize}
+            onChange={props.setIconButtonSize}
+          />
         ) : null}
 
         {props.activeComponentId === "segmented-control" ? (
-          <ControlSegment label="Size" options={segmentedSizes} value={props.segmentedSize} onChange={props.setSegmentedSize} />
+          <ControlSegment
+            label="Size"
+            options={segmentedSizes}
+            value={props.segmentedSize}
+            onChange={props.setSegmentedSize}
+          />
         ) : null}
 
         {props.activeComponentId === "switch-control" ? (
           <>
-            <ControlSegment label="Size" options={switchSizes} value={props.switchSize} onChange={props.setSwitchSize} />
-            <ToggleControl checked={props.switchChecked} label="Checked" onChange={props.setSwitchChecked} />
+            <ControlSegment
+              label="Size"
+              options={switchSizes}
+              value={props.switchSize}
+              onChange={props.setSwitchSize}
+            />
+            <ToggleControl
+              checked={props.switchChecked}
+              label="Checked"
+              onChange={props.setSwitchChecked}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "floating-action-button" ? (
           <>
-            <ControlSegment label="Size" options={fabSizes} value={props.fabSize} onChange={props.setFabSize} />
-            <ControlSegment label="Tone" options={fabTones} value={props.fabTone} onChange={props.setFabTone} />
+            <ControlSegment
+              label="Size"
+              options={fabSizes}
+              value={props.fabSize}
+              onChange={props.setFabSize}
+            />
+            <ControlSegment
+              label="Tone"
+              options={fabTones}
+              value={props.fabTone}
+              onChange={props.setFabTone}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "chat-bubble" ? (
           <>
-            <ControlSegment label="Side" options={chatSides} value={props.chatSide} onChange={props.setChatSide} />
-            <ControlSegment label="Size" options={chatSizes} value={props.chatSize} onChange={props.setChatSize} />
+            <ControlSegment
+              label="Side"
+              options={chatSides}
+              value={props.chatSide}
+              onChange={props.setChatSide}
+            />
+            <ControlSegment
+              label="Size"
+              options={chatSizes}
+              value={props.chatSize}
+              onChange={props.setChatSize}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "message-input" ? (
-          <ControlSegment label="Size" options={messageInputSizes} value={props.messageInputSize} onChange={props.setMessageInputSize} />
+          <ControlSegment
+            label="Size"
+            options={messageInputSizes}
+            value={props.messageInputSize}
+            onChange={props.setMessageInputSize}
+          />
         ) : null}
 
         {props.activeComponentId === "surface" ? (
           <>
-            <ControlSegment label="Surface" options={surfaceVariants} value={props.surfaceVariant} onChange={props.setSurfaceVariant} />
-            <ControlSegment label="Padding" options={surfacePaddings} value={props.surfacePadding} onChange={props.setSurfacePadding} />
+            <ControlSegment
+              label="Surface"
+              options={surfaceVariants}
+              value={props.surfaceVariant}
+              onChange={props.setSurfaceVariant}
+            />
+            <ControlSegment
+              label="Padding"
+              options={surfacePaddings}
+              value={props.surfacePadding}
+              onChange={props.setSurfacePadding}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "calendar-preview" ? (
           <>
-            <ControlSegment label="Density" options={calendarDensities} value={props.calendarDensity} onChange={props.setCalendarDensity} />
-            <ControlSegment label="Preview style" options={previewStyles} value={props.activePreviewStyle} onChange={props.setActivePreviewStyle} />
+            <ControlSegment
+              label="Density"
+              options={calendarDensities}
+              value={props.calendarDensity}
+              onChange={props.setCalendarDensity}
+            />
+            <ControlSegment
+              label="Preview style"
+              options={previewStyles}
+              value={props.activePreviewStyle}
+              onChange={props.setActivePreviewStyle}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "menu-checkbox" ? (
           <>
-            <ToggleControl checked={props.selectedOptions.alpha} label="Option A" onChange={() => props.toggleOption("alpha")} />
-            <ToggleControl checked={props.selectedOptions.beta} label="Option B" onChange={() => props.toggleOption("beta")} />
-            <ToggleControl checked={props.selectedOptions.gamma} label="Option C" onChange={() => props.toggleOption("gamma")} />
+            <ToggleControl
+              checked={props.selectedOptions.alpha}
+              label="Option A"
+              onChange={() => props.toggleOption("alpha")}
+            />
+            <ToggleControl
+              checked={props.selectedOptions.beta}
+              label="Option B"
+              onChange={() => props.toggleOption("beta")}
+            />
+            <ToggleControl
+              checked={props.selectedOptions.gamma}
+              label="Option C"
+              onChange={() => props.toggleOption("gamma")}
+            />
           </>
         ) : null}
 
         {props.activeComponentId === "three-stage-sheet" ? (
-          <ControlOptions label="Stage" options={sheetStages} value={props.activeStage} onChange={props.setActiveStage} />
+          <ControlOptions
+            label="Stage"
+            options={sheetStages}
+            value={props.activeStage}
+            onChange={props.setActiveStage}
+          />
         ) : null}
 
         {props.activeComponentId === "example-pages" ? (
@@ -2643,9 +3222,21 @@ const chatListRowsByFilter: Record<
   }>
 > = {
   all: [
-    { title: "사진을 찍고 글을 씁니다", subtitle: "새 메시지가 도착했습니다.", meta: "6d" },
-    { title: "2030 서울권 도서관", subtitle: "모임 공지가 올라왔어요.", badge: "10+" },
-    { title: "우솔배드민턴 클럽", subtitle: "새 일정이 공유됐습니다.", meta: "8:20" },
+    {
+      title: "사진을 찍고 글을 씁니다",
+      subtitle: "새 메시지가 도착했습니다.",
+      meta: "6d",
+    },
+    {
+      title: "2030 서울권 도서관",
+      subtitle: "모임 공지가 올라왔어요.",
+      badge: "10+",
+    },
+    {
+      title: "우솔배드민턴 클럽",
+      subtitle: "새 일정이 공유됐습니다.",
+      meta: "8:20",
+    },
     { title: "테토키", subtitle: "모임이 아니었어요", meta: "7:38" },
   ],
   selling: [
@@ -2659,8 +3250,16 @@ const chatListRowsByFilter: Record<
     { title: "동네 나눔", subtitle: "아직 받을 수 있나요?", meta: "1d" },
   ],
   events: [
-    { title: "동네 산책 이벤트", subtitle: "새 혜택이 열렸습니다.", badge: "2" },
-    { title: "모임 챌린지", subtitle: "이번 주 참여자가 늘었어요.", meta: "today" },
+    {
+      title: "동네 산책 이벤트",
+      subtitle: "새 혜택이 열렸습니다.",
+      badge: "2",
+    },
+    {
+      title: "모임 챌린지",
+      subtitle: "이번 주 참여자가 늘었어요.",
+      meta: "today",
+    },
     { title: "쿠폰 알림", subtitle: "오늘까지 사용할 수 있어요.", meta: "3h" },
   ],
 }
@@ -2670,24 +3269,84 @@ const communityRowsBySection: Record<
   Array<{ title: string; subtitle: string; meta: string; tag: string }>
 > = {
   life: [
-    { title: "양양홍천고속도로", subtitle: "에서 911한테 따였네요", meta: "서초1동 · 조회 348", tag: "취미" },
-    { title: "레전드 학생", subtitle: "이중약속에 파토까지 완벽엔딩", meta: "서초2동 · 조회 525", tag: "일반" },
-    { title: "괜히 샀다 멀미난다", subtitle: "하 ㅠㅠ 이걸 왜", meta: "서초1동 · 조회 3,498", tag: "생활/편의" },
+    {
+      title: "양양홍천고속도로",
+      subtitle: "에서 911한테 따였네요",
+      meta: "서초1동 · 조회 348",
+      tag: "취미",
+    },
+    {
+      title: "레전드 학생",
+      subtitle: "이중약속에 파토까지 완벽엔딩",
+      meta: "서초2동 · 조회 525",
+      tag: "일반",
+    },
+    {
+      title: "괜히 샀다 멀미난다",
+      subtitle: "하 ㅠㅠ 이걸 왜",
+      meta: "서초1동 · 조회 3,498",
+      tag: "생활/편의",
+    },
   ],
   club: [
-    { title: "아침 러닝 같이 하실 분", subtitle: "매주 화목 7시에 모여요", meta: "방배동 · 멤버 18", tag: "운동" },
-    { title: "사진 산책 모임", subtitle: "가볍게 찍고 커피 마셔요", meta: "서초동 · 멤버 42", tag: "취미" },
-    { title: "주말 보드게임", subtitle: "초보자도 편하게 오세요", meta: "잠원동 · 멤버 27", tag: "모임" },
+    {
+      title: "아침 러닝 같이 하실 분",
+      subtitle: "매주 화목 7시에 모여요",
+      meta: "방배동 · 멤버 18",
+      tag: "운동",
+    },
+    {
+      title: "사진 산책 모임",
+      subtitle: "가볍게 찍고 커피 마셔요",
+      meta: "서초동 · 멤버 42",
+      tag: "취미",
+    },
+    {
+      title: "주말 보드게임",
+      subtitle: "초보자도 편하게 오세요",
+      meta: "잠원동 · 멤버 27",
+      tag: "모임",
+    },
   ],
   cafe: [
-    { title: "조용한 작업 카페 추천", subtitle: "콘센트 자리 많은 곳 있을까요?", meta: "반포동 · 댓글 12", tag: "카페" },
-    { title: "디카페인 맛있는 곳", subtitle: "저녁에 가도 부담 없는 곳", meta: "서초1동 · 조회 221", tag: "질문" },
-    { title: "신상 베이커리 후기", subtitle: "소금빵은 꽤 괜찮았어요", meta: "양재동 · 조회 894", tag: "후기" },
+    {
+      title: "조용한 작업 카페 추천",
+      subtitle: "콘센트 자리 많은 곳 있을까요?",
+      meta: "반포동 · 댓글 12",
+      tag: "카페",
+    },
+    {
+      title: "디카페인 맛있는 곳",
+      subtitle: "저녁에 가도 부담 없는 곳",
+      meta: "서초1동 · 조회 221",
+      tag: "질문",
+    },
+    {
+      title: "신상 베이커리 후기",
+      subtitle: "소금빵은 꽤 괜찮았어요",
+      meta: "양재동 · 조회 894",
+      tag: "후기",
+    },
   ],
   apt: [
-    { title: "엘리베이터 점검 안내", subtitle: "내일 오전 10시부터래요", meta: "래미안 · 댓글 4", tag: "공지" },
-    { title: "분리수거장 위치 문의", subtitle: "처음 이사 와서 헷갈리네요", meta: "서초아파트 · 조회 76", tag: "생활" },
-    { title: "택배 보관함 오류", subtitle: "혹시 같은 문제 있으신가요?", meta: "반포자이 · 댓글 9", tag: "문의" },
+    {
+      title: "엘리베이터 점검 안내",
+      subtitle: "내일 오전 10시부터래요",
+      meta: "래미안 · 댓글 4",
+      tag: "공지",
+    },
+    {
+      title: "분리수거장 위치 문의",
+      subtitle: "처음 이사 와서 헷갈리네요",
+      meta: "서초아파트 · 조회 76",
+      tag: "생활",
+    },
+    {
+      title: "택배 보관함 오류",
+      subtitle: "혹시 같은 문제 있으신가요?",
+      meta: "반포자이 · 댓글 9",
+      tag: "문의",
+    },
   ],
 }
 
@@ -2712,6 +3371,27 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
     React.useState<CommunitySectionValue>("life")
   const [communityFilter, setCommunityFilter] =
     React.useState<CommunityFilterValue>("recommend")
+  const [calendarMode, setCalendarMode] =
+    React.useState<CalendarControlValue>("details")
+  const [calendarSelectedOptions, setCalendarSelectedOptions] = React.useState<
+    Record<CalendarControlValue, boolean>
+  >({
+    compact: false,
+    stacked: true,
+    details: true,
+    list: false,
+  })
+  const [commerceCategory, setCommerceCategory] =
+    React.useState<CommerceCategoryValue>("outer")
+  const [storeSection, setStoreSection] =
+    React.useState<StoreSectionValue>("curation")
+
+  function toggleCalendarOption(value: CalendarControlValue) {
+    setCalendarSelectedOptions((current) => ({
+      ...current,
+      [value]: !current[value],
+    }))
+  }
 
   if (examplePage === "service-menu") {
     return (
@@ -2762,7 +3442,11 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
                   density="regular"
                   title={label}
                   subtitle={index % 2 === 0 ? "조건주문 · 알림" : undefined}
-                  leading={<Avatar size="sm" shape="rounded">{label.slice(0, 1)}</Avatar>}
+                  leading={
+                    <Avatar size="sm" shape="rounded">
+                      {label.slice(0, 1)}
+                    </Avatar>
+                  }
                   divider={false}
                 />
               )
@@ -2790,7 +3474,11 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
             tone="neutral"
             size="md"
             title="동네 사람들이 아는 꿀팁을 확인해보세요."
-            leading={<Avatar size="sm" shape="rounded">K</Avatar>}
+            leading={
+              <Avatar size="sm" shape="rounded">
+                K
+              </Avatar>
+            }
             trailing={<span aria-hidden="true">×</span>}
           />
           <NoticeBanner
@@ -2856,19 +3544,18 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
           <AnimatedExamplePanel panelKey={`chat-list-${chatFilter}`}>
             <Stack gap="none" className="mt-4">
               {chatListRowsByFilter[chatFilter].map((row, index) => (
-                  <ListItem
-                    key={row.title}
-                    density="roomy"
-                    title={row.title}
-                    subtitle={row.subtitle}
-                    leading={<Avatar size="md">{index + 1}</Avatar>}
-                    meta={row.meta}
-                    trailing={
-                      row.badge ? <Badge tone="accent">{row.badge}</Badge> : null
-                    }
-                  />
-                )
-              )}
+                <ListItem
+                  key={row.title}
+                  density="roomy"
+                  title={row.title}
+                  subtitle={row.subtitle}
+                  leading={<Avatar size="md">{index + 1}</Avatar>}
+                  meta={row.meta}
+                  trailing={
+                    row.badge ? <Badge tone="accent">{row.badge}</Badge> : null
+                  }
+                />
+              ))}
             </Stack>
           </AnimatedExamplePanel>
         </div>
@@ -2939,6 +3626,362 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
     )
   }
 
+  if (examplePage === "social-dm") {
+    return (
+      <ExampleScreen>
+        <AppBar
+          align="center"
+          size="regular"
+          title="masasa_film"
+          subtitle="프로필 상태 업데이트 있음"
+          trailing={
+            <IconButton aria-label="메시지 작성">
+              <Glyph label="W" />
+            </IconButton>
+          }
+        />
+        <div className="space-y-5 px-5 pb-6">
+          <label className="flex min-h-12 items-center gap-3 rounded-[18px] bg-foreground/[0.055] px-4 text-foreground/52 focus-within:ring-2 focus-within:ring-[var(--ds-accent)]/25">
+            <span className="sr-only">DM 검색</span>
+            <Glyph label="S" />
+            <input
+              className="min-w-0 flex-1 bg-transparent text-[1rem] font-semibold outline-none placeholder:text-foreground/44"
+              placeholder="Search"
+              type="search"
+            />
+          </label>
+          <ActionGrid
+            columns="two"
+            gap="lg"
+            items={[
+              {
+                id: "note",
+                label: "Your note",
+                description: "Location off",
+                icon: <Avatar size="xl">Me</Avatar>,
+              },
+              {
+                id: "map",
+                label: "Map",
+                description: "Nearby friends",
+                icon: (
+                  <span className="grid size-20 place-items-center rounded-full bg-[linear-gradient(135deg,#9ed7ff,#dff7c8)] text-sm font-semibold text-foreground/70">
+                    Map
+                  </span>
+                ),
+              },
+            ]}
+          />
+          <div className="flex items-center justify-between">
+            <Text variant="title">Messages</Text>
+            <Text variant="label" tone="muted">
+              Requests
+            </Text>
+          </div>
+          <Text tone="secondary">
+            Chats will appear here after you send or receive a message.{" "}
+            <span className="font-semibold text-[#4057ff]">Get started</span>
+          </Text>
+          <Text variant="title">Suggestions</Text>
+          <Stack gap="sm">
+            {[
+              ["트렌드포털", "Tap to chat", "Tp"],
+              ["스테이폴리오 | 10년의 큐레이션", "Tap to chat", "SF"],
+              ["경제&라이프스타일 매거진 | 에크케", "Tap to chat", "ek"],
+            ].map(([title, subtitle, avatar]) => (
+              <ListItem
+                key={title}
+                density="regular"
+                divider={false}
+                title={title}
+                subtitle={subtitle}
+                leading={<Avatar size="lg">{avatar}</Avatar>}
+                trailing={
+                  <IconButton aria-label={`${title}에게 사진 보내기`}>
+                    <Glyph label="C" />
+                  </IconButton>
+                }
+              />
+            ))}
+          </Stack>
+          <NoticeBanner
+            tone="neutral"
+            size="sm"
+            title="Your notifications are off."
+            action="Turn on"
+            leading={<Glyph label="N" />}
+            trailing={<span aria-hidden="true">×</span>}
+          />
+        </div>
+      </ExampleScreen>
+    )
+  }
+
+  if (examplePage === "calendar-toolbar") {
+    return (
+      <ExampleScreen>
+        <div className="relative px-5 pt-5">
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              variant="secondary"
+              className="h-12 rounded-full bg-white/86 px-4 text-[1rem] shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
+            >
+              <span aria-hidden="true">‹</span>
+              2026
+            </Button>
+            <div className="flex min-h-12 items-center gap-1 rounded-full bg-white/88 p-1 shadow-[0_14px_34px_rgba(15,23,42,0.1)] backdrop-blur-2xl">
+              <IconButton aria-label="보기 메뉴" className="shadow-none">
+                <Glyph label="V" />
+              </IconButton>
+              <IconButton aria-label="검색" className="shadow-none">
+                <Glyph label="S" />
+              </IconButton>
+              <FormatFilter
+                title="View filters"
+                triggerLabel="보기 옵션 선택"
+                description="월 화면에서 동시에 켤 표시 방식을 고릅니다."
+                options={calendarControlOptions}
+                selected={calendarSelectedOptions}
+                onToggle={toggleCalendarOption}
+              />
+            </div>
+          </div>
+          <Text
+            as="h2"
+            className="mt-8 text-[3rem] leading-none font-semibold tracking-normal"
+          >
+            April
+          </Text>
+          <div className="mt-5">
+            <SegmentedControl
+              ariaLabel="달력 보기 방식"
+              options={calendarSegmentOptions}
+              value={calendarMode}
+              size="sm"
+              onValueChange={setCalendarMode}
+            />
+          </div>
+          <Surface
+            variant="floating"
+            padding="sm"
+            className="absolute top-[5.3rem] right-5 z-20 w-[16rem] rounded-[2rem]"
+          >
+            <Stack gap="xs">
+              {calendarControlOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-checked={calendarSelectedOptions[option.value]}
+                  role="menuitemcheckbox"
+                  className="flex min-h-12 items-center gap-3 rounded-[18px] px-3 text-left text-[1rem] font-semibold transition-colors outline-none hover:bg-foreground/[0.055] focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35"
+                  onClick={() => toggleCalendarOption(option.value)}
+                >
+                  <span className="grid size-6 place-items-center">
+                    {calendarSelectedOptions[option.value] ? "✓" : null}
+                  </span>
+                  <Glyph label={option.value === "list" ? "L" : "M"} />
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </Stack>
+          </Surface>
+        </div>
+        <MiniEventMonth mode={calendarMode} />
+      </ExampleScreen>
+    )
+  }
+
+  if (examplePage === "commerce-category") {
+    return (
+      <ExampleScreen>
+        <PageHeader
+          size="regular"
+          align="center"
+          title="남성의류"
+          meta={<span aria-hidden="true">⌄</span>}
+          leading={
+            <IconButton aria-label="뒤로가기">
+              <span aria-hidden="true">‹</span>
+            </IconButton>
+          }
+          trailing={
+            <>
+              <IconButton aria-label="검색">
+                <Glyph label="S" />
+              </IconButton>
+              <IconButton aria-label="장바구니">
+                <Glyph label="B" />
+              </IconButton>
+            </>
+          }
+        />
+        <div className="border-b border-foreground/[0.07] px-5 pb-3">
+          <PillTabs
+            ariaLabel="상위 카테고리"
+            options={commerceCategoryOptions}
+            value={commerceCategory}
+            variant="text"
+            size="md"
+            onValueChange={setCommerceCategory}
+          />
+        </div>
+        <div className="border-b border-foreground/[0.07] px-5 py-3">
+          <PillTabs
+            ariaLabel="상품 필터"
+            options={[
+              { value: "all", label: "전체" },
+              { value: "jacket", label: "재킷" },
+              { value: "denim", label: "데님" },
+              { value: "training", label: "트레이닝" },
+            ]}
+            value="all"
+            variant="chip"
+            size="sm"
+            onValueChange={() => undefined}
+          />
+        </div>
+        <div className="flex gap-2 overflow-x-auto border-b border-foreground/[0.07] px-5 py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {["단독", "색상", "가격대", "상품정보", "브랜드"].map((label) => (
+            <Button
+              key={label}
+              variant="secondary"
+              className="h-10 rounded-full bg-foreground/[0.055] px-4 text-foreground/70"
+            >
+              {label}⌄
+            </Button>
+          ))}
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 pt-3 pb-6">
+          <Grid columns="three" gap="sm">
+            {commerceProducts.map((product) => (
+              <CommerceProductCard key={product.name} product={product} />
+            ))}
+          </Grid>
+        </div>
+      </ExampleScreen>
+    )
+  }
+
+  if (examplePage === "store-home") {
+    return (
+      <ExampleScreen>
+        <AppBar
+          size="large"
+          title="스토어"
+          leading={
+            <span className="grid size-8 place-items-center rounded-[8px] bg-[#4ec260] text-base font-semibold text-white">
+              N
+            </span>
+          }
+          trailing={
+            <>
+              <IconButton aria-label="알림">
+                <Glyph label="N" />
+              </IconButton>
+              <IconButton aria-label="장바구니">
+                <Glyph label="B" />
+              </IconButton>
+            </>
+          }
+        />
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-6">
+          <label className="flex min-h-12 items-center gap-3 rounded-[18px] border border-[#6b48f6]/70 bg-white px-4 text-foreground/52 focus-within:ring-2 focus-within:ring-[#6b48f6]/25">
+            <span className="sr-only">스토어 검색</span>
+            <Glyph label="S" />
+            <input
+              className="min-w-0 flex-1 bg-transparent text-[1rem] font-semibold outline-none placeholder:text-foreground/44"
+              placeholder="상품명 또는 브랜드 입력"
+              type="search"
+            />
+            <Glyph label="C" />
+          </label>
+          <section className="-mx-5 mt-4 bg-[#a9dd72] px-5 py-7 text-white">
+            <div className="grid grid-cols-[1fr_7rem] items-center gap-3">
+              <div>
+                <Text
+                  as="h2"
+                  className="text-[1.55rem] leading-8 font-semibold text-white"
+                >
+                  3% 추가 적립 멤데이 오픈까지 단 하루!
+                </Text>
+                <Text className="mt-2 font-semibold text-white/90">
+                  오직 하루만 드리는 특별 적립 찬스
+                </Text>
+              </div>
+              <div className="grid aspect-square place-items-center rounded-full bg-white/30 text-[2rem] font-semibold">
+                3%
+              </div>
+            </div>
+          </section>
+          <ActionGrid
+            columns="four"
+            gap="md"
+            items={storeShortcutItems}
+            className="mt-5"
+          />
+          <PillTabs
+            ariaLabel="스토어 섹션"
+            className="mt-6"
+            options={storeSectionOptions}
+            value={storeSection}
+            variant="text"
+            size="md"
+            onValueChange={setStoreSection}
+          />
+          <Text variant="title" className="mt-5">
+            <span className="text-[#6b48f6]">21nak</span>님을 위한 큐레이션
+          </Text>
+          <div className="mt-4 flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {["FOR YOU", "CAP", "SHIRT", "POUCH", "JEWEL", "TOY"].map(
+              (label, index) => (
+                <StoreBadge
+                  key={label}
+                  label={label}
+                  size="lg"
+                  tone={
+                    ["violet", "charcoal", "silver", "navy", "cream", "coral"][
+                      index
+                    ] ?? "violet"
+                  }
+                />
+              )
+            )}
+          </div>
+          <Grid columns="three" gap="sm" className="mt-5">
+            {[
+              { label: "급상승 스타일", tone: "navy" },
+              { label: "여름 모자", tone: "sage" },
+              { label: "지난주 클릭", tone: "silver" },
+            ].map(({ label, tone }) => (
+              <CurationTile key={label} label={label} tone={tone} />
+            ))}
+          </Grid>
+        </div>
+      </ExampleScreen>
+    )
+  }
+
+  if (examplePage === "social-feed") {
+    return (
+      <ExampleScreen>
+        <div className="min-h-0 flex-1 overflow-y-auto pb-6">
+          <FeedPostPreview
+            author="lingrongdang"
+            caption="홍태준이 자존감을 지키는 법..."
+            date="April 17"
+            tone="portrait"
+          />
+          <FeedPostPreview
+            author="dicero_kr"
+            caption="새 던전 이벤트"
+            date="April 18"
+            tone="game"
+          />
+        </div>
+      </ExampleScreen>
+    )
+  }
+
   if (examplePage === "finance-home") {
     return (
       <ExampleScreen>
@@ -2974,13 +4017,17 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
             size="md"
             title="국내 어닝콜도 이제 들을 수 있어요"
             action="일정 보기 ›"
-            leading={<Avatar size="sm" shape="rounded" tone="accent">A</Avatar>}
+            leading={
+              <Avatar size="sm" shape="rounded" tone="accent">
+                A
+              </Avatar>
+            }
           />
           <Text variant="title" className="mt-6">
             기본계좌
           </Text>
           <Grid columns="two" gap="sm" className="mt-3">
-            <MetricCard
+            <ValueCard
               label="원화"
               value={
                 <>
@@ -2993,7 +4040,7 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
                 </>
               }
             />
-            <MetricCard
+            <ValueCard
               label="달러"
               value={
                 <>
@@ -3012,7 +4059,7 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
           </Text>
           <Text
             as="p"
-            className="mt-1 flex items-baseline text-[2.05rem] font-semibold leading-none"
+            className="mt-1 flex items-baseline text-[2.05rem] leading-none font-semibold"
           >
             <span className="leading-none">$</span>
             <AnimatedNumber
@@ -3021,10 +4068,7 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
               value="8,663.06"
             />
           </Text>
-          <Text
-            tone="accent"
-            className="mt-2 flex items-baseline leading-none"
-          >
+          <Text tone="accent" className="mt-2 flex items-baseline leading-none">
             <span className="leading-none">-$</span>
             <AnimatedNumber
               animationKey="finance-home-invested-delta"
@@ -3088,7 +4132,7 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
             </IconButton>
           </>
         }
-        />
+      />
       <div className="px-5 pb-24">
         <PillTabs
           ariaLabel="커뮤니티 섹션"
@@ -3115,17 +4159,20 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
           </Text>
           <Stack gap="none" className="mt-2">
             {communityRowsBySection[communitySection].map((row, index) => (
-                <ListItem
-                  key={`${row.title}-${communityFilter}`}
-                  density="roomy"
-                  title={row.title}
-                  subtitle={row.subtitle}
-                  description={row.meta}
-                  leading={<Badge tone="neutral">{row.tag}</Badge>}
-                  trailing={<Avatar size="lg" shape="rounded">{index + 1}</Avatar>}
-                />
-              )
-            )}
+              <ListItem
+                key={`${row.title}-${communityFilter}`}
+                density="roomy"
+                title={row.title}
+                subtitle={row.subtitle}
+                description={row.meta}
+                leading={<Badge tone="neutral">{row.tag}</Badge>}
+                trailing={
+                  <Avatar size="lg" shape="rounded">
+                    {index + 1}
+                  </Avatar>
+                }
+              />
+            ))}
           </Stack>
         </AnimatedExamplePanel>
       </div>
@@ -3136,6 +4183,243 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
         글쓰기
       </FloatingActionButton>
     </ExampleScreen>
+  )
+}
+
+function MiniEventMonth({ mode }: { mode: CalendarControlValue }) {
+  const days = Array.from({ length: 28 }, (_, index) => index + 1)
+
+  return (
+    <div className="mt-5 grid flex-1 grid-cols-7 overflow-hidden border-t border-foreground/[0.08] opacity-70">
+      {days.map((day) => (
+        <div
+          key={day}
+          className="min-h-[6rem] border-r border-b border-foreground/[0.06] px-1.5 py-2"
+        >
+          <div
+            className={cn(
+              "text-center text-[1.05rem] font-semibold tabular-nums",
+              day % 7 === 5 ? "text-foreground/42" : "text-foreground"
+            )}
+          >
+            {day}
+          </div>
+          <div className="mt-2 space-y-1">
+            {day % 3 === 0 ? (
+              <EventPill
+                label={mode === "list" ? "List" : "Daily"}
+                tone="lavender"
+              />
+            ) : null}
+            {day % 4 === 0 ? <EventPill label="memo" tone="green" /> : null}
+            {day % 5 === 0 ? <EventPill label="7 AM" tone="peach" /> : null}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function EventPill({
+  label,
+  tone,
+}: {
+  label: string
+  tone: "green" | "lavender" | "peach"
+}) {
+  return (
+    <div
+      className={cn(
+        "truncate rounded-md px-1.5 py-1 text-[0.66rem] leading-none font-semibold",
+        tone === "lavender" && "bg-[#c6c4da] text-[#070737]",
+        tone === "green" && "bg-[#d9f3cc] text-[#477f38]",
+        tone === "peach" && "bg-[#f8dfbf] text-[#8b5826]"
+      )}
+    >
+      {label}
+    </div>
+  )
+}
+
+function CommerceProductCard({
+  product,
+}: {
+  product: (typeof commerceProducts)[number]
+}) {
+  return (
+    <article className="min-w-0">
+      <ProductArt tone={product.color} />
+      <div className="mt-2 space-y-1 px-1">
+        <Text variant="label" className="truncate">
+          {product.brand} <span aria-hidden="true">›</span>
+        </Text>
+        <Text className="line-clamp-2 text-[0.8rem] leading-5">
+          {product.name}
+        </Text>
+        <Text variant="label" className="tabular-nums">
+          {product.discount ? (
+            <span className="mr-1 text-[var(--ds-accent)]">
+              {product.discount}
+            </span>
+          ) : null}
+          {product.price}
+        </Text>
+        <Text variant="caption" tone="muted">
+          likes {product.likes} · 5.0
+        </Text>
+      </div>
+    </article>
+  )
+}
+
+function ProductArt({ tone }: { tone: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "relative aspect-square overflow-hidden rounded-[10px] bg-foreground/[0.055]",
+        tone === "sage" && "bg-[#cbd3bd]",
+        tone === "silver" && "bg-[#d9dde1]",
+        tone === "black" && "bg-[#191a1d]",
+        tone === "navy" && "bg-[#222b35]",
+        tone === "charcoal" && "bg-[#32343a]",
+        tone === "mist" && "bg-[#cfd4d1]"
+      )}
+    >
+      <span className="absolute top-2 right-2 text-sm font-semibold text-white drop-shadow">
+        H
+      </span>
+      <span
+        className={cn(
+          "absolute top-[23%] left-1/2 h-[54%] w-[46%] -translate-x-1/2 rounded-t-[42%] rounded-b-[16%] bg-white/58 shadow-[inset_0_-12px_20px_rgba(15,23,42,0.12)]",
+          tone === "black" && "bg-neutral-950",
+          tone === "navy" && "bg-[#1c2632]",
+          tone === "charcoal" && "bg-[#24262b]"
+        )}
+      />
+      <span className="absolute top-[34%] left-[22%] h-[34%] w-[20%] rotate-12 rounded-full bg-white/34" />
+      <span className="absolute top-[34%] right-[22%] h-[34%] w-[20%] -rotate-12 rounded-full bg-white/34" />
+    </div>
+  )
+}
+
+function StoreBadge({
+  label,
+  size = "md",
+  tone,
+}: {
+  label: string
+  size?: "md" | "lg"
+  tone: string
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "grid shrink-0 place-items-center rounded-full text-center text-[0.68rem] leading-none font-semibold text-white",
+        size === "md" ? "size-14" : "size-16",
+        tone === "red" && "bg-[#d9504a]",
+        tone === "green" && "bg-[#4cbf68]",
+        tone === "coral" && "bg-[#e4604d]",
+        tone === "blue" && "bg-[#7aa6ff]",
+        tone === "cream" && "bg-[#f2eadc] text-[#b56b2f]",
+        tone === "violet" && "bg-[#6b48f6]",
+        tone === "teal" && "bg-[#1b6d5a]",
+        tone === "charcoal" && "bg-[#24272d]",
+        tone === "silver" && "bg-[#d9dde1] text-foreground",
+        tone === "navy" && "bg-[#253244]",
+        tone === "sage" && "bg-[#cbd3bd] text-foreground"
+      )}
+    >
+      {label}
+    </span>
+  )
+}
+
+function CurationTile({ label, tone }: { label: string; tone: string }) {
+  return (
+    <article className="overflow-hidden rounded-[14px] bg-white shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
+      <div className="p-2">
+        <Badge tone="accent" size="sm">
+          {label}
+        </Badge>
+      </div>
+      <ProductArt tone={tone} />
+    </article>
+  )
+}
+
+function FeedPostPreview({
+  author,
+  caption,
+  date,
+  tone,
+}: {
+  author: string
+  caption: string
+  date: string
+  tone: "game" | "portrait"
+}) {
+  return (
+    <article className="border-b border-foreground/[0.08] bg-white">
+      <AppBar
+        size="compact"
+        title={author}
+        subtitle={`${author} · Original audio`}
+        leading={<Avatar size="sm">{author.slice(0, 2)}</Avatar>}
+        trailing={
+          <IconButton
+            aria-label={`${author} 더보기`}
+            className="border-0 shadow-none"
+          >
+            <Glyph label="M" />
+          </IconButton>
+        }
+      />
+      <div
+        role="img"
+        aria-label={`${author} 피드 미디어`}
+        className={cn(
+          "relative aspect-[1.08/1] overflow-hidden",
+          tone === "portrait"
+            ? "bg-[linear-gradient(160deg,#2b1b18,#5d4137_55%,#211714)]"
+            : "bg-[linear-gradient(160deg,#1a2035,#513d75_48%,#302034)]"
+        )}
+      >
+        {tone === "portrait" ? (
+          <div className="absolute inset-x-[22%] top-[12%] bottom-0 rounded-t-full bg-[linear-gradient(180deg,#d0a485,#4a2c26)] opacity-90" />
+        ) : (
+          <>
+            <div className="absolute inset-x-0 bottom-0 h-[42%] bg-[#3b3347]" />
+            <div className="absolute top-[28%] left-[28%] size-36 rounded-[38%] bg-[#a36ade] shadow-[0_0_40px_rgba(163,106,222,0.5)]" />
+            <div className="absolute bottom-[14%] left-[10%] size-16 rounded-[32%] bg-[#d6c178]" />
+            <div className="absolute right-[12%] bottom-[12%] size-14 rounded-[32%] bg-[#95b24f]" />
+          </>
+        )}
+        <div className="absolute inset-x-8 bottom-8 text-center text-[1.3rem] leading-8 font-semibold text-white drop-shadow">
+          {tone === "portrait"
+            ? "나와 결이 맞지 않을 거라고 생각한 사람을 만남으로써"
+            : "새로운 던전에서 보상이 기다립니다"}
+        </div>
+      </div>
+      <div className="space-y-2 px-5 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-[0.95rem] font-semibold">
+            <span>H 9,886</span>
+            <span>C 14</span>
+            <span>S 2,401</span>
+          </div>
+          <Glyph label="B" />
+        </div>
+        <Text variant="label">
+          {author} <span className="font-medium">{caption}</span>{" "}
+          <span className="text-foreground/48">more</span>
+        </Text>
+        <Text variant="caption" tone="muted">
+          {date}
+        </Text>
+      </div>
+    </article>
   )
 }
 
@@ -3181,7 +4465,9 @@ function ExampleScreen({
     <div
       className={cn(
         "relative flex min-h-full flex-col overflow-hidden pt-[max(1.25rem,env(safe-area-inset-top))]",
-        surface === "muted" ? "bg-foreground/[0.045]" : "bg-[var(--calendar-app-bg)]"
+        surface === "muted"
+          ? "bg-foreground/[0.045]"
+          : "bg-[var(--calendar-app-bg)]"
       )}
     >
       {children}
@@ -3200,8 +4486,14 @@ function MobileFrame({ children }: { children: React.ReactNode }) {
   )
 }
 
-function MobileTopBar({ activeComponentId }: { activeComponentId: ComponentId }) {
-  const item = componentItems.find((candidate) => candidate.id === activeComponentId)
+function MobileTopBar({
+  activeComponentId,
+}: {
+  activeComponentId: ComponentId
+}) {
+  const item = componentItems.find(
+    (candidate) => candidate.id === activeComponentId
+  )
 
   return (
     <div className="px-5 pt-[max(3.75rem,env(safe-area-inset-top))]">
@@ -3262,7 +4554,9 @@ function ComponentUsage({ item }: { item: ComponentItem }) {
         </div>
         <StatusBadge status={item.status} />
       </div>
-      <p className="mt-3 text-sm leading-6 text-foreground/58">{item.description}</p>
+      <p className="mt-3 text-sm leading-6 text-foreground/58">
+        {item.description}
+      </p>
     </section>
   )
 }
@@ -3300,7 +4594,7 @@ function ListRow({
   )
 }
 
-function MetricTile({ label, value }: { label: string; value: string }) {
+function GridPreviewTile({ label, value }: { label: string; value: string }) {
   return (
     <motion.div
       layout
@@ -3322,7 +4616,7 @@ function Glyph({ label }: { label: string }) {
   return (
     <span
       aria-hidden="true"
-      className="grid size-5 place-items-center rounded-full bg-current/12 text-[0.62rem] font-semibold leading-none"
+      className="grid size-5 place-items-center rounded-full bg-current/12 text-[0.62rem] leading-none font-semibold"
     >
       {label}
     </span>
