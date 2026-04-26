@@ -3,6 +3,7 @@
 set -euo pipefail
 
 LABEL="com.toda.discord-bridge"
+SCREEN_NAME="toda-discord"
 SOURCE_PATH="${BASH_SOURCE[0]}"
 while [ -L "$SOURCE_PATH" ]; do
   SOURCE_DIR="$(cd -P "$(dirname "$SOURCE_PATH")" && pwd)"
@@ -116,9 +117,15 @@ start_service() {
 
   rm -f "$SUPERVISOR_PID_FILE" "$STOP_FILE" "$HEALTH_FILE"
   touch "$STDOUT_LOG" "$STDERR_LOG"
+  write_runner_script
 
-  nohup "$RUN_SCRIPT" >>"$STDOUT_LOG" 2>>"$STDERR_LOG" </dev/null &
-  disown || true
+  if command -v screen >/dev/null 2>&1; then
+    screen -S "$SCREEN_NAME" -X quit >/dev/null 2>&1 || true
+    screen -dmS "$SCREEN_NAME" "$RUN_SCRIPT"
+  else
+    nohup "$RUN_SCRIPT" >>"$STDOUT_LOG" 2>>"$STDERR_LOG" </dev/null &
+    disown || true
+  fi
 
   for _ in $(seq 1 20); do
     if is_running; then
@@ -139,6 +146,7 @@ stop_service() {
 
   if ! is_running; then
     rm -f "$SUPERVISOR_PID_FILE" "$STOP_FILE"
+    screen -S "$SCREEN_NAME" -X quit >/dev/null 2>&1 || true
     echo "toda-discord is not running."
     return
   fi
@@ -146,6 +154,7 @@ stop_service() {
   local pid
   pid="$(read_supervisor_pid)"
   touch "$STOP_FILE"
+  screen -S "$SCREEN_NAME" -X quit >/dev/null 2>&1 || true
   kill "$pid" >/dev/null 2>&1 || true
 
   for _ in $(seq 1 20); do

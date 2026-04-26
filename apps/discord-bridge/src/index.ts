@@ -934,6 +934,31 @@ function isLikelyQuestion(content: string) {
   ].some((token) => normalized.includes(token))
 }
 
+function isProgressRequest(content: string) {
+  const normalized = content.toLowerCase().replace(/\s+/g, "")
+
+  if (!normalized) {
+    return false
+  }
+
+  return [
+    "진행사항",
+    "진행상황",
+    "진행상태",
+    "진척",
+    "상태알려",
+    "상황알려",
+    "어디까지",
+    "얼마나",
+    "완성도",
+    "남은작업",
+    "뭐하고",
+    "뭐하는",
+    "progress",
+    "status",
+  ].some((token) => normalized.includes(token))
+}
+
 function buildDiscoveryFacilitatorReply(content: string) {
   const firstLine = content
     .split(/\r?\n/)
@@ -1117,6 +1142,43 @@ function buildConversationFallbackReply(state: SprintThreadState, content: strin
   }
 
   return buildAutonomousStageReply(state)
+}
+
+function buildProgressReply(state: SprintThreadState) {
+  const nextGate = nextHumanGate(state.stage)
+  const job = state.job
+  const isRunning = state.status === "ACTIVE" && job?.status === "RUNNING"
+  const lines = [
+    "현재 진행사항은 이렇게 보면 돼요.",
+    `- 단계: ${workflowStageLabel(state)}`,
+    `- 상태: ${statusLabel(state.status)}`,
+    `- 작업: ${job?.status ?? "IDLE"}${job?.label ? ` (${job.label})` : ""}`,
+    `- 다음 사람 체크포인트: ${nextGate ? workflowStageLabel(state, nextGate) : "없음"}`,
+  ]
+
+  if (job?.detailLines?.length) {
+    lines.push(...job.detailLines.map((line) => `- ${line}`))
+  }
+
+  if (job?.summary) {
+    lines.push(`- 최근 요약: ${summarizeJobText(job.summary, 360)}`)
+  }
+
+  if (job?.error) {
+    lines.push(`- 최근 오류: ${summarizeJobText(job.error, 260)}`)
+  }
+
+  if (state.preview?.url) {
+    lines.push(`- preview: ${state.preview.url}`)
+  }
+
+  lines.push(`- branch: ${state.branchName}`)
+
+  if (isRunning) {
+    lines.push("", "아직 완료 전환 신호는 안 들어왔어요. 작업이 끝나면 다음 단계나 확인 게이트로 자동 전환돼요.")
+  }
+
+  return lines.join("\n")
 }
 
 async function buildThreadTranscript(thread: ThreadChannel, currentMessageId: string) {
@@ -3186,6 +3248,7 @@ async function handleThreadMessage(message: Message) {
 
   const messageReferences = getMessageReferences(message)
   const trimmedContent = message.content.trim()
+  const progressRequest = isProgressRequest(trimmedContent)
 
   if (isDesignSystemWorkflow(state) && (messageReferences.length > 0 || trimmedContent)) {
     state = store.upsert({
@@ -3208,14 +3271,20 @@ async function handleThreadMessage(message: Message) {
     return
   }
 
-  await safeReact(message, "👀")
-
   try {
     store.upsert({
       ...state,
       lastOperatorMessageId: message.id,
       updatedAt: nowIso(),
     })
+
+    if (progressRequest) {
+      await safeReact(message, "👀")
+      await message.channel.sendTyping()
+      await replyWithChunkedMessage(message, buildProgressReply(state))
+      await safeReact(message, "✅")
+      return
+    }
 
     if (shouldReplyWithReviewUrl(state, trimmedContent)) {
       await safeReact(message, "⏳")
@@ -3257,6 +3326,7 @@ async function handleThreadMessage(message: Message) {
       return
     }
 
+    await safeReact(message, "👀")
     await safeReact(message, "⏳")
     await message.channel.sendTyping()
     const conversation = await buildConversationReply(message.channel, state, contentForBridge, message.id)
@@ -3271,6 +3341,7 @@ async function handleThreadMessage(message: Message) {
   } catch (error) {
     await removeOwnReaction(message, "⏳")
     await safeReact(message, "⚠️")
+    await replyWithChunkedMessage(message, "답변 생성 중 오류가 났어요. 로컬 로그를 확인하고 이어서 다시 답할게요.").catch(() => null)
     throw error
   }
 }
