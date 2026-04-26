@@ -5,8 +5,12 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { promisify } from "node:util"
 
+import type { SprintPreviewProtection } from "./types.js"
+
 const execFileAsync = promisify(execFile)
 const PREVIEW_TIMEOUT_MS = Number(process.env.DISCORD_PREVIEW_TIMEOUT_MS ?? 15 * 60_000)
+const PREVIEW_ACCESS_TIMEOUT_MS = Number(process.env.DISCORD_PREVIEW_ACCESS_TIMEOUT_MS ?? 20_000)
+const PROTECTION_BYPASS_HEADER = "x-vercel-protection-bypass"
 const VERCEL_IGNORE_ADDITIONS = [
   ".data",
   ".turbo",
@@ -23,7 +27,7 @@ function parseField(stdout: string, name: string) {
 
 export async function runVercelPreviewDeployment(
   worktreePath: string,
-  options: { previewScriptPath?: string } = {},
+  options: { previewScriptPath?: string; targetPath?: string } = {},
 ) {
   const restoreVercelIgnore = await ensurePreviewVercelIgnore(worktreePath)
   const command = options.previewScriptPath
@@ -52,11 +56,103 @@ export async function runVercelPreviewDeployment(
     return {
       url,
       ready: readyValue === "yes",
+      protection: await checkPreviewProtection(url, options.targetPath ?? "/"),
       raw: combined.trim(),
     }
   } finally {
     await restoreVercelIgnore()
   }
+}
+
+export async function checkPreviewProtection(baseUrl: string, targetPath: string): Promise<SprintPreviewProtection> {
+  const checkedUrl = buildPreviewUrl(baseUrl, targetPath)
+
+  try {
+    const publicStatus = await fetchPreviewStatus(checkedUrl)
+
+    if (isProtectedStatus(publicStatus)) {
+      return verifyAutomationBypass(checkedUrl, publicStatus)
+    }
+
+    return {
+      access: "public",
+      checkedUrl,
+      checkedStatus: publicStatus,
+      automationBypass: "not_needed",
+    }
+  } catch (error) {
+    return {
+      access: "unknown",
+      checkedUrl,
+      automationBypass: "unknown",
+      error: error instanceof Error ? error.message : String(error),
+    }
+  }
+}
+
+async function verifyAutomationBypass(checkedUrl: string, checkedStatus: number): Promise<SprintPreviewProtection> {
+  const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim()
+
+  if (!bypassSecret) {
+    return {
+      access: "protected",
+      checkedUrl,
+      checkedStatus,
+      automationBypass: "not_configured",
+    }
+  }
+
+  try {
+    const automationStatus = await fetchPreviewStatus(checkedUrl, {
+      [PROTECTION_BYPASS_HEADER]: bypassSecret,
+    })
+
+    return {
+      access: "protected",
+      checkedUrl,
+      checkedStatus,
+      automationBypass: isProtectedStatus(automationStatus) || automationStatus >= 500 ? "failed" : "verified",
+      automationStatus,
+    }
+  } catch (error) {
+    return {
+      access: "protected",
+      checkedUrl,
+      checkedStatus,
+      automationBypass: "failed",
+      error: error instanceof Error ? error.message : String(error),
+    }
+  }
+}
+
+async function fetchPreviewStatus(url: string, headers: Record<string, string> = {}) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), PREVIEW_ACCESS_TIMEOUT_MS)
+
+  try {
+    const response = await fetch(url, {
+      headers,
+      redirect: "manual",
+      signal: controller.signal,
+    })
+
+    return response.status
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+function buildPreviewUrl(baseUrl: string, targetPath: string) {
+  const url = new URL(baseUrl)
+  const normalizedPath = targetPath.startsWith("/") ? targetPath : `/${targetPath}`
+  url.pathname = normalizedPath
+  url.search = ""
+  url.hash = ""
+  return url.toString()
+}
+
+function isProtectedStatus(status: number) {
+  return status === 401 || status === 403
 }
 
 function shellEscape(value: string) {

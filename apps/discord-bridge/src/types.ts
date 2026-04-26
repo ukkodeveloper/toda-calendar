@@ -38,6 +38,16 @@ export type SprintPreviewDeployment = {
   url: string
   ready: boolean
   deployedAt: string
+  protection?: SprintPreviewProtection
+}
+
+export type SprintPreviewProtection = {
+  access: "public" | "protected" | "unknown"
+  checkedUrl: string
+  checkedStatus?: number
+  automationBypass: "not_needed" | "verified" | "not_configured" | "failed" | "unknown"
+  automationStatus?: number
+  error?: string
 }
 
 export type SprintWorkflowKind = "sprint" | "design_system"

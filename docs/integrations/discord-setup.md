@@ -53,10 +53,13 @@ cp apps/discord-bridge/.env.example apps/discord-bridge/.env
 - `DISCORD_CODEX_TIMEOUT_MS`
 - `DISCORD_CODEX_STAGE_TIMEOUT_MS`
 - `DISCORD_DESIGN_SYSTEM_TIMEOUT_MS`
+- `VERCEL_AUTOMATION_BYPASS_SECRET`
 
 `DISCORD_WORKTREE_ROOT`를 비워두면 기본값은 `~/.codex/worktrees/discord`다.
 `DISCORD_CODEX_MODEL`을 비워두면 기본값은 `gpt-5.4`다.
 긴 자동 작업의 기본 제한 시간은 90분이다.
+Vercel Deployment Protection이 켜진 preview를 자동 확인하려면 Vercel의 Protection Bypass for Automation secret을
+`VERCEL_AUTOMATION_BYPASS_SECRET`에 넣는다. bridge는 이 값을 Discord 메시지나 URL에 노출하지 않고 HTTP header 검증에만 쓴다.
 
 ## 4. 설치와 점검
 

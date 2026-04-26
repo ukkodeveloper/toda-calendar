@@ -25,7 +25,7 @@ import { ThreadStore } from "./thread-store.js"
 import type { SprintPreviewDeployment, SprintReferenceAttachment, SprintStage, SprintStageSummary, SprintStatus, SprintThreadState } from "./types.js"
 import { getBranchName, getRunSprintKey, getSprintKey, getWorktreeName, getWorktreePath, ensureGitWorktree } from "./worktree.js"
 import { runCodexDiscussionReply, runCodexStageTransitionSummary } from "./codex-runner.js"
-import { runVercelPreviewDeployment } from "./preview-deployer.js"
+import { checkPreviewProtection, runVercelPreviewDeployment } from "./preview-deployer.js"
 import { getCodexStageTimeoutMs, runCodexStageWorker } from "./stage-worker.js"
 import { getDesignSystemStageTimeoutMs, runDesignSystemStageWorker } from "./design-system-worker.js"
 import { runMainMergeOperator } from "./merge-operator.js"
@@ -568,7 +568,52 @@ function formatPreviewReviewLine(preview?: SprintPreviewDeployment) {
     return "preview URL이 아직 없어요."
   }
 
-  return `preview: ${preview.url}${preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`
+  return `preview: ${formatPreviewStatus(preview)}`
+}
+
+function formatPreviewStatus(preview: SprintPreviewDeployment) {
+  return `${preview.url}${preview.ready ? "" : " (아직 준비 중일 수 있어요)"}${formatPreviewProtectionSuffix(preview)}`
+}
+
+function formatPreviewProtectionSuffix(preview: SprintPreviewDeployment) {
+  if (preview.protection?.access !== "protected") {
+    return ""
+  }
+
+  if (preview.protection.automationBypass === "verified") {
+    return " (Vercel 보호됨, 자동 검증 완료)"
+  }
+
+  if (preview.protection.automationBypass === "not_configured") {
+    return " (Vercel 보호됨, 브라우저 확인은 Vercel 로그인 필요)"
+  }
+
+  return " (Vercel 보호됨, 자동 우회 검증 실패)"
+}
+
+function buildPreviewProtectionLines(preview?: SprintPreviewDeployment) {
+  const protection = preview?.protection
+
+  if (!protection || protection.access !== "protected") {
+    return []
+  }
+
+  if (protection.automationBypass === "verified") {
+    return [
+      `- 보호 확인: 일반 공개 접근은 ${protection.checkedStatus}로 막혀 있고, 자동화 우회 헤더 검증은 ${protection.automationStatus}로 통과했어요.`,
+    ]
+  }
+
+  if (protection.automationBypass === "not_configured") {
+    return [
+      `- 보호 확인: 일반 공개 접근은 ${protection.checkedStatus}로 막혀 있어요.`,
+      "- Discord에서 바로 열려면 Vercel 로그인 권한이 필요하거나, VERCEL_AUTOMATION_BYPASS_SECRET 설정 후 자동 검증만 통과시킬 수 있어요.",
+    ]
+  }
+
+  return [
+    `- 보호 확인: 일반 공개 접근은 ${protection.checkedStatus ?? "unknown"}로 막혀 있고, 자동화 우회 검증은 실패했어요.`,
+  ]
 }
 
 function buildPreviewRouteUrl(preview: SprintPreviewDeployment, route: string) {
@@ -632,6 +677,7 @@ function buildReviewUrlReply(state: SprintThreadState) {
 
   if (state.preview?.url) {
     lines.push(`- external preview: ${buildPreviewRouteUrl(state.preview, route)}`)
+    lines.push(...buildPreviewProtectionLines(state.preview))
   }
 
   return lines.join("\n")
@@ -674,7 +720,7 @@ function buildActivityCard(state: SprintThreadState) {
   ]
 
   if (state.preview?.url) {
-    lines.push(`- preview: ${state.preview.url}${state.preview.ready ? "" : " (준비 중일 수 있어요)"}`)
+    lines.push(`- preview: ${formatPreviewStatus(state.preview)}`)
   }
 
   if (state.status === "WAITING_FOR_APPROVAL") {
@@ -780,8 +826,9 @@ function buildStageControlCard(state: SprintThreadState) {
           ...(state.preview
             ? [
                 "",
-                `external preview: ${state.preview.url}${state.preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`,
+                `external preview: ${formatPreviewStatus(state.preview)}`,
                 ...(state.stage === "DEMO_REVIEW" ? [`이번 데모: ${buildPreviewRouteUrl(state.preview, getDemoRoute(state))}`] : []),
+                ...buildPreviewProtectionLines(state.preview),
               ]
             : []),
           "",
@@ -844,7 +891,7 @@ function formatDetailStatus(state: SprintThreadState) {
   const jobDiagnosticLine = state.job?.diagnosticLines?.length
     ? ["오류 진단:", ...state.job.diagnosticLines.map((line) => `- ${line}`)].join("\n")
     : null
-  const previewLine = state.preview ? `preview URL: ${state.preview.url}${state.preview.ready ? "" : " (준비 중일 수 있어요)"}` : null
+  const previewLine = state.preview ? `preview URL: ${formatPreviewStatus(state.preview)}` : null
 
   return [
     `${workflowName(state)}: \`${state.sprintId}/${state.featureSlug}\``,
@@ -891,7 +938,7 @@ function formatChannelSummary(states: SprintThreadState[]) {
         `  작업: ${state.job?.status ?? "IDLE"}${state.job?.label ? ` (${state.job.label})` : ""}`,
         `  다음 체크포인트: ${nextGate ? workflowStageLabel(state, nextGate) : "없음"}`,
         `  worktree: \`${state.worktreeName}\` / branch: \`${state.branchName}\``,
-        ...(state.preview ? [`  preview: ${state.preview.url}`] : []),
+        ...(state.preview ? [`  preview: ${formatPreviewStatus(state.preview)}`] : []),
       ].join("\n")
     }),
   ].join("\n")
@@ -1170,7 +1217,7 @@ function buildProgressReply(state: SprintThreadState) {
   }
 
   if (state.preview?.url) {
-    lines.push(`- preview: ${state.preview.url}`)
+    lines.push(`- preview: ${formatPreviewStatus(state.preview)}`)
   }
 
   lines.push(`- branch: ${state.branchName}`)
@@ -1355,15 +1402,37 @@ function buildLatestStageSummarySection(summary?: SprintStageSummary) {
 }
 
 async function deployPreviewForState(state: SprintThreadState) {
+  const route = state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/"
   const result = await runVercelPreviewDeployment(state.worktreePath, {
     previewScriptPath: `${env.repoRoot}/scripts/remote/vercel-preview.sh`,
+    targetPath: route,
   })
 
   return {
     url: result.url,
     ready: result.ready,
+    protection: result.protection,
     deployedAt: nowIso(),
   } satisfies SprintPreviewDeployment
+}
+
+async function refreshPreviewProtectionForState(state: SprintThreadState) {
+  if (!state.preview?.url || state.preview.protection) {
+    return state
+  }
+
+  const route = state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/"
+  const nextState = {
+    ...state,
+    preview: {
+      ...state.preview,
+      protection: await checkPreviewProtection(state.preview.url, route),
+    },
+    updatedAt: nowIso(),
+  } satisfies SprintThreadState
+
+  store.upsert(nextState)
+  return nextState
 }
 
 function summarizeJobText(text: string, maxLength = 180) {
@@ -1687,7 +1756,8 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
         "배포 확인 링크를 만들었어요. 직접 보고 다음 결정을 내려주세요.",
         ...buildLatestStageSummarySection(stageSummary),
         "",
-        `- preview: ${preview.url}${preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`,
+        `- preview: ${formatPreviewStatus(preview)}`,
+        ...buildPreviewProtectionLines(preview),
         "- 더 고칠 게 있으면 `수정 더 하기`",
         "- 이대로 괜찮으면 `완료, main 반영`",
       ].join("\n"),
@@ -3113,12 +3183,20 @@ async function handleNextStageButton(interaction: ButtonInteraction) {
 
 async function ensurePreviewForThread(thread: ThreadChannel, state: SprintThreadState) {
   if (state.preview?.url) {
+    const inspectedState = await refreshPreviewProtectionForState(state)
+    const preview = inspectedState.preview
+
+    if (!preview) {
+      throw new Error("preview 상태를 확인하지 못했어요.")
+    }
+
     return {
-      nextState: state,
+      nextState: inspectedState,
       reply: [
         "이미 preview 링크가 있어요.",
-        `- preview: ${state.preview.url}${state.preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`,
-        `- 확인 URL: ${buildPreviewRouteUrl(state.preview, state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/")}`,
+        `- preview: ${formatPreviewStatus(preview)}`,
+        `- 확인 URL: ${buildPreviewRouteUrl(preview, inspectedState.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(inspectedState) ? getDemoRoute(inspectedState) : "/")}`,
+        ...buildPreviewProtectionLines(preview),
       ].join("\n"),
     }
   }
@@ -3154,8 +3232,9 @@ async function ensurePreviewForThread(thread: ThreadChannel, state: SprintThread
     nextState,
     reply: [
       "외부 preview를 배포했어요.",
-      `- preview: ${preview.url}${preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`,
+      `- preview: ${formatPreviewStatus(preview)}`,
       `- 확인 URL: ${buildPreviewRouteUrl(preview, state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/")}`,
+      ...buildPreviewProtectionLines(preview),
       `- local: ${buildLocalDevRouteUrl(state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/")}`,
     ].join("\n"),
   }
