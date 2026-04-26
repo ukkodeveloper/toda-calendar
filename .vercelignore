@@ -1,0 +1,7 @@
+.data
+.turbo
+node_modules
+
+apps/*/dist
+apps/*/.next
+apps/*/.expo
