@@ -1355,7 +1355,7 @@ export function DesignSystemDemo({
     <main className="min-h-dvh bg-[var(--calendar-app-bg)] text-foreground">
       <div className="grid min-h-dvh grid-rows-[auto_minmax(0,1fr)]">
         <TopBar activeComponent={activeComponent} />
-        <div className="grid min-h-0 grid-cols-[13.5rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_21rem]">
+        <div className="grid min-h-0 grid-cols-1 lg:grid-cols-[13.5rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_21rem]">
           <ComponentSidebar
             activeComponentId={activeComponentId}
             activeSection={activeSection}
@@ -1366,9 +1366,17 @@ export function DesignSystemDemo({
             onSelectSection={navigateToSection}
             searchValue={componentSearch}
           />
+          <MobileComponentNav
+            activeComponentId={activeComponentId}
+            activeSection={activeSection}
+            examplePage={examplePage}
+            onSelect={navigateToComponent}
+            onSelectExample={navigateToExamplePage}
+            onSelectSection={navigateToSection}
+          />
           <section
             ref={previewScrollRef}
-            className="min-h-0 overflow-y-auto px-3 py-5 lg:px-6"
+            className="min-h-0 overflow-y-auto px-3 py-4 lg:px-6 lg:py-5"
           >
             <div className="mx-auto max-w-[28rem]">
               <MobileFrame>
@@ -1664,7 +1672,7 @@ function ComponentSidebar({
     "컴포넌트"
 
   return (
-    <aside className="min-h-0 overflow-y-auto border-r border-black/[0.06] bg-white/58 px-3 py-3 backdrop-blur-2xl">
+    <aside className="hidden min-h-0 overflow-y-auto border-r border-black/[0.06] bg-white/58 px-3 py-3 backdrop-blur-2xl lg:block">
       <div className="mb-3 px-2">
         <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
           Design System
@@ -1833,6 +1841,100 @@ function ComponentSidebar({
         )}
       </LayoutGroup>
     </aside>
+  )
+}
+
+function MobileComponentNav({
+  activeComponentId,
+  activeSection,
+  examplePage,
+  onSelectExample,
+  onSelect,
+  onSelectSection,
+}: {
+  activeComponentId: ComponentId
+  activeSection: DesignNavSection
+  examplePage: ExamplePage
+  onSelectExample: (examplePage: ExamplePage) => void
+  onSelect: (id: ComponentId) => void
+  onSelectSection: (section: DesignNavSection) => void
+}) {
+  const sectionItems =
+    activeSection === "examples"
+      ? []
+      : componentItems.filter(
+          (item) =>
+            item.id !== "example-pages" &&
+            getComponentSection(item.id) === activeSection
+        )
+  const activeComponent =
+    activeComponentId === "example-pages"
+      ? getExamplePageDisplay(examplePage)
+      : getComponentItem(activeComponentId)
+
+  return (
+    <nav className="border-b border-black/[0.06] bg-white/66 px-3 py-3 backdrop-blur-2xl lg:hidden">
+      <div className="mx-auto max-w-[28rem] space-y-3">
+        <div className="flex gap-1 overflow-x-auto rounded-[18px] bg-black/[0.045] p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {designNavSections.map((section) => {
+            const selected = activeSection === section.id
+
+            return (
+              <button
+                key={section.id}
+                type="button"
+                className={cn(
+                  "min-h-10 shrink-0 rounded-[14px] px-3 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
+                  selected
+                    ? "bg-white text-foreground shadow-[var(--ds-elevation-1)]"
+                    : "text-foreground/48"
+                )}
+                onClick={() => onSelectSection(section.id)}
+              >
+                {section.label}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-[22px] bg-white/64 p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
+          <label className="min-w-0">
+            <span className="mb-1 block truncate text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
+              {activeSection === "examples" ? "Example" : "Component"}
+            </span>
+            <select
+              className="h-11 w-full rounded-full border border-black/[0.06] bg-white/82 px-3 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-[var(--ds-accent)]/25"
+              value={
+                activeSection === "examples" ? examplePage : activeComponentId
+              }
+              onChange={(event) => {
+                if (activeSection === "examples") {
+                  onSelectExample(event.target.value as ExamplePage)
+                  return
+                }
+
+                onSelect(event.target.value as ComponentId)
+              }}
+            >
+              {activeSection === "examples"
+                ? examplePages.map((page) => (
+                    <option key={page} value={page}>
+                      {examplePageItems[page].title}
+                    </option>
+                  ))
+                : sectionItems.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title}
+                    </option>
+                  ))}
+            </select>
+          </label>
+          {activeComponent ? (
+            <StatusBadge status={activeComponent.status} />
+          ) : null}
+        </div>
+      </div>
+    </nav>
   )
 }
 
@@ -2709,7 +2811,7 @@ function ControlsPanel(props: {
     componentItems[0]!
 
   return (
-    <aside className="col-start-2 border-t border-black/[0.06] bg-white/62 px-4 py-4 backdrop-blur-2xl xl:col-auto xl:min-h-0 xl:overflow-y-auto xl:border-t-0 xl:border-l">
+    <aside className="border-t border-black/[0.06] bg-white/62 px-4 py-4 backdrop-blur-2xl lg:col-start-2 xl:col-auto xl:min-h-0 xl:overflow-y-auto xl:border-t-0 xl:border-l">
       <div className="mb-4">
         <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
           Controls
@@ -4477,9 +4579,9 @@ function ExampleScreen({
 
 function MobileFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto w-[402px] max-w-full rounded-[52px] bg-neutral-950 p-[7px] shadow-[0_28px_80px_rgba(15,23,42,0.24)]">
-      <div className="relative h-[874px] max-h-[calc(100dvh-7rem)] overflow-hidden rounded-[44px] bg-[var(--calendar-app-bg)]">
-        <div className="absolute top-3 left-1/2 z-20 h-7 w-[7.4rem] -translate-x-1/2 rounded-full bg-neutral-950" />
+    <div className="mx-auto w-[402px] max-w-full rounded-[40px] bg-neutral-950 p-[5px] shadow-[0_22px_62px_rgba(15,23,42,0.22)] sm:rounded-[52px] sm:p-[7px] sm:shadow-[0_28px_80px_rgba(15,23,42,0.24)]">
+      <div className="relative h-[min(760px,calc(100dvh-12.25rem))] min-h-[520px] overflow-hidden rounded-[34px] bg-[var(--calendar-app-bg)] sm:h-[874px] sm:max-h-[calc(100dvh-7rem)] sm:rounded-[44px]">
+        <div className="absolute top-2.5 left-1/2 z-20 h-6 w-[6.4rem] -translate-x-1/2 rounded-full bg-neutral-950 sm:top-3 sm:h-7 sm:w-[7.4rem]" />
         {children}
       </div>
     </div>
