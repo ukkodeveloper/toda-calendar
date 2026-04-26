@@ -2,7 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm build:packages && pnpm --filter api build && pnpm --filter web build",
-  "outputDirectory": "apps/web/out",
   "functions": {
     "api/index.ts": {
       "maxDuration": 30
