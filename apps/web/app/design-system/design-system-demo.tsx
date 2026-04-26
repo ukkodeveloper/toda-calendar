@@ -372,26 +372,31 @@ const componentGroups: ComponentCategory[] = [
 const designNavSections: Array<{
   id: DesignNavSection
   label: string
+  mobileLabel: string
   description: string
 }> = [
   {
     id: "foundations",
     label: "파운데이션",
+    mobileLabel: "기초",
     description: "토큰과 레이아웃 기초",
   },
   {
     id: "components",
     label: "컴포넌트",
+    mobileLabel: "컴포넌트",
     description: "재사용 UI",
   },
   {
     id: "patterns",
     label: "패턴",
+    mobileLabel: "패턴",
     description: "조립된 상호작용",
   },
   {
     id: "examples",
     label: "예시 페이지",
+    mobileLabel: "예시",
     description: "화면 단위 샘플",
   },
 ]
@@ -1875,7 +1880,7 @@ function MobileComponentNav({
   return (
     <nav className="border-b border-black/[0.06] bg-white/66 px-3 py-3 backdrop-blur-2xl lg:hidden">
       <div className="mx-auto max-w-[28rem] space-y-3">
-        <div className="flex gap-1 overflow-x-auto rounded-[18px] bg-black/[0.045] p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="grid grid-cols-4 gap-1 rounded-[18px] bg-black/[0.045] p-1">
           {designNavSections.map((section) => {
             const selected = activeSection === section.id
 
@@ -1884,26 +1889,34 @@ function MobileComponentNav({
                 key={section.id}
                 type="button"
                 className={cn(
-                  "min-h-10 shrink-0 rounded-[14px] px-3 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
+                  "min-h-10 min-w-0 rounded-[14px] px-1.5 text-center text-[0.86rem] font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
                   selected
                     ? "bg-white text-foreground shadow-[var(--ds-elevation-1)]"
                     : "text-foreground/48"
                 )}
                 onClick={() => onSelectSection(section.id)}
               >
-                {section.label}
+                <span className="block truncate">{section.mobileLabel}</span>
               </button>
             )
           })}
         </div>
 
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-[22px] bg-white/64 p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
-          <label className="min-w-0">
-            <span className="mb-1 block truncate text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
+        <div className="rounded-[22px] bg-white/64 p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <span className="truncate text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
               {activeSection === "examples" ? "Example" : "Component"}
             </span>
+            {activeComponent ? (
+              <StatusBadge status={activeComponent.status} />
+            ) : null}
+          </div>
+          <label className="relative block min-w-0">
+            <span className="sr-only">
+              {activeSection === "examples" ? "예시 페이지" : "컴포넌트"} 선택
+            </span>
             <select
-              className="h-11 w-full rounded-full border border-black/[0.06] bg-white/82 px-3 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-[var(--ds-accent)]/25"
+              className="h-11 w-full appearance-none rounded-full border border-black/[0.06] bg-white/82 pr-11 pl-4 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-[var(--ds-accent)]/25"
               value={
                 activeSection === "examples" ? examplePage : activeComponentId
               }
@@ -1928,10 +1941,23 @@ function MobileComponentNav({
                     </option>
                   ))}
             </select>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-foreground/72"
+            >
+              <svg
+                viewBox="0 0 16 16"
+                className="size-4"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              >
+                <path d="m4 6 4 4 4-4" />
+              </svg>
+            </span>
           </label>
-          {activeComponent ? (
-            <StatusBadge status={activeComponent.status} />
-          ) : null}
         </div>
       </div>
     </nav>
