@@ -21,11 +21,12 @@
 
 ## 최소 명령어
 
-사용자가 기억할 명령어는 두 개뿐이다.
+사용자가 기억할 명령어는 세 개뿐이다.
 
 ```text
 /sprint
 /status
+/design-system
 ```
 
 그 외에는 그냥 자연어로 말하면 된다.
@@ -62,6 +63,29 @@
 예시:
 - 기존: `sprint1-oauth`
 - 새 실행: `sprint1-oauth-2`
+
+## 디자인 시스템 example 작업
+
+스크린샷이나 참고 설명을 바로 `/design-system/examples/<slug>` 예제로 만들 때는 별도 스프린트를 열지 않고 아래 명령을 쓴다.
+
+```text
+/design-system example:weekly-rewind-page brief:주간 회상 페이지 reference:<screenshot>
+```
+
+그러면 bot이:
+
+1. `design-system-<example>` thread를 만든다.
+2. 별도 worktree / branch를 만든다.
+3. 첨부와 설명을 분석해 바로 example 구현을 시작한다.
+4. 끝나면 `pnpm preview:vercel`로 preview URL을 만들고 확인 게이트를 띄운다.
+
+작업 원칙은 다음 순서다.
+
+- 같은 목적의 기존 컴포넌트를 먼저 쓴다.
+- 기존 컴포넌트와 조금만 다르면 새 컴포넌트보다 variant를 추가한다.
+- 정말 없는 패턴만 새 컴포넌트나 토큰으로 추가한다.
+
+확인 게이트에서는 `수정 더 하기`로 다시 구현 루프를 돌리거나, `완료, main 반영`으로 merge 단계에 넘긴다.
 
 스프린트를 아예 접고 싶으면 스레드 안의 `파기 후 종료` 버튼을 누르면 된다.
 한 번 더 확인한 뒤:
@@ -270,7 +294,7 @@ pnpm preview:demo
 이 명령은 active sprint branch들을 `codex/demo-preview`에 모은 뒤
 `/design-system` preview URL을 출력한다.
 
-`BLOCKED`가 되면 thread 안의 버튼이나 `/status`에서 `다시 시도`를 누르면 된다.
+`BLOCKED`가 되면 thread 안의 버튼이나 `/status`에서 `다음 단계로 진행`을 누르거나, 스레드에 필요한 방향을 말해 다시 이어가면 된다.
 
 ## 데모 확인 자료
 

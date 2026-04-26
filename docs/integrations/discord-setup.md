@@ -51,9 +51,12 @@ cp apps/discord-bridge/.env.example apps/discord-bridge/.env
 - `DISCORD_WORKTREE_ROOT`
 - `DISCORD_CODEX_MODEL`
 - `DISCORD_CODEX_TIMEOUT_MS`
+- `DISCORD_CODEX_STAGE_TIMEOUT_MS`
+- `DISCORD_DESIGN_SYSTEM_TIMEOUT_MS`
 
 `DISCORD_WORKTREE_ROOT`를 비워두면 기본값은 `~/.codex/worktrees/discord`다.
 `DISCORD_CODEX_MODEL`을 비워두면 기본값은 `gpt-5.4`다.
+긴 자동 작업의 기본 제한 시간은 90분이다.
 
 ## 4. 설치와 점검
 

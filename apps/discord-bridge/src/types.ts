@@ -25,6 +25,7 @@ export type SprintJobState = {
   summary?: string
   error?: string
   detailLines?: string[]
+  diagnosticLines?: string[]
 }
 
 export type SprintStageSummary = {
@@ -37,6 +38,16 @@ export type SprintPreviewDeployment = {
   url: string
   ready: boolean
   deployedAt: string
+}
+
+export type SprintWorkflowKind = "sprint" | "design_system"
+
+export type SprintReferenceAttachment = {
+  id: string
+  url: string
+  name: string
+  contentType?: string
+  size?: number
 }
 
 export type SprintThreadState = {
@@ -58,6 +69,9 @@ export type SprintThreadState = {
   stageStartedAt?: string
   latestStageSummary?: SprintStageSummary
   preview?: SprintPreviewDeployment
+  workflowKind?: SprintWorkflowKind
+  sourceBrief?: string
+  referenceAttachments?: SprintReferenceAttachment[]
   checkpointMessageId?: string
   activityMessageId?: string
   lastOperatorMessageId?: string

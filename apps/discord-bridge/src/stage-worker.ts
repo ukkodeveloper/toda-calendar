@@ -12,26 +12,29 @@ import { ensureSprintAssetsDir, ensureSprintDoc, getSprintAssetsDirRelativePath,
 const execFileAsync = promisify(execFile)
 const CODEX_MODEL = process.env.DISCORD_CODEX_MODEL?.trim() || "gpt-5.4"
 
+function readPositiveNumberEnv(name: string, fallback: number) {
+  const value = Number(process.env[name] ?? fallback)
+  return Number.isFinite(value) && value > 0 ? value : fallback
+}
+
+const DEFAULT_CODEX_STAGE_TIMEOUT_MS = readPositiveNumberEnv("DISCORD_CODEX_STAGE_TIMEOUT_MS", 90 * 60_000)
+const SHORT_CODEX_STAGE_TIMEOUT_MS = readPositiveNumberEnv("DISCORD_CODEX_SHORT_STAGE_TIMEOUT_MS", 5 * 60_000)
+
 function shellEscape(value: string) {
   return `'${value.replace(/'/g, `'"'"'`)}'`
 }
 
-function timeoutForStage(stage: SprintStage) {
+export function getCodexStageTimeoutMs(stage: SprintStage) {
   switch (stage) {
     case "DESIGN_PACK":
-      return 180_000
     case "DEMO_BUILD":
-      return 600_000
-    case "TECHNICAL_FREEZE":
-      return 180_000
     case "IMPLEMENTATION":
-      return 900_000
-    case "PREVIEW_REVIEW":
-      return 180_000
     case "MERGE":
-      return 600_000
+      return DEFAULT_CODEX_STAGE_TIMEOUT_MS
+    case "TECHNICAL_FREEZE":
+    case "PREVIEW_REVIEW":
     default:
-      return 180_000
+      return SHORT_CODEX_STAGE_TIMEOUT_MS
   }
 }
 
@@ -188,6 +191,7 @@ export async function runCodexStageWorker(params: {
   worktreePath: string
   state: SprintThreadState
   transcript: string
+  signal?: AbortSignal
 }) {
   ensureSprintDoc(params.worktreePath, params.state)
   ensureSprintAssetsDir(params.worktreePath, params.state)
@@ -213,8 +217,9 @@ export async function runCodexStageWorker(params: {
 
     await execFileAsync("/bin/bash", ["-lc", command], {
       cwd: params.worktreePath,
-      timeout: timeoutForStage(params.state.stage),
+      timeout: getCodexStageTimeoutMs(params.state.stage),
       maxBuffer: 10 * 1024 * 1024,
+      signal: params.signal,
     })
 
     return {

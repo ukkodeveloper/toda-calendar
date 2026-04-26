@@ -10,6 +10,7 @@ import {
   GatewayIntentBits,
   MessageFlags,
   Message,
+  type Attachment,
   type ButtonInteraction,
   type ChatInputCommandInteraction,
   type GuildTextBasedChannel,
@@ -21,11 +22,12 @@ import { BridgeHealthReporter } from "./health.js"
 import { ensureRuntimeDir, getBridgeHealthFile, getBridgeJobLogFile } from "./runtime-files.js"
 import { JobLogger } from "./job-log.js"
 import { ThreadStore } from "./thread-store.js"
-import type { SprintPreviewDeployment, SprintStage, SprintStageSummary, SprintStatus, SprintThreadState } from "./types.js"
+import type { SprintPreviewDeployment, SprintReferenceAttachment, SprintStage, SprintStageSummary, SprintStatus, SprintThreadState } from "./types.js"
 import { getBranchName, getRunSprintKey, getSprintKey, getWorktreeName, getWorktreePath, ensureGitWorktree } from "./worktree.js"
 import { runCodexDiscussionReply, runCodexStageTransitionSummary } from "./codex-runner.js"
 import { runVercelPreviewDeployment } from "./preview-deployer.js"
-import { runCodexStageWorker } from "./stage-worker.js"
+import { getCodexStageTimeoutMs, runCodexStageWorker } from "./stage-worker.js"
+import { getDesignSystemStageTimeoutMs, runDesignSystemStageWorker } from "./design-system-worker.js"
 import { getSprintAssetsDirAbsolutePath, getSprintDocAbsolutePath } from "./sprint-files.js"
 
 const env = loadEnv()
@@ -43,11 +45,16 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 })
 const runningAutomationThreads = new Set<string>()
+const automationAbortControllers = new Map<string, AbortController>()
+const queuedAutomationThreads = new Set<string>()
+const MAX_AUTONOMOUS_STAGE_WORKERS = env.DISCORD_AUTONOMOUS_STAGE_CONCURRENCY
+let activeAutomationWorkerCount = 0
 const DISCORD_MESSAGE_LIMIT = 1_900
 
 const GATE_APPROVE_ID = "sprint:gate:approve"
 const PREVIEW_REVISE_ID = "sprint:preview:revise"
 const PREVIEW_APPROVE_ID = "sprint:preview:approve"
+const NEXT_STAGE_ID = "sprint:stage:next"
 const AUTONOMOUS_RETRY_ID = "sprint:job:retry"
 const TERMINATE_REQUEST_ID = "sprint:terminate:request"
 const TERMINATE_CONFIRM_PREFIX = "sprint:terminate:confirm"
@@ -348,6 +355,90 @@ function nextAutomaticStage(stage: SprintStage): SprintStage | null {
   }
 }
 
+function nextTextCommandStage(stage: SprintStage): SprintStage | null {
+  switch (stage) {
+    case "DISCOVERY_WORKSHOP":
+      return "DESIGN_PACK"
+    case "DESIGN_PACK":
+      return "DEMO_BUILD"
+    case "DEMO_BUILD":
+      return "DEMO_REVIEW"
+    case "DEMO_REVIEW":
+      return "TECHNICAL_FREEZE"
+    case "TECHNICAL_FREEZE":
+      return "IMPLEMENTATION"
+    case "IMPLEMENTATION":
+      return "PREVIEW_REVIEW"
+    case "PREVIEW_REVIEW":
+      return "MERGE"
+    case "MERGE":
+      return "DONE"
+    default:
+      return null
+  }
+}
+
+type ThreadTextCommand = "NEXT_STAGE" | "RETRY_STAGE" | "PREVIEW_REVISE" | "PREVIEW_APPROVE"
+
+function compactThreadCommand(content: string) {
+  return content
+    .trim()
+    .toLowerCase()
+    .replace(/[`'"“”‘’.,!?~…\s]/g, "")
+}
+
+function isShortThreadCommand(content: string) {
+  const trimmed = content.trim()
+  return trimmed.length > 0 && trimmed.length <= 80 && !trimmed.includes("\n")
+}
+
+function parseThreadTextCommand(content: string, state: SprintThreadState): ThreadTextCommand | null {
+  if (!isShortThreadCommand(content)) {
+    return null
+  }
+
+  const compact = compactThreadCommand(content)
+
+  if (
+    compact === "다시시도" ||
+    compact === "재시도" ||
+    compact === "retry" ||
+    compact.includes("다시시도해") ||
+    compact.includes("재시도해")
+  ) {
+    return "RETRY_STAGE"
+  }
+
+  if (state.stage === "PREVIEW_REVIEW") {
+    if (compact.includes("수정더하기") || compact.includes("수정더해") || compact.includes("다시수정") || compact.startsWith("revise")) {
+      return "PREVIEW_REVISE"
+    }
+
+    if (compact.includes("main반영") || compact.includes("메인반영") || compact.includes("완료main") || compact.includes("머지") || compact === "merge") {
+      return "PREVIEW_APPROVE"
+    }
+  }
+
+  const nextStageCommands = [
+    "다음단계로",
+    "다음단계진행",
+    "다음단계넘어",
+    "다음으로",
+    "다음진행",
+    "계속진행",
+    "진행해줘",
+    "진행해볼래",
+    "넘어가",
+    "넘겨줘",
+  ]
+
+  if (compact === "다음단계" || compact === "approve" || compact === "continue" || nextStageCommands.some((command) => compact.includes(command))) {
+    return "NEXT_STAGE"
+  }
+
+  return null
+}
+
 function getGateConfig(stage: SprintStage) {
   switch (stage) {
     case "DISCOVERY_WORKSHOP":
@@ -365,6 +456,60 @@ function getGateConfig(stage: SprintStage) {
     default:
       return null
   }
+}
+
+function isDesignSystemWorkflow(state: SprintThreadState) {
+  return state.workflowKind === "design_system"
+}
+
+function workflowName(state: SprintThreadState) {
+  return isDesignSystemWorkflow(state) ? "디자인 시스템 example" : "스프린트"
+}
+
+function workflowStageLabel(state: SprintThreadState, stage = state.stage) {
+  if (!isDesignSystemWorkflow(state)) {
+    return stageLabel(stage)
+  }
+
+  switch (stage) {
+    case "IMPLEMENTATION":
+      return "1. example 구현"
+    case "PREVIEW_REVIEW":
+      return "2. preview 확인 [게이트]"
+    case "MERGE":
+      return "3. main 반영"
+    case "DONE":
+      return "4. 완료"
+    default:
+      return stageLabel(stage)
+  }
+}
+
+function workflowStageSummary(state: SprintThreadState) {
+  if (!isDesignSystemWorkflow(state)) {
+    return stageSummary(state.stage)
+  }
+
+  switch (state.stage) {
+    case "IMPLEMENTATION":
+      return "첨부와 설명을 분석해서 `/design-system/examples` page example을 구현해요."
+    case "PREVIEW_REVIEW":
+      return "배포된 example을 보고 더 고칠지, main에 반영할지 정해요."
+    case "MERGE":
+      return "최종 확인 후 main에 반영해요."
+    case "DONE":
+      return "이 디자인 시스템 example 작업은 마무리됐어요."
+    default:
+      return stageSummary(state.stage)
+  }
+}
+
+function normalizeExampleSlug(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 }
 
 function buildStageButtons(state: SprintThreadState, disabled = false) {
@@ -398,16 +543,6 @@ function buildStageButtons(state: SprintThreadState, disabled = false) {
     )
   }
 
-  if (!gate && state.status === "BLOCKED" && isAutonomousStage(state.stage)) {
-    row.addComponents(
-      new ButtonBuilder()
-        .setCustomId(AUTONOMOUS_RETRY_ID)
-        .setLabel("다시 시도")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(disabled),
-    )
-  }
-
   row.addComponents(
     new ButtonBuilder()
       .setCustomId(TERMINATE_REQUEST_ID)
@@ -427,11 +562,106 @@ function formatPreviewReviewLine(preview?: SprintPreviewDeployment) {
   return `preview: ${preview.url}${preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`
 }
 
+function buildPreviewRouteUrl(preview: SprintPreviewDeployment, route: string) {
+  return `${preview.url.replace(/\/$/, "")}${route.startsWith("/") ? route : `/${route}`}`
+}
+
+function buildLocalDevRouteUrl(route: string) {
+  return `${env.DISCORD_LOCAL_DEV_ORIGIN.replace(/\/$/, "")}${route.startsWith("/") ? route : `/${route}`}`
+}
+
+function getDemoRoute(state: SprintThreadState) {
+  return `/design-system/examples/${isDesignSystemWorkflow(state) ? state.featureSlug : state.sprintKey}`
+}
+
+function shouldDeployPreviewFromMessage(state: SprintThreadState, content: string) {
+  if (state.stage !== "DEMO_REVIEW" && state.stage !== "PREVIEW_REVIEW") {
+    return false
+  }
+
+  const compact = compactThreadCommand(content)
+
+  if (!compact) {
+    return false
+  }
+
+  return compact.includes("vercel") || compact.includes("외부") || compact.includes("배포")
+}
+
+function shouldReplyWithReviewUrl(state: SprintThreadState, content: string) {
+  if (state.stage !== "DEMO_REVIEW" && state.stage !== "PREVIEW_REVIEW") {
+    return false
+  }
+
+  const compact = compactThreadCommand(content)
+
+  if (!compact) {
+    return false
+  }
+
+  return (
+    shouldDeployPreviewFromMessage(state, content) ||
+    compact.includes("preview") ||
+    compact.includes("프리뷰") ||
+    compact.includes("url") ||
+    compact.includes("링크") ||
+    compact.includes("localhost") ||
+    compact.includes("로컬")
+  )
+}
+
+function buildReviewUrlReply(state: SprintThreadState) {
+  const route = state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/"
+  const lines = [
+    "맞아요. 확인 URL은 이걸 보면 돼요.",
+    `- local: ${buildLocalDevRouteUrl(route)}`,
+  ]
+
+  if (state.stage === "DEMO_REVIEW") {
+    lines.push(`- design-system: ${buildLocalDevRouteUrl("/design-system")}`)
+  }
+
+  if (state.preview?.url) {
+    lines.push(`- external preview: ${buildPreviewRouteUrl(state.preview, route)}`)
+  }
+
+  return lines.join("\n")
+}
+
+function workflowStatusLabel(state: SprintThreadState) {
+  if (state.status === "BLOCKED") {
+    return "멈춤"
+  }
+
+  if (state.job?.status === "RUNNING") {
+    switch (state.stage) {
+      case "DESIGN_PACK":
+        return "흐름 정리 중"
+      case "DEMO_BUILD":
+        return "데모 구현 중"
+      case "TECHNICAL_FREEZE":
+        return "구현 준비 중"
+      case "IMPLEMENTATION":
+        return isDesignSystemWorkflow(state) ? "example 구현 중" : "구현 중"
+      case "MERGE":
+        return "main 반영 중"
+      default:
+        return "작업 중"
+    }
+  }
+
+  if (isAutonomousStage(state.stage) && state.status === "ACTIVE") {
+    return "작업 준비 중"
+  }
+
+  return statusLabel(state.status)
+}
+
 function buildActivityCard(state: SprintThreadState) {
   const lines = [
     "**진행 현황**",
-    `- 단계: ${stageLabel(state.stage)}`,
-    `- 상태: ${statusLabel(state.status)}`,
+    `- 단계: ${workflowStageLabel(state)}`,
+    `- 상태: ${workflowStatusLabel(state)}`,
   ]
 
   if (state.preview?.url) {
@@ -452,13 +682,16 @@ function buildActivityCard(state: SprintThreadState) {
   } else if (state.job?.status === "FAILED" && state.job.error) {
     lines.push("", "막힌 이유")
     lines.push(`- ${state.job.error}`)
+    if (state.job.diagnosticLines?.length) {
+      lines.push(...state.job.diagnosticLines.map((line) => `- ${line}`))
+    }
   } else if (state.job?.summary) {
     lines.push("", "최근 작업")
     lines.push(`- ${state.job.summary}`)
   }
 
   if (state.latestStageSummary?.content) {
-    lines.push("", `${stageLabel(state.latestStageSummary.stage)}에서 정리된 내용`)
+    lines.push("", `${workflowStageLabel(state, state.latestStageSummary.stage)}에서 정리된 내용`)
     lines.push(state.latestStageSummary.content)
   }
 
@@ -510,11 +743,11 @@ function buildStageControlCard(state: SprintThreadState) {
     content:
       state.stage === "PREVIEW_REVIEW"
         ? [
-            `지금은 **${stageLabel(state.stage)}** 단계예요.`,
+            `지금은 **${workflowStageLabel(state)}** 단계예요.`,
             ...buildLatestStageSummarySection(state.latestStageSummary),
             "",
             `- ${formatPreviewReviewLine(state.preview)}`,
-            `- ${stageSummary(state.stage)}`,
+            `- ${workflowStageSummary(state)}`,
             "",
             "배포된 화면을 보고 결정하면 돼요.",
             "- 더 고칠 게 있으면 `수정 더 하기`",
@@ -523,22 +756,41 @@ function buildStageControlCard(state: SprintThreadState) {
           ].join("\n")
         : gate
           ? [
-          `지금은 **${stageLabel(state.stage)}** 단계예요.`,
+          `지금은 **${workflowStageLabel(state)}** 단계예요.`,
           ...buildLatestStageSummarySection(state.latestStageSummary),
           "",
           `지금 정할 것: ${gate.gateLabel}`,
-          `- ${stageSummary(state.stage)}`,
+          `- ${workflowStageSummary(state)}`,
+          ...(state.stage === "DEMO_REVIEW"
+            ? [
+                "",
+                `이번 데모: ${buildLocalDevRouteUrl(getDemoRoute(state))}`,
+                `전체 목록: ${buildLocalDevRouteUrl("/design-system")}`,
+              ]
+            : []),
+          ...(state.preview
+            ? [
+                "",
+                `external preview: ${state.preview.url}${state.preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`,
+                ...(state.stage === "DEMO_REVIEW" ? [`이번 데모: ${buildPreviewRouteUrl(state.preview, getDemoRoute(state))}`] : []),
+              ]
+            : []),
           "",
           "계속 이야기하다가 방향이 정리되면 버튼을 눌러주세요.",
           "이번 스프린트를 여기서 접고 싶으면 `파기 후 종료`를 누르면 돼요.",
           ].join("\n")
           : [
-            `지금은 **${stageLabel(state.stage)}** 단계예요.`,
-            `- ${stageSummary(state.stage)}`,
+            `지금은 **${workflowStageLabel(state)}** 단계예요.`,
+            `상태: ${workflowStatusLabel(state)}`,
+            `- ${workflowStageSummary(state)}`,
             ...buildLatestStageSummarySection(state.latestStageSummary),
+            ...(state.job?.status === "RUNNING" && state.job.detailLines?.length
+              ? ["", "지금 하는 일", ...state.job.detailLines.map((line) => `- ${line}`)]
+              : []),
             "",
-            "이 구간은 내가 알아서 진행할게요.",
-            "다만 여기서 멈추고 싶다면 `파기 후 종료`로 정리할 수 있어요.",
+            "이 단계는 사람이 승인하는 게이트가 아니에요.",
+            state.status === "BLOCKED" ? "필요한 방향을 스레드에 남기면 다시 이어갈게요." : "작업이 끝나면 다음 확인 단계로 자동 전환돼요.",
+            "중단하려면 `파기 후 종료`로 정리할 수 있어요.",
           ].join("\n"),
     components: buildStageButtons(state),
   }
@@ -547,10 +799,10 @@ function buildStageControlCard(state: SprintThreadState) {
 function buildExistingSprintChoice(state: SprintThreadState) {
   return {
     content: [
-      "같은 스프린트가 이미 열려 있어요.",
+      `같은 ${workflowName(state)} 작업이 이미 열려 있어요.`,
       `- 스레드: <#${state.threadId}>`,
       `- 실행: ${formatRunLabel(state)}`,
-      `- 단계: ${stageLabel(state.stage)}`,
+      `- 단계: ${workflowStageLabel(state)}`,
       `- 상태: ${statusLabel(state.status)}`,
       "",
       "어떻게 할까요?",
@@ -580,18 +832,18 @@ function formatDetailStatus(state: SprintThreadState) {
   const jobDetailLine = state.job?.detailLines?.length
     ? ["현재 작업 단계:", ...state.job.detailLines.map((line) => `- ${line}`)].join("\n")
     : null
-  const stageSummaryLine = state.latestStageSummary?.content
-    ? [`직전 단계 요약 (${stageLabel(state.latestStageSummary.stage)}):`, state.latestStageSummary.content].join("\n")
+  const jobDiagnosticLine = state.job?.diagnosticLines?.length
+    ? ["오류 진단:", ...state.job.diagnosticLines.map((line) => `- ${line}`)].join("\n")
     : null
   const previewLine = state.preview ? `preview URL: ${state.preview.url}${state.preview.ready ? "" : " (준비 중일 수 있어요)"}` : null
 
   return [
-    `스프린트: \`${state.sprintId}/${state.featureSlug}\``,
+    `${workflowName(state)}: \`${state.sprintId}/${state.featureSlug}\``,
     `실행: ${formatRunLabel(state)}`,
-    `현재 단계: ${stageLabel(state.stage)}`,
+    `현재 단계: ${workflowStageLabel(state)}`,
     `상태: \`${state.status}\` (${statusLabel(state.status)})`,
     jobLine,
-    `다음 사람 체크포인트: ${nextGate ? stageLabel(nextGate) : "없음"}`,
+    `다음 사람 체크포인트: ${nextGate ? workflowStageLabel(state, nextGate) : "없음"}`,
     `worktree: \`${state.worktreeName}\``,
     `branch: \`${state.branchName}\``,
     `codex session: ${state.codexSessionId ? `\`${state.codexSessionId}\`` : "아직 생성 전"}`,
@@ -601,7 +853,10 @@ function formatDetailStatus(state: SprintThreadState) {
     jobDetailLine,
     jobSummaryLine,
     jobErrorLine,
-    stageSummaryLine,
+    jobDiagnosticLine,
+    state.latestStageSummary?.content
+      ? [`직전 단계 요약 (${workflowStageLabel(state, state.latestStageSummary.stage)}):`, state.latestStageSummary.content].join("\n")
+      : null,
   ]
     .filter(Boolean)
     .join("\n")
@@ -615,7 +870,7 @@ function formatChannelSummary(states: SprintThreadState[]) {
   const sorted = [...states].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
 
   return [
-    `현재 등록된 스프린트: ${sorted.length}개`,
+    `현재 등록된 작업: ${sorted.length}개`,
     "",
     ...sorted.map((state) => {
       const nextGate = nextHumanGate(state.stage)
@@ -623,9 +878,9 @@ function formatChannelSummary(states: SprintThreadState[]) {
       return [
         `- <#${state.threadId}>`,
         `  실행: ${formatRunLabel(state)}`,
-        `  단계: ${stageLabel(state.stage)} / 상태: ${statusLabel(state.status)}`,
+        `  단계: ${workflowStageLabel(state)} / 상태: ${statusLabel(state.status)}`,
         `  작업: ${state.job?.status ?? "IDLE"}${state.job?.label ? ` (${state.job.label})` : ""}`,
-        `  다음 체크포인트: ${nextGate ? stageLabel(nextGate) : "없음"}`,
+        `  다음 체크포인트: ${nextGate ? workflowStageLabel(state, nextGate) : "없음"}`,
         `  worktree: \`${state.worktreeName}\` / branch: \`${state.branchName}\``,
         ...(state.preview ? [`  preview: ${state.preview.url}`] : []),
       ].join("\n")
@@ -742,8 +997,8 @@ function buildAutonomousStageReply(state: SprintThreadState) {
   const nextGate = nextHumanGate(state.stage)
 
   return [
-    `지금은 **${stageLabel(state.stage)}** 단계예요.`,
-    `- ${stageSummary(state.stage)}`,
+    `지금은 **${workflowStageLabel(state)}** 단계예요.`,
+    `- ${workflowStageSummary(state)}`,
     ...buildLatestStageSummarySection(state.latestStageSummary),
     "",
     "이 구간은 내가 알아서 진행할게요.",
@@ -752,7 +1007,7 @@ function buildAutonomousStageReply(state: SprintThreadState) {
     "- 막히는 결정이 생길 때",
     "- 검증이 끝났을 때",
     "- 사람이 확인해야 할 게 생길 때",
-    `- 다음 체크포인트: ${nextGate ? `\`${nextGate}\`` : "없음"}`,
+    `- 다음 체크포인트: ${nextGate ? workflowStageLabel(state, nextGate) : "없음"}`,
   ].join("\n")
 }
 
@@ -760,7 +1015,7 @@ function buildAutonomousStageStartReply(state: SprintThreadState) {
   switch (state.stage) {
     case "DESIGN_PACK":
       return [
-        `좋아요. 이제 **${stageLabel(state.stage)}** 단계로 넘어가요.`,
+        `좋아요. 이제 **${workflowStageLabel(state)}** 단계로 넘어가요.`,
         ...buildLatestStageSummarySection(state.latestStageSummary),
         "",
         "내가 지금 할 일",
@@ -775,7 +1030,7 @@ function buildAutonomousStageStartReply(state: SprintThreadState) {
       ].join("\n")
     case "DEMO_BUILD":
       return [
-        `좋아요. 이제 **${stageLabel(state.stage)}** 단계로 넘어가요.`,
+        `좋아요. 이제 **${workflowStageLabel(state)}** 단계로 넘어가요.`,
         ...buildLatestStageSummarySection(state.latestStageSummary),
         "",
         "내가 지금 할 일",
@@ -790,7 +1045,7 @@ function buildAutonomousStageStartReply(state: SprintThreadState) {
       ].join("\n")
     case "TECHNICAL_FREEZE":
       return [
-        `좋아요. 이제 **${stageLabel(state.stage)}** 단계로 넘어가요.`,
+        `좋아요. 이제 **${workflowStageLabel(state)}** 단계로 넘어가요.`,
         ...buildLatestStageSummarySection(state.latestStageSummary),
         "",
         "내가 지금 할 일",
@@ -808,17 +1063,17 @@ function buildAutonomousStageStartReply(state: SprintThreadState) {
       return buildAutonomousStageReply(state)
     case "PREVIEW_REVIEW":
       return [
-        `좋아요. 이제 **${stageLabel(state.stage)}** 단계예요.`,
+        `좋아요. 이제 **${workflowStageLabel(state)}** 단계예요.`,
         ...buildLatestStageSummarySection(state.latestStageSummary),
         "",
         `- ${formatPreviewReviewLine(state.preview)}`,
         "- 링크를 직접 보고 더 고칠지, 이대로 반영할지 정하면 돼요.",
       ].join("\n")
     case "DONE":
-      return "이번 스프린트는 끝났어요."
+      return isDesignSystemWorkflow(state) ? "이 디자인 시스템 example 작업은 끝났어요." : "이번 스프린트는 끝났어요."
     case "DISCOVERY_WORKSHOP":
     case "DEMO_REVIEW":
-      return `지금은 **${stageLabel(state.stage)}** 단계예요.`
+      return `지금은 **${workflowStageLabel(state)}** 단계예요.`
   }
 }
 
@@ -864,19 +1119,7 @@ async function buildThreadTranscript(thread: ThreadChannel, currentMessageId: st
     .sort((left, right) => left.createdTimestamp - right.createdTimestamp)
     .slice(-8)
 
-  return ordered
-    .map((message) => {
-      const role = message.author.bot ? "bot" : "user"
-      const content = message.content.trim()
-
-      if (!content) {
-        return null
-      }
-
-      return `${role}: ${content}`
-    })
-    .filter(Boolean)
-    .join("\n")
+  return ordered.map(formatMessageForTranscript).filter(Boolean).join("\n")
 }
 
 async function buildAutomationTranscript(thread: ThreadChannel) {
@@ -885,19 +1128,7 @@ async function buildAutomationTranscript(thread: ThreadChannel) {
     .filter((message) => !message.system)
     .sort((left, right) => left.createdTimestamp - right.createdTimestamp)
 
-  return ordered
-    .map((message) => {
-      const role = message.author.bot ? "bot" : "user"
-      const content = message.content.trim()
-
-      if (!content) {
-        return null
-      }
-
-      return `${role}: ${content}`
-    })
-    .filter(Boolean)
-    .join("\n")
+  return ordered.map(formatMessageForTranscript).filter(Boolean).join("\n")
 }
 
 async function buildStageTranscript(thread: ThreadChannel, stageStartedAt?: string, currentMessageId?: string) {
@@ -910,19 +1141,26 @@ async function buildStageTranscript(thread: ThreadChannel, stageStartedAt?: stri
     .filter((message) => !hasStageStartedAt || message.createdTimestamp >= stageStartedTs)
     .sort((left, right) => left.createdTimestamp - right.createdTimestamp)
 
-  return ordered
-    .map((message) => {
-      const role = message.author.bot ? "bot" : "user"
-      const content = message.content.trim()
+  return ordered.map(formatMessageForTranscript).filter(Boolean).join("\n")
+}
 
-      if (!content) {
-        return null
-      }
+function formatMessageForTranscript(message: Message) {
+  const role = message.author.bot ? "bot" : "user"
+  const content = message.content.trim()
+  const attachments = [...message.attachments.values()].map((attachment) =>
+    [
+      `attachment: ${attachment.name}`,
+      `type=${attachment.contentType ?? "unknown"}`,
+      `url=${attachment.url}`,
+    ].join(" "),
+  )
+  const body = [content, ...attachments].filter(Boolean).join("\n")
 
-      return `${role}: ${content}`
-    })
-    .filter(Boolean)
-    .join("\n")
+  if (!body) {
+    return null
+  }
+
+  return `${role}: ${body}`
 }
 
 function buildFallbackStageSummary(params: {
@@ -1060,6 +1298,108 @@ function summarizeJobText(text: string, maxLength = 180) {
   return compact.length <= maxLength ? compact : `${compact.slice(0, maxLength - 3)}...`
 }
 
+type StageFailureReport = {
+  summary: string
+  details: string[]
+  logDetail: string
+}
+
+function formatDuration(ms: number) {
+  const minutes = Math.round(ms / 60_000)
+
+  if (minutes >= 1) {
+    return `${minutes}분`
+  }
+
+  return `${Math.round(ms / 1000)}초`
+}
+
+function getErrorRecord(error: unknown) {
+  return typeof error === "object" && error !== null ? (error as Record<string, unknown>) : {}
+}
+
+function getStringField(record: Record<string, unknown>, key: string) {
+  const value = record[key]
+  return typeof value === "string" && value.trim() ? value.trim() : undefined
+}
+
+function getBooleanField(record: Record<string, unknown>, key: string) {
+  const value = record[key]
+  return typeof value === "boolean" ? value : undefined
+}
+
+function getExitCode(record: Record<string, unknown>) {
+  const value = record.code
+  return typeof value === "number" || typeof value === "string" ? String(value) : undefined
+}
+
+function getOutputTail(value: unknown, maxLines = 4) {
+  const text =
+    typeof value === "string"
+      ? value
+      : Buffer.isBuffer(value)
+        ? value.toString("utf8")
+        : undefined
+
+  if (!text?.trim()) {
+    return undefined
+  }
+
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(-maxLines)
+    .join(" / ")
+}
+
+function timeoutForState(state: SprintThreadState) {
+  return isDesignSystemWorkflow(state) ? getDesignSystemStageTimeoutMs() : getCodexStageTimeoutMs(state.stage)
+}
+
+function describeAutonomousStageError(error: unknown, state: SprintThreadState): StageFailureReport {
+  const record = getErrorRecord(error)
+  const message = error instanceof Error ? error.message : String(error || "알 수 없는 오류")
+  const name = error instanceof Error ? error.name : getStringField(record, "name")
+  const code = getExitCode(record)
+  const signal = getStringField(record, "signal")
+  const killed = getBooleanField(record, "killed")
+  const cmd = getStringField(record, "cmd")
+  const stderrTail = getOutputTail(record.stderr)
+  const stdoutTail = getOutputTail(record.stdout, 2)
+  const timeoutMs = timeoutForState(state)
+
+  let summary: string
+
+  if (name === "AbortError") {
+    summary = "작업 중단됨: 새 단계로 넘기거나 재시도하면서 이전 Codex 실행을 중단했어요."
+  } else if (killed && signal === "SIGTERM") {
+    summary = `시간 초과: ${workflowStageLabel(state)} worker가 ${formatDuration(timeoutMs)} 제한을 넘겨 종료됐어요.`
+  } else if (signal) {
+    summary = `프로세스 종료: Codex worker가 signal ${signal}로 멈췄어요.`
+  } else if (code) {
+    summary = `프로세스 실패: Codex worker가 exit code ${code}로 종료됐어요.`
+  } else {
+    summary = `실행 실패: ${summarizeJobText(message, 220)}`
+  }
+
+  const details = [
+    code ? `exit code: ${code}` : null,
+    signal ? `signal: ${signal}` : null,
+    killed !== undefined ? `killed: ${String(killed)}` : null,
+    cmd ? `command: ${summarizeJobText(cmd, 260)}` : null,
+    stderrTail ? `stderr: ${summarizeJobText(stderrTail, 420)}` : null,
+    stdoutTail ? `stdout: ${summarizeJobText(stdoutTail, 260)}` : null,
+    !stderrTail && !stdoutTail && message !== summary ? `message: ${summarizeJobText(message, 420)}` : null,
+  ].filter(Boolean) as string[]
+
+  return {
+    summary,
+    details,
+    logDetail: [summary, ...details].join("\n"),
+  }
+}
+
 function buildRunningJobState(state: SprintThreadState) {
   const timestamp = nowIso()
 
@@ -1068,7 +1408,7 @@ function buildRunningJobState(state: SprintThreadState) {
     job: {
       status: "RUNNING" as const,
       stage: state.stage,
-      label: stageLabel(state.stage),
+      label: workflowStageLabel(state),
       startedAt: state.job?.status === "RUNNING" && state.job.stage === state.stage ? state.job.startedAt ?? timestamp : timestamp,
       updatedAt: timestamp,
       summary: state.job?.summary,
@@ -1079,7 +1419,7 @@ function buildRunningJobState(state: SprintThreadState) {
   }
 }
 
-function buildFailedJobState(state: SprintThreadState, error: string) {
+function buildFailedJobState(state: SprintThreadState, failure: StageFailureReport) {
   const timestamp = nowIso()
 
   return {
@@ -1088,15 +1428,48 @@ function buildFailedJobState(state: SprintThreadState, error: string) {
     job: {
       status: "FAILED" as const,
       stage: state.stage,
-      label: stageLabel(state.stage),
+      label: workflowStageLabel(state),
       startedAt: state.job?.startedAt ?? timestamp,
       updatedAt: timestamp,
       summary: state.job?.summary,
-      error: summarizeJobText(error, 240),
+      error: summarizeJobText(failure.summary, 420),
       detailLines: state.job?.detailLines,
+      diagnosticLines: failure.details.map((line) => summarizeJobText(line, 420)),
     },
     updatedAt: timestamp,
   }
+}
+
+function isCurrentAutonomousJob(latestState: SprintThreadState | undefined, runningState: SprintThreadState) {
+  return (
+    latestState?.stage === runningState.stage &&
+    latestState.status === "ACTIVE" &&
+    latestState.stageStartedAt === runningState.stageStartedAt &&
+    latestState.job?.status === "RUNNING" &&
+    latestState.job.stage === runningState.job?.stage &&
+    latestState.job.startedAt === runningState.job?.startedAt
+  )
+}
+
+function logDiscardedAutonomousJob(runningState: SprintThreadState, detail: string) {
+  jobLogger.append({
+    at: nowIso(),
+    threadId: runningState.threadId,
+    sprintKey: runningState.sprintKey,
+    stage: runningState.stage,
+    kind: "job.discarded",
+    detail,
+  })
+}
+
+function abortRunningAutonomousStage(threadId: string) {
+  const controller = automationAbortControllers.get(threadId)
+
+  if (!controller || controller.signal.aborted) {
+    return
+  }
+
+  controller.abort()
 }
 
 async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintThreadState, reply: string) {
@@ -1106,7 +1479,7 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
     job: {
       status: "IDLE" as const,
       stage: state.stage,
-      label: stageLabel(state.stage),
+      label: workflowStageLabel(state),
       startedAt: state.job?.startedAt,
       updatedAt: timestamp,
       summary: summarizeJobText(reply),
@@ -1151,6 +1524,10 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
       stage: "DEMO_REVIEW",
       status: "WAITING_FOR_APPROVAL",
       latestStageSummary: stageSummary,
+      job: {
+        ...baseState.job,
+        detailLines: ["데모 구현 완료", "로컬 dev URL에서 데모 흐름을 확인하면 돼요."],
+      },
       stageStartedAt: timestamp,
       checkpointMessageId: undefined,
     }
@@ -1161,8 +1538,9 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
       thread,
       [
         "데모를 준비했어요. 이제 실제 흐름을 보고 방향만 확인하면 돼요.",
-        `- 전체 목록: \`/design-system\``,
-        `- 이번 데모: \`/design-system/examples/${state.sprintKey}\``,
+        `- 전체 목록: ${buildLocalDevRouteUrl("/design-system")}`,
+        `- 이번 데모: ${buildLocalDevRouteUrl(getDemoRoute(state))}`,
+        "- 외부에서 봐야 하면 스레드에 `Vercel preview 배포해줘`라고 말하면 돼요.",
         ...buildLatestStageSummarySection(stageSummary),
       ].join("\n"),
     )
@@ -1245,6 +1623,30 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
   }
 
   if (state.stage === "MERGE") {
+    const mergeNeedsHuman = reply.includes("여기서 사람이 확인해야 해요") || /\bblocker\b/i.test(reply)
+
+    if (mergeNeedsHuman) {
+      const blockedState: SprintThreadState = {
+        ...baseState,
+        status: "BLOCKED",
+        job: {
+          status: "FAILED",
+          stage: state.stage,
+          label: workflowStageLabel(state),
+          startedAt: state.job?.startedAt,
+          updatedAt: timestamp,
+          summary: summarizeJobText(reply),
+          error: summarizeJobText(reply, 240),
+          detailLines: ["main 반영 확인 필요"],
+        },
+      }
+
+      store.upsert(blockedState)
+      await sendChunkedThreadMessage(thread, reply)
+      await sendChunkedThreadMessage(thread, "main 반영이 막혀서 여기서 멈췄어요. `/status`로 상태를 확인하고 필요한 정리를 한 뒤 다시 이어가면 돼요.")
+      return postStageControlMessage(thread, blockedState)
+    }
+
     const stageSummary = await summarizeStageTransition({
       thread,
       state,
@@ -1288,6 +1690,7 @@ async function runAutonomousStageCycle(threadId: string) {
   }
 
   runningAutomationThreads.add(threadId)
+  let rescheduleAfterRelease = false
 
   try {
     while (true) {
@@ -1307,6 +1710,7 @@ async function runAutonomousStageCycle(threadId: string) {
       let runningState: SprintThreadState = withJobDetail(buildRunningJobState(state), ["작업 준비 중", "worktree 상태를 확인하고 있어요."])
       store.upsert(runningState)
       runningState = await syncActivityCard(thread, runningState)
+      await refreshStoredControlMessage(thread, runningState)
       jobLogger.append({
         at: nowIso(),
         threadId: runningState.threadId,
@@ -1325,17 +1729,36 @@ async function runAutonomousStageCycle(threadId: string) {
 
         runningState = withJobDetail(runningState, [
           "worktree 준비 완료",
-          `${stageLabel(runningState.stage)} 작업을 Codex가 진행 중이에요.`,
+          `${workflowStageLabel(runningState)} 작업을 Codex가 진행 중이에요.`,
         ])
         store.upsert(runningState)
         runningState = await syncActivityCard(thread, runningState)
+        await refreshStoredControlMessage(thread, runningState)
 
         const transcript = await buildAutomationTranscript(thread)
-        const result = await runCodexStageWorker({
-          worktreePath: runningState.worktreePath,
-          state: runningState,
-          transcript,
-        })
+        const abortController = new AbortController()
+        automationAbortControllers.set(threadId, abortController)
+        const result = isDesignSystemWorkflow(runningState)
+          ? await runDesignSystemStageWorker({
+              worktreePath: runningState.worktreePath,
+              state: runningState,
+              transcript,
+              references: runningState.referenceAttachments ?? [],
+              signal: abortController.signal,
+            })
+          : await runCodexStageWorker({
+              worktreePath: runningState.worktreePath,
+              state: runningState,
+              transcript,
+              signal: abortController.signal,
+            })
+        automationAbortControllers.delete(threadId)
+
+        if (!isCurrentAutonomousJob(store.get(threadId), runningState)) {
+          rescheduleAfterRelease = true
+          logDiscardedAutonomousJob(runningState, "stage changed before worker completed")
+          break
+        }
 
         const nextState = await advanceAfterAutonomousStage(thread, runningState, result.reply)
         jobLogger.append({
@@ -1351,8 +1774,16 @@ async function runAutonomousStageCycle(threadId: string) {
           break
         }
       } catch (error) {
-        const message = error instanceof Error ? error.message : "알 수 없는 오류"
-        const failedState = buildFailedJobState(runningState, message)
+        automationAbortControllers.delete(threadId)
+
+        if (!isCurrentAutonomousJob(store.get(threadId), runningState)) {
+          rescheduleAfterRelease = true
+          logDiscardedAutonomousJob(runningState, "stage changed before worker failed")
+          break
+        }
+
+        const failure = describeAutonomousStageError(error, runningState)
+        const failedState = buildFailedJobState(runningState, failure)
         store.upsert(failedState)
         await syncActivityCard(thread, failedState)
         jobLogger.append({
@@ -1361,13 +1792,14 @@ async function runAutonomousStageCycle(threadId: string) {
           sprintKey: failedState.sprintKey,
           stage: failedState.stage,
           kind: "job.failed",
-          detail: summarizeJobText(message),
+          detail: summarizeJobText(failure.logDetail, 900),
         })
         await sendChunkedThreadMessage(
           thread,
           [
-            `여기서 잠깐 멈췄어요. 지금은 **${stageLabel(failedState.stage)}** 단계예요.`,
-            `- 원인: ${summarizeJobText(message)}`,
+            `여기서 잠깐 멈췄어요. 지금은 **${workflowStageLabel(failedState)}** 단계예요.`,
+            `- 원인: ${failure.summary}`,
+            ...failure.details.map((line) => `- ${line}`),
             "- `/status`로 상태를 확인하고, 필요한 방향을 말해주면 다시 이어갈게요.",
           ].join("\n"),
         )
@@ -1375,12 +1807,48 @@ async function runAutonomousStageCycle(threadId: string) {
       }
     }
   } finally {
+    automationAbortControllers.delete(threadId)
     runningAutomationThreads.delete(threadId)
+
+    if (rescheduleAfterRelease) {
+      const latestState = store.get(threadId)
+
+      if (latestState && isAutonomousStage(latestState.stage) && latestState.status === "ACTIVE") {
+        scheduleAutonomousStage(threadId)
+      }
+    }
   }
 }
 
 function scheduleAutonomousStage(threadId: string) {
-  void runAutonomousStageCycle(threadId)
+  if (runningAutomationThreads.has(threadId) || queuedAutomationThreads.has(threadId)) {
+    return
+  }
+
+  queuedAutomationThreads.add(threadId)
+  drainAutonomousStageQueue()
+}
+
+function drainAutonomousStageQueue() {
+  while (activeAutomationWorkerCount < MAX_AUTONOMOUS_STAGE_WORKERS && queuedAutomationThreads.size > 0) {
+    const nextThreadId = queuedAutomationThreads.values().next().value
+
+    if (!nextThreadId) {
+      break
+    }
+
+    queuedAutomationThreads.delete(nextThreadId)
+
+    if (runningAutomationThreads.has(nextThreadId)) {
+      continue
+    }
+
+    activeAutomationWorkerCount += 1
+    void runAutonomousStageCycle(nextThreadId).finally(() => {
+      activeAutomationWorkerCount = Math.max(0, activeAutomationWorkerCount - 1)
+      drainAutonomousStageQueue()
+    })
+  }
 }
 
 async function buildConversationReply(thread: ThreadChannel, state: SprintThreadState, content: string, currentMessageId: string) {
@@ -1585,6 +2053,84 @@ function buildSprintState(params: {
   return state
 }
 
+function toReferenceAttachment(attachment: Attachment): SprintReferenceAttachment {
+  return {
+    id: attachment.id,
+    url: attachment.url,
+    name: attachment.name,
+    contentType: attachment.contentType ?? undefined,
+    size: attachment.size,
+  }
+}
+
+function getDesignSystemCommandReferences(interaction: ChatInputCommandInteraction) {
+  return ["reference", "reference2", "reference3"]
+    .map((name) => interaction.options.getAttachment(name))
+    .filter((attachment): attachment is Attachment => Boolean(attachment))
+    .map(toReferenceAttachment)
+}
+
+function getMessageReferences(message: Message) {
+  return [...message.attachments.values()].map(toReferenceAttachment)
+}
+
+function mergeReferenceAttachments(
+  current: SprintReferenceAttachment[] | undefined,
+  next: SprintReferenceAttachment[],
+) {
+  const byId = new Map<string, SprintReferenceAttachment>()
+
+  for (const reference of [...(current ?? []), ...next]) {
+    byId.set(reference.id, reference)
+  }
+
+  return [...byId.values()]
+}
+
+function buildDesignSystemState(params: {
+  thread: ThreadChannel
+  featureSlug: string
+  baseSprintKey: string
+  runNumber: number
+  sourceBrief?: string
+  referenceAttachments?: SprintReferenceAttachment[]
+}) {
+  const runSprintKey = getRunSprintKey(params.baseSprintKey, params.runNumber)
+  const worktreeName = getWorktreeName(runSprintKey)
+  const branchName = getBranchName(runSprintKey)
+  const worktreePath = getWorktreePath(env.worktreeRoot, worktreeName)
+  const timestamp = nowIso()
+
+  const state: SprintThreadState = {
+    threadId: params.thread.id,
+    parentChannelId: params.thread.parentId ?? env.DISCORD_SPRINT_CHANNEL_ID,
+    guildId: params.thread.guildId,
+    sprintId: "design-system",
+    featureSlug: params.featureSlug,
+    baseSprintKey: params.baseSprintKey,
+    sprintKey: runSprintKey,
+    runNumber: params.runNumber,
+    stage: "IMPLEMENTATION",
+    status: "ACTIVE",
+    worktreeName,
+    worktreePath,
+    branchName,
+    job: {
+      status: "IDLE",
+      stage: "IMPLEMENTATION",
+      label: "1. example 구현",
+    },
+    stageStartedAt: timestamp,
+    workflowKind: "design_system",
+    sourceBrief: params.sourceBrief,
+    referenceAttachments: params.referenceAttachments ?? [],
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  }
+
+  return state
+}
+
 async function sendKickoff(thread: ThreadChannel, state: SprintThreadState) {
   await thread.send(
     [
@@ -1601,7 +2147,7 @@ async function sendKickoff(thread: ThreadChannel, state: SprintThreadState) {
       `- worktree path: \`${state.worktreePath}\``,
       "",
       "지금 할 일",
-      `- ${stageSummary(state.stage)}`,
+      `- ${workflowStageSummary(state)}`,
     ].join("\n"),
   )
 
@@ -1620,6 +2166,31 @@ async function sendKickoff(thread: ThreadChannel, state: SprintThreadState) {
 
   store.upsert(nextState)
   await syncActivityCard(thread, nextState)
+}
+
+async function sendDesignSystemKickoff(thread: ThreadChannel, state: SprintThreadState) {
+  await thread.send(
+    [
+      `\`${state.featureSlug}\` 디자인 시스템 example 작업을 시작했어요.`,
+      `- route: \`/design-system/examples/${state.featureSlug}\``,
+      `- 실행: ${formatRunLabel(state)}`,
+      `- 참고 첨부: ${state.referenceAttachments?.length ?? 0}개`,
+      "",
+      "진행 방식",
+      "- 스크린샷과 설명을 분석해 바로 example을 구현해요.",
+      "- 기존 컴포넌트를 먼저 쓰고, 필요하면 variant를 추가해요.",
+      "- 정말 없는 패턴만 새 컴포넌트나 토큰으로 정리해요.",
+      "- 끝나면 Vercel preview 링크를 올리고, 그때 한 번만 확인하면 돼요.",
+      "",
+      "실행 정보",
+      `- worktree: \`${state.worktreeName}\``,
+      `- branch: \`${state.branchName}\``,
+      `- worktree path: \`${state.worktreePath}\``,
+    ].join("\n"),
+  )
+
+  const postedState = await postStageControlMessage(thread, state)
+  scheduleAutonomousStage(postedState.threadId)
 }
 
 async function postStageControlMessage(thread: ThreadChannel, state: SprintThreadState) {
@@ -1678,6 +2249,54 @@ async function handleSprint(interaction: ChatInputCommandInteraction) {
     content: `스프린트 스레드를 만들었어요: <#${thread.id}>`,
   })
   await sendKickoff(thread, state)
+}
+
+async function handleDesignSystem(interaction: ChatInputCommandInteraction) {
+  const exampleSlug = normalizeExampleSlug(interaction.options.getString("example", true))
+  const sourceBrief = interaction.options.getString("brief")?.trim()
+  const referenceAttachments = getDesignSystemCommandReferences(interaction)
+
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral })
+
+  if (!exampleSlug) {
+    await interaction.editReply({
+      content: "`example`은 영문/숫자 기반 slug로 입력해주세요. 예: `weekly-rewind-page`",
+    })
+    return
+  }
+
+  if (!sourceBrief && referenceAttachments.length === 0) {
+    await interaction.editReply({
+      content: "`brief`나 참고 이미지를 하나 이상 넣어주세요. 그래야 example을 바로 구현할 수 있어요.",
+    })
+    return
+  }
+
+  const baseSprintKey = getSprintKey("design-system", exampleSlug)
+  const existing = await resolveExistingSprintThread(baseSprintKey)
+
+  if (existing) {
+    await interaction.editReply(buildExistingSprintChoice(existing.state))
+    return
+  }
+
+  const parentChannel = await resolveSprintParentChannel(interaction)
+  const runNumber = store.getNextRunNumber(baseSprintKey)
+  const thread = await createSprintThreadInChannel(parentChannel, "design-system", exampleSlug, runNumber)
+  const state = buildDesignSystemState({
+    thread,
+    featureSlug: exampleSlug,
+    baseSprintKey,
+    runNumber,
+    sourceBrief,
+    referenceAttachments,
+  })
+
+  store.upsert(state)
+  await interaction.editReply({
+    content: `디자인 시스템 example 작업 스레드를 만들었어요: <#${thread.id}>`,
+  })
+  await sendDesignSystemKickoff(thread, state)
 }
 
 async function handleStatus(interaction: ChatInputCommandInteraction) {
@@ -1758,7 +2377,7 @@ async function handleExistingContinue(interaction: ButtonInteraction, threadId: 
       "좋아요. 기존 스레드에서 이어서 진행할게요.",
       `- 스레드: <#${resumedState.threadId}>`,
       `- 실행: ${formatRunLabel(resumedState)}`,
-      `- 단계: ${stageLabel(resumedState.stage)}`,
+      `- 단계: ${workflowStageLabel(resumedState)}`,
       `- 상태: ${statusLabel(resumedState.status)}`,
     ].join("\n"),
     components: [],
@@ -1794,13 +2413,22 @@ async function handleExistingRestart(interaction: ButtonInteraction, threadId: s
 
   store.upsert(pausedState)
 
-  const nextState = buildSprintState({
-    thread,
-    sprintId: existingState.sprintId,
-    featureSlug: existingState.featureSlug,
-    baseSprintKey,
-    runNumber,
-  })
+  const nextState = isDesignSystemWorkflow(existingState)
+    ? buildDesignSystemState({
+        thread,
+        featureSlug: existingState.featureSlug,
+        baseSprintKey,
+        runNumber,
+        sourceBrief: existingState.sourceBrief,
+        referenceAttachments: existingState.referenceAttachments,
+      })
+    : buildSprintState({
+        thread,
+        sprintId: existingState.sprintId,
+        featureSlug: existingState.featureSlug,
+        baseSprintKey,
+        runNumber,
+      })
 
   store.upsert(nextState)
 
@@ -1810,7 +2438,7 @@ async function handleExistingRestart(interaction: ButtonInteraction, threadId: s
     await disableStoredControlMessage(previousThread, existingState, "새 실행으로 이동됨")
     await previousThread.send(
       [
-        "이 스프린트는 새 스레드에서 다시 시작할게요.",
+        `이 ${workflowName(existingState)} 작업은 새 스레드에서 다시 시작할게요.`,
         `- 새 스레드: <#${thread.id}>`,
         `- 현재 상태: ${statusLabel(pausedState.status)}`,
       ].join("\n"),
@@ -1827,7 +2455,11 @@ async function handleExistingRestart(interaction: ButtonInteraction, threadId: s
     components: [],
   })
 
-  await sendKickoff(thread, nextState)
+  if (isDesignSystemWorkflow(nextState)) {
+    await sendDesignSystemKickoff(thread, nextState)
+  } else {
+    await sendKickoff(thread, nextState)
+  }
 }
 
 async function disableStoredControlMessage(thread: ThreadChannel, state: SprintThreadState, statusText: string) {
@@ -1845,6 +2477,26 @@ async function disableStoredControlMessage(thread: ThreadChannel, state: SprintT
     content: `${checkpointMessage.content}\n\n상태: ${statusText}`,
     components: [],
   })
+}
+
+async function refreshStoredControlMessage(thread: ThreadChannel, state: SprintThreadState) {
+  if (!state.checkpointMessageId) {
+    return
+  }
+
+  const controlCard = buildStageControlCard(state)
+
+  if (!controlCard) {
+    return
+  }
+
+  const checkpointMessage = await thread.messages.fetch(state.checkpointMessageId).catch(() => null)
+
+  if (!checkpointMessage) {
+    return
+  }
+
+  await checkpointMessage.edit(controlCard).catch(() => null)
 }
 
 async function finalizeSprintTermination(thread: ThreadChannel, state: SprintThreadState) {
@@ -1978,6 +2630,153 @@ async function disableStageControlMessage(interaction: ButtonInteraction, state:
   })
 }
 
+async function disableClickedStageButtons(interaction: ButtonInteraction, state: SprintThreadState, statusText: string) {
+  const baseContent = interaction.message.content?.trim()
+  const content = baseContent ? `${baseContent}\n\n상태: ${statusText}` : `상태: ${statusText}`
+
+  await interaction.message
+    .edit({
+      content,
+      components: buildStageButtons(state, true),
+    })
+    .catch(() => null)
+}
+
+async function advanceToNextStageFromThread(params: {
+  thread: ThreadChannel
+  state: SprintThreadState
+  operatorId: string
+  currentMessageId?: string
+  statusText?: string
+}) {
+  const nextStage = nextTextCommandStage(params.state.stage)
+
+  if (!nextStage) {
+    return null
+  }
+
+  await disableStoredControlMessage(params.thread, params.state, params.statusText ?? "텍스트 명령으로 다음 단계 진행됨")
+
+  const stageSummary = await summarizeStageTransition({
+    thread: params.thread,
+    state: params.state,
+    toStage: nextStage,
+    currentMessageId: params.currentMessageId,
+  })
+
+  const nextStartedAt = nowIso()
+  const nextState: SprintThreadState = {
+    ...params.state,
+    stage: nextStage,
+    status: statusFromStage(nextStage),
+    latestStageSummary: stageSummary,
+    job: {
+      status: "IDLE",
+      stage: nextStage,
+      label: workflowStageLabel(params.state, nextStage),
+      updatedAt: nextStartedAt,
+    },
+    stageStartedAt: nextStartedAt,
+    checkpointMessageId: undefined,
+    lastOperatorMessageId: params.operatorId,
+    updatedAt: nextStartedAt,
+  }
+
+  store.upsert(nextState)
+  abortRunningAutonomousStage(params.state.threadId)
+  await sendChunkedThreadMessage(params.thread, buildAutonomousStageStartReply(nextState))
+  const postedState = await postStageControlMessage(params.thread, nextState)
+
+  if (isAutonomousStage(postedState.stage) && postedState.status === "ACTIVE") {
+    scheduleAutonomousStage(postedState.threadId)
+  }
+
+  return postedState
+}
+
+async function retryAutonomousStageFromThread(thread: ThreadChannel, state: SprintThreadState) {
+  if (!isAutonomousStage(state.stage)) {
+    return null
+  }
+
+  if (state.status === "ACTIVE" && state.job?.status === "RUNNING") {
+    return state
+  }
+
+  const timestamp = nowIso()
+  const nextState: SprintThreadState = {
+    ...state,
+    status: "ACTIVE",
+    job: {
+      status: "IDLE",
+      stage: state.stage,
+      label: workflowStageLabel(state),
+      updatedAt: timestamp,
+      summary: state.job?.summary,
+      error: undefined,
+    },
+    updatedAt: timestamp,
+  }
+
+  store.upsert(nextState)
+  await syncActivityCard(thread, nextState)
+  scheduleAutonomousStage(nextState.threadId)
+  return nextState
+}
+
+async function applyPreviewDecisionFromThread(params: {
+  thread: ThreadChannel
+  state: SprintThreadState
+  mode: "revise" | "approve"
+  operatorId: string
+  currentMessageId?: string
+}) {
+  if (params.state.stage !== "PREVIEW_REVIEW") {
+    return null
+  }
+
+  const nextStage: SprintStage = params.mode === "revise" ? (isDesignSystemWorkflow(params.state) ? "IMPLEMENTATION" : "TECHNICAL_FREEZE") : "MERGE"
+  const disabledStatusText = params.mode === "revise" ? "텍스트 명령으로 수정 작업으로 돌아감" : "텍스트 명령으로 main 반영 진행됨"
+
+  await disableStoredControlMessage(params.thread, params.state, disabledStatusText)
+
+  const stageSummary = await summarizeStageTransition({
+    thread: params.thread,
+    state: params.state,
+    toStage: nextStage,
+    currentMessageId: params.currentMessageId,
+  })
+
+  const nextStartedAt = nowIso()
+  const nextState: SprintThreadState = {
+    ...params.state,
+    stage: nextStage,
+    status: statusFromStage(nextStage),
+    latestStageSummary: stageSummary,
+    preview: params.mode === "revise" ? undefined : params.state.preview,
+    job: {
+      status: "IDLE",
+      stage: nextStage,
+      label: workflowStageLabel(params.state, nextStage),
+      updatedAt: nextStartedAt,
+    },
+    stageStartedAt: nextStartedAt,
+    checkpointMessageId: undefined,
+    lastOperatorMessageId: params.operatorId,
+    updatedAt: nextStartedAt,
+  }
+
+  store.upsert(nextState)
+  await sendChunkedThreadMessage(params.thread, buildAutonomousStageStartReply(nextState))
+  const postedState = await postStageControlMessage(params.thread, nextState)
+
+  if (isAutonomousStage(postedState.stage) && postedState.status === "ACTIVE") {
+    scheduleAutonomousStage(postedState.threadId)
+  }
+
+  return postedState
+}
+
 async function handleGateApprove(interaction: ButtonInteraction) {
   if (!interaction.channel?.isThread()) {
     await interaction.reply({
@@ -2029,7 +2828,7 @@ async function handleGateApprove(interaction: ButtonInteraction) {
     job: {
       status: "IDLE",
       stage: nextStage,
-      label: stageLabel(nextStage),
+      label: workflowStageLabel(state, nextStage),
       updatedAt: nextStartedAt,
     },
     stageStartedAt: nextStartedAt,
@@ -2038,6 +2837,7 @@ async function handleGateApprove(interaction: ButtonInteraction) {
     updatedAt: nextStartedAt,
   }
 
+  store.upsert(nextState)
   await sendChunkedThreadMessage(interaction.channel, buildAutonomousStageStartReply(nextState))
 
   await postStageControlMessage(interaction.channel, nextState)
@@ -2079,7 +2879,7 @@ async function handlePreviewDecision(interaction: ButtonInteraction, mode: "revi
     return
   }
 
-  const nextStage: SprintStage = mode === "revise" ? "TECHNICAL_FREEZE" : "MERGE"
+  const nextStage: SprintStage = mode === "revise" ? (isDesignSystemWorkflow(state) ? "IMPLEMENTATION" : "TECHNICAL_FREEZE") : "MERGE"
   const disabledStatusText = mode === "revise" ? "수정 작업으로 돌아감" : "main 반영으로 진행됨"
 
   await disableStageControlMessage(interaction, state, disabledStatusText)
@@ -2104,7 +2904,7 @@ async function handlePreviewDecision(interaction: ButtonInteraction, mode: "revi
     job: {
       status: "IDLE",
       stage: nextStage,
-      label: stageLabel(nextStage),
+      label: workflowStageLabel(state, nextStage),
       updatedAt: nextStartedAt,
     },
     stageStartedAt: nextStartedAt,
@@ -2113,6 +2913,7 @@ async function handlePreviewDecision(interaction: ButtonInteraction, mode: "revi
     updatedAt: nextStartedAt,
   }
 
+  store.upsert(nextState)
   await sendChunkedThreadMessage(interaction.channel, buildAutonomousStageStartReply(nextState))
   await postStageControlMessage(interaction.channel, nextState)
   await syncActivityCard(interaction.channel, nextState)
@@ -2159,7 +2960,7 @@ async function handleAutonomousRetry(interaction: ButtonInteraction) {
     job: {
       status: "IDLE",
       stage: state.stage,
-      label: stageLabel(state.stage),
+      label: workflowStageLabel(state),
       updatedAt: nowIso(),
       summary: state.job?.summary,
       error: undefined,
@@ -2175,18 +2976,218 @@ async function handleAutonomousRetry(interaction: ButtonInteraction) {
   scheduleAutonomousStage(nextState.threadId)
 }
 
+async function handleNextStageButton(interaction: ButtonInteraction) {
+  if (!interaction.channel?.isThread()) {
+    await interaction.reply({
+      content: "이 버튼은 스프린트 스레드 안에서만 사용할 수 있어요.",
+      flags: MessageFlags.Ephemeral,
+    })
+    return
+  }
+
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral })
+
+  const state = store.get(interaction.channel.id)
+
+  if (!state) {
+    await interaction.editReply({
+      content: "이 스레드는 아직 스프린트 스레드로 등록되지 않았어요.",
+    })
+    return
+  }
+
+  await disableClickedStageButtons(interaction, state, "다음 단계로 진행됨")
+
+  const nextState = await advanceToNextStageFromThread({
+    thread: interaction.channel,
+    state,
+    operatorId: interaction.user.id,
+    statusText: "다음 단계로 진행됨",
+  })
+
+  if (!nextState) {
+    await interaction.editReply({
+      content: state.stage === "DONE" ? "이미 완료된 스프린트예요." : `현재 단계 \`${state.stage}\`에서는 넘길 다음 단계가 없어요.`,
+    })
+    return
+  }
+
+  await interaction.editReply({
+    content:
+      isAutonomousStage(state.stage) && state.status === "ACTIVE" && state.job?.status === "RUNNING"
+        ? "진행 중이던 작업은 중단하고 다음 단계로 넘겼어요."
+        : "다음 단계로 넘겼어요.",
+  })
+}
+
+async function ensurePreviewForThread(thread: ThreadChannel, state: SprintThreadState) {
+  if (state.preview?.url) {
+    return {
+      nextState: state,
+      reply: [
+        "이미 preview 링크가 있어요.",
+        `- preview: ${state.preview.url}${state.preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`,
+        `- 확인 URL: ${buildPreviewRouteUrl(state.preview, state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/")}`,
+      ].join("\n"),
+    }
+  }
+
+  const deployingState = withJobDetail(state, [
+    "preview URL 요청 받음",
+    "Vercel preview를 배포하고 있어요.",
+  ])
+  store.upsert(deployingState)
+  await syncActivityCard(thread, deployingState)
+
+  const preview = await deployPreviewForState(deployingState)
+  const timestamp = nowIso()
+  const nextState: SprintThreadState = {
+    ...deployingState,
+    preview,
+    job: {
+      ...(deployingState.job ?? { status: "IDLE" as const }),
+      status: "IDLE" as const,
+      stage: deployingState.stage,
+      label: workflowStageLabel(deployingState),
+      updatedAt: timestamp,
+      detailLines: ["preview 배포 완료"],
+      error: undefined,
+    },
+    updatedAt: timestamp,
+  }
+
+  store.upsert(nextState)
+  await syncActivityCard(thread, nextState)
+
+  return {
+    nextState,
+    reply: [
+      "외부 preview를 배포했어요.",
+      `- preview: ${preview.url}${preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`,
+      `- 확인 URL: ${buildPreviewRouteUrl(preview, state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/")}`,
+      `- local: ${buildLocalDevRouteUrl(state.stage === "DEMO_REVIEW" || isDesignSystemWorkflow(state) ? getDemoRoute(state) : "/")}`,
+    ].join("\n"),
+  }
+}
+
+async function runThreadTextCommand(message: Message, state: SprintThreadState, command: ThreadTextCommand) {
+  if (!message.channel.isThread()) {
+    return null
+  }
+
+  if (command === "RETRY_STAGE") {
+    const nextState = await retryAutonomousStageFromThread(message.channel, state)
+
+    if (!nextState) {
+      return "지금 단계는 자동 재시도가 필요하지 않아요. 다음 단계로 넘기려면 `다음 단계`라고 입력해주세요."
+    }
+
+    if (state.status === "ACTIVE" && state.job?.status === "RUNNING") {
+      return `이미 **${workflowStageLabel(state)}** 작업이 진행 중이에요. 끝나면 다음 단계로 자동 전환돼요.`
+    }
+
+    return "좋아요. 같은 단계에서 다시 시도할게요. 끝나면 다음 단계로 자동 전환돼요."
+  }
+
+  if (command === "PREVIEW_REVISE" || command === "PREVIEW_APPROVE") {
+    const nextState = await applyPreviewDecisionFromThread({
+      thread: message.channel,
+      state,
+      mode: command === "PREVIEW_REVISE" ? "revise" : "approve",
+      operatorId: message.author.id,
+      currentMessageId: message.id,
+    })
+
+    if (!nextState) {
+      return "지금은 preview 확인 단계가 아니에요."
+    }
+
+    return command === "PREVIEW_REVISE" ? "좋아요. 수정 사이클을 한 번 더 돌릴게요." : "좋아요. 이제 main 반영으로 넘어갈게요."
+  }
+
+  const nextState = await advanceToNextStageFromThread({
+    thread: message.channel,
+    state,
+    operatorId: message.author.id,
+    currentMessageId: message.id,
+  })
+
+  if (nextState) {
+    if (isAutonomousStage(state.stage) && state.status === "ACTIVE" && state.job?.status === "RUNNING") {
+      return "진행 중이던 작업은 중단하고 다음 단계로 넘겼어요."
+    }
+
+    return "다음 단계로 넘겼어요."
+  }
+
+  if (isAutonomousStage(state.stage)) {
+    if (state.status === "ACTIVE" && state.job?.status === "RUNNING") {
+      return `지금은 **${workflowStageLabel(state)}** 작업이 진행 중이에요. 끝나면 다음 단계로 자동 전환돼요.`
+    }
+
+    const retriedState = await retryAutonomousStageFromThread(message.channel, state)
+
+    if (retriedState) {
+      return "현재 단계가 막혀 있어서 같은 단계부터 다시 시도할게요. 끝나면 다음 단계로 자동 전환돼요."
+    }
+  }
+
+  if (state.stage === "DONE") {
+    return "이미 완료된 스프린트예요."
+  }
+
+  return `현재 단계 \`${state.stage}\`에서는 텍스트로 넘길 다음 단계가 없어요.`
+}
+
 async function handleThreadMessage(message: Message) {
   if (!message.channel.isThread()) {
     return
   }
 
-  const state = store.get(message.channel.id)
+  let state = store.get(message.channel.id)
 
   if (!state) {
     return
   }
 
   const lowered = message.content.trim().toLowerCase()
+  const textCommand = parseThreadTextCommand(message.content, state)
+
+  if (textCommand) {
+    await safeReact(message, "👀")
+
+    try {
+      await safeReact(message, "⏳")
+      await message.channel.sendTyping()
+      const reply = await runThreadTextCommand(message, state, textCommand)
+
+      if (reply) {
+        await replyWithChunkedMessage(message, reply)
+      }
+
+      await removeOwnReaction(message, "⏳")
+      await safeReact(message, "✅")
+    } catch (error) {
+      await removeOwnReaction(message, "⏳")
+      await safeReact(message, "⚠️")
+      throw error
+    }
+
+    return
+  }
+
+  const messageReferences = getMessageReferences(message)
+  const trimmedContent = message.content.trim()
+
+  if (isDesignSystemWorkflow(state) && (messageReferences.length > 0 || trimmedContent)) {
+    state = store.upsert({
+      ...state,
+      sourceBrief: [state.sourceBrief, trimmedContent].filter(Boolean).join("\n\n") || state.sourceBrief,
+      referenceAttachments: mergeReferenceAttachments(state.referenceAttachments, messageReferences),
+      lastOperatorMessageId: message.id,
+      updatedAt: nowIso(),
+    })
+  }
 
   if (lowered === "approve" || lowered === "continue" || lowered.startsWith("revise:")) {
     await message.channel.sendTyping()
@@ -2208,7 +3209,33 @@ async function handleThreadMessage(message: Message) {
       updatedAt: nowIso(),
     })
 
-    const trimmedContent = message.content.trim()
+    if (shouldReplyWithReviewUrl(state, trimmedContent)) {
+      await safeReact(message, "⏳")
+      await message.channel.sendTyping()
+
+      if (!shouldDeployPreviewFromMessage(state, trimmedContent)) {
+        await replyWithChunkedMessage(message, buildReviewUrlReply(state))
+        await removeOwnReaction(message, "⏳")
+        await safeReact(message, "✅")
+        return
+      }
+
+      try {
+        const previewResult = await ensurePreviewForThread(message.channel, state)
+        state = previewResult.nextState
+        await replyWithChunkedMessage(message, previewResult.reply)
+        await removeOwnReaction(message, "⏳")
+        await safeReact(message, "✅")
+      } catch (error) {
+        const reason = error instanceof Error ? summarizeJobText(error.message, 220) : "알 수 없는 오류"
+        await replyWithChunkedMessage(message, `preview 배포에 실패했어요.\n- 원인: ${reason}`)
+        await removeOwnReaction(message, "⏳")
+        await safeReact(message, "⚠️")
+      }
+
+      return
+    }
+
     const contentForBridge =
       trimmedContent ||
       (message.attachments.size > 0 ? "사용자가 첨부 파일이나 이미지를 올렸어. 첨부 자료를 보고 방향을 같이 정리해달라는 뜻으로 이해해줘." : "")
@@ -2318,6 +3345,11 @@ client.on("interactionCreate", async (interaction) => {
         return
       }
 
+      if (interaction.customId === NEXT_STAGE_ID) {
+        await handleNextStageButton(interaction)
+        return
+      }
+
       if (interaction.customId.startsWith(`${TERMINATE_CONFIRM_PREFIX}:`)) {
         await handleTerminateConfirm(interaction, interaction.customId.split(":").at(-1) ?? "")
         return
@@ -2347,6 +3379,11 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "status") {
       await handleStatus(interaction)
+      return
+    }
+
+    if (interaction.commandName === "design-system") {
+      await handleDesignSystem(interaction)
     }
   } catch (error) {
     console.error(error)

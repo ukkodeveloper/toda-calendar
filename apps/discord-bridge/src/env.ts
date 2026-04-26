@@ -15,6 +15,8 @@ const envSchema = z.object({
   DISCORD_DEFAULT_SPRINT_ID: z.string().min(1).default("sprint1"),
   DISCORD_BRIDGE_STATE_FILE: z.string().min(1).default(".data/discord-bridge-state.json"),
   DISCORD_WORKTREE_ROOT: z.string().min(1).default(path.join(os.homedir(), ".codex/worktrees/discord")),
+  DISCORD_LOCAL_DEV_ORIGIN: z.string().url().default("http://localhost:3000"),
+  DISCORD_AUTONOMOUS_STAGE_CONCURRENCY: z.coerce.number().int().positive().default(2),
   TODA_REPO_ROOT: z.string().optional(),
 })
 
