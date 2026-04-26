@@ -1,7 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm build:packages && pnpm --filter api build && pnpm --filter web build",
+  "outputDirectory": "apps/web/.next",
   "functions": {
     "api/index.ts": {
       "maxDuration": 30
