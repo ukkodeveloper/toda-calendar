@@ -47,7 +47,9 @@ fi
 
 READY="no"
 for _ in $(seq 1 30); do
-  if curl -fsSLI "$PREVIEW_URL" >/dev/null 2>&1 || curl -fsSL "$PREVIEW_URL" >/dev/null 2>&1; then
+  HTTP_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' -L "$PREVIEW_URL" 2>/dev/null || true)"
+
+  if [[ "$HTTP_STATUS" =~ ^[234][0-9][0-9]$ ]]; then
     READY="yes"
     break
   fi

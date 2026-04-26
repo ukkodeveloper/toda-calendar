@@ -28,6 +28,7 @@ import { runCodexDiscussionReply, runCodexStageTransitionSummary } from "./codex
 import { runVercelPreviewDeployment } from "./preview-deployer.js"
 import { getCodexStageTimeoutMs, runCodexStageWorker } from "./stage-worker.js"
 import { getDesignSystemStageTimeoutMs, runDesignSystemStageWorker } from "./design-system-worker.js"
+import { runMainMergeOperator } from "./merge-operator.js"
 import { getSprintAssetsDirAbsolutePath, getSprintDocAbsolutePath } from "./sprint-files.js"
 
 const env = loadEnv()
@@ -1354,7 +1355,9 @@ function buildLatestStageSummarySection(summary?: SprintStageSummary) {
 }
 
 async function deployPreviewForState(state: SprintThreadState) {
-  const result = await runVercelPreviewDeployment(state.worktreePath)
+  const result = await runVercelPreviewDeployment(state.worktreePath, {
+    previewScriptPath: `${env.repoRoot}/scripts/remote/vercel-preview.sh`,
+  })
 
   return {
     url: result.url,
@@ -1805,24 +1808,13 @@ async function runAutonomousStageCycle(threadId: string) {
         runningState = await syncActivityCard(thread, runningState)
         await refreshStoredControlMessage(thread, runningState)
 
-        const transcript = await buildAutomationTranscript(thread)
-        const abortController = new AbortController()
-        automationAbortControllers.set(threadId, abortController)
-        const result = isDesignSystemWorkflow(runningState)
-          ? await runDesignSystemStageWorker({
-              worktreePath: runningState.worktreePath,
-              state: runningState,
-              transcript,
-              references: runningState.referenceAttachments ?? [],
-              signal: abortController.signal,
-            })
-          : await runCodexStageWorker({
-              worktreePath: runningState.worktreePath,
-              state: runningState,
-              transcript,
-              signal: abortController.signal,
-            })
-        automationAbortControllers.delete(threadId)
+        const result =
+          runningState.stage === "MERGE"
+            ? await runMainMergeOperator({
+                repoRoot: env.repoRoot,
+                state: runningState,
+              })
+            : await runAutonomousWorker(threadId, runningState, thread)
 
         if (!isCurrentAutonomousJob(store.get(threadId), runningState)) {
           rescheduleAfterRelease = true
@@ -1887,6 +1879,35 @@ async function runAutonomousStageCycle(threadId: string) {
         scheduleAutonomousStage(threadId)
       }
     }
+  }
+}
+
+async function runAutonomousWorker(
+  threadId: string,
+  runningState: SprintThreadState,
+  thread: ThreadChannel,
+) {
+  const transcript = await buildAutomationTranscript(thread)
+  const abortController = new AbortController()
+  automationAbortControllers.set(threadId, abortController)
+
+  try {
+    return isDesignSystemWorkflow(runningState)
+      ? await runDesignSystemStageWorker({
+          worktreePath: runningState.worktreePath,
+          state: runningState,
+          transcript,
+          references: runningState.referenceAttachments ?? [],
+          signal: abortController.signal,
+        })
+      : await runCodexStageWorker({
+          worktreePath: runningState.worktreePath,
+          state: runningState,
+          transcript,
+          signal: abortController.signal,
+        })
+  } finally {
+    automationAbortControllers.delete(threadId)
   }
 }
 
