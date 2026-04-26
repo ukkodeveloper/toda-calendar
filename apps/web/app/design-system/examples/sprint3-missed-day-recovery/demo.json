@@ -1,0 +1,129 @@
+{
+  "slug": "sprint3-missed-day-recovery",
+  "sprintId": "sprint3",
+  "featureSlug": "missed-day-recovery",
+  "title": "Missed day recovery demo",
+  "summary": "Calendar Home에서 조용히 다시 남기도록 제안하고, 기존 DayEditorSheet와 QuietToast로만 흐름을 닫는 데모다.",
+  "status": "ready",
+  "updatedAt": "2026-04-26",
+  "entryPoints": [
+    {
+      "label": "QuietNudge",
+      "location": "Calendar Home의 하단 dock 바로 위",
+      "userIntent": "앱 첫 진입에서 최근 하루 공백을 부담 없이 다시 남길 수 있다."
+    },
+    {
+      "label": "DayEditorSheet",
+      "location": "열어보기를 누른 직후 기존 입력 시트로 이동",
+      "userIntent": "새 화면 없이 어제 또는 그제를 바로 열고 저장할 수 있다."
+    }
+  ],
+  "flowSteps": [
+    {
+      "label": "후보 계산",
+      "screen": "Calendar Home",
+      "userAction": "앱 첫 진입에서 홈으로 들어온다.",
+      "systemResponse": "어제가 비어 있으면 어제를, 아니면 그제를 하루 1건만 계산한다."
+    },
+    {
+      "label": "조용한 제안",
+      "screen": "QuietNudge",
+      "userAction": "사용자가 문구를 읽고 열어보기를 누르거나 닫는다.",
+      "systemResponse": "열어보기면 시트로 이동하고, 닫기면 같은 날짜를 24시간 숨긴다."
+    },
+    {
+      "label": "기록 이어쓰기",
+      "screen": "DayEditorSheet",
+      "userAction": "기존 입력 시트에서 내용을 남기거나 저장 없이 닫는다.",
+      "systemResponse": "저장하면 홈으로 돌아가고, 저장 없이 닫으면 닫기와 같은 24시간 규칙을 쓴다."
+    },
+    {
+      "label": "완료 피드백",
+      "screen": "QuietToast",
+      "userAction": "저장 직후 결과를 확인한다.",
+      "systemResponse": "어제/그제 기준 동적 문구를 보여주고 같은 날짜는 다시 제안하지 않는다."
+    }
+  ],
+  "screens": [
+    {
+      "name": "Calendar Home / 어제 제안",
+      "role": "Entry",
+      "primaryAction": "QuietNudge에서 열어보기를 누른다.",
+      "secondaryAction": "닫고 오늘은 더 제안받지 않는다.",
+      "stateNotes": [
+        "어제가 비어 있으면 이 상태가 기본 진입점이다.",
+        "셀 힌트 없이 홈 안에서만 조용히 노출된다."
+      ]
+    },
+    {
+      "name": "Calendar Home / 그제 fallback",
+      "role": "Fallback",
+      "primaryAction": "어제가 이미 채워진 경우 그제를 연다.",
+      "secondaryAction": "여전히 하루 1건만 제안한다.",
+      "stateNotes": [
+        "그제는 어제가 채워졌을 때만 내려간다.",
+        "복수 날짜를 한 번에 다루지 않는다."
+      ]
+    },
+    {
+      "name": "DayEditorSheet / 대상 날짜 열림",
+      "role": "Core action",
+      "primaryAction": "기존 시트에서 바로 저장한다.",
+      "secondaryAction": "저장 없이 닫아도 24시간 숨김으로 처리한다.",
+      "stateNotes": [
+        "새 복구 전용 화면은 만들지 않는다.",
+        "기존 입력 방식과 리듬을 그대로 유지한다."
+      ]
+    },
+    {
+      "name": "Calendar Home / 저장 완료",
+      "role": "Completion",
+      "primaryAction": "QuietToast를 보고 홈 흐름으로 돌아간다.",
+      "secondaryAction": "같은 날짜는 다시 제안받지 않는다.",
+      "stateNotes": [
+        "토스트 문구는 어제/그제 기준으로 바뀐다.",
+        "저장 완료 후 nudge는 즉시 사라진다."
+      ]
+    },
+    {
+      "name": "Calendar Home / 숨김 상태",
+      "role": "Dismissed",
+      "primaryAction": "아무 방해 없이 홈을 계속 쓴다.",
+      "secondaryAction": "다음 후보 계산은 24시간 뒤 첫 진입에서만 일어난다.",
+      "stateNotes": [
+        "닫기와 저장 없는 종료는 같은 규칙으로 다룬다.",
+        "오늘 안에는 같은 날짜를 다시 띄우지 않는다."
+      ]
+    }
+  ],
+  "designSystem": {
+    "components": [
+      "Surface",
+      "AppBar",
+      "CalendarPreview",
+      "SegmentedControl",
+      "Button",
+      "Badge",
+      "Text"
+    ],
+    "tokens": [
+      "calendar-app-bg",
+      "calendar-accent",
+      "calendar-divider",
+      "surface-panel",
+      "ring"
+    ],
+    "notes": [
+      "QuietNudge와 QuietToast는 이번 데모 폴더 안에서만 mock으로 구성했다.",
+      "DayEditorSheet는 shared BottomSheet 규칙을 따르는 로컬 미리보기로 표현했다.",
+      "셀 힌트는 이번 스프린트 범위에서 의도적으로 제외했다."
+    ]
+  },
+  "reviewChecklist": [
+    "홈 첫 진입에서 하루 1건만 제안되는지 보인다.",
+    "어제 우선, 그제 fallback 규칙이 자연스럽게 읽힌다.",
+    "저장 없이 닫기와 닫기가 같은 24시간 숨김으로 이해된다.",
+    "저장 후 토스트와 재노출 없음이 한 화면 안에서 확인된다.",
+    "새 복구 전용 페이지 없이 기존 흐름 안에서 끝난다."
+  ]
+}

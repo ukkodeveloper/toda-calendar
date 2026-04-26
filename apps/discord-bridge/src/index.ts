@@ -541,6 +541,14 @@ function buildStageButtons(state: SprintThreadState, disabled = false) {
         .setStyle(ButtonStyle.Success)
         .setDisabled(disabled),
     )
+  } else if (state.status === "BLOCKED" && isAutonomousStage(state.stage)) {
+    row.addComponents(
+      new ButtonBuilder()
+        .setCustomId(AUTONOMOUS_RETRY_ID)
+        .setLabel(state.stage === "MERGE" ? "main 반영 다시 시도" : "같은 단계 다시 시도")
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(disabled),
+    )
   }
 
   row.addComponents(
