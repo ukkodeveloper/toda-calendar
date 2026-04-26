@@ -26,6 +26,8 @@ function timeoutForStage(stage: SprintStage) {
       return 180_000
     case "IMPLEMENTATION":
       return 900_000
+    case "PREVIEW_REVIEW":
+      return 180_000
     case "MERGE":
       return 600_000
     default:
@@ -43,6 +45,8 @@ function stageTaskLabel(stage: SprintStage) {
       return "기술 범위 확정"
     case "IMPLEMENTATION":
       return "구현"
+    case "PREVIEW_REVIEW":
+      return "배포 확인"
     case "MERGE":
       return "반영"
     default:
@@ -150,12 +154,20 @@ function buildStagePrompt(params: {
         "- 첫 줄: `구현과 1차 검증을 끝냈어요.`",
         "- 다음 줄들: 바뀐 핵심, 검증 결과, 남은 리스크",
       ].join("\n")
+    case "PREVIEW_REVIEW":
+      return [
+        ...common,
+        "",
+        "지금은 배포 확인 단계다.",
+        "- 여기서는 실제 구현 작업을 하지 않는다.",
+        "- 사용자가 preview에서 어떤 점을 다시 고치고 싶은지 정리하는 단계다.",
+      ].join("\n")
     case "MERGE":
       return [
         ...common,
         "",
         "이번 단계 목표",
-        "- 현재 worktree 결과를 local main에 안전하게 반영할 수 있는지 점검한다.",
+        "- preview 확인이 끝난 현재 worktree 결과를 local main에 안전하게 반영할 수 있는지 점검한다.",
         "- 가능한 경우 squash merge 준비 또는 실제 반영을 진행한다.",
         "- 반영이 어렵다면 정확한 blocker를 남긴다.",
         "",

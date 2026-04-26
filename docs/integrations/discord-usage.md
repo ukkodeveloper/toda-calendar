@@ -84,7 +84,7 @@
 bot은 단계에 따라 다르게 반응한다.
 
 - Discovery, Demo에서는 의견과 추천안을 같이 준다.
-- Design Pack, Demo Build, Technical Freeze, Implementation, Merge에서는 불필요한 답장 대신 진행 상황과 다음 알림 시점만 짧게 알려준다.
+- Design Pack, Technical Freeze, Implementation, Merge에서는 불필요한 답장 대신 진행 상황과 다음 알림 시점만 짧게 알려준다.
 
 즉, 같은 스레드 안에서는 Discord 로그만 다시 읽어 붙이는 게 아니라 실제 Codex 세션 맥락도 계속 이어진다.
 앱이 재시작돼도 state store에 저장된 session id를 보고 다시 이어붙인다.
@@ -102,6 +102,17 @@ bot은 단계에 따라 다르게 반응한다.
 
 버튼만 누르면 된다.
 
+현재 단계 이름은 이렇게 보인다.
+
+- `1. 방향 정리 [게이트]`
+- `2. 흐름 정리`
+- `3. 데모 확인 [게이트]`
+- `4. 구현 준비`
+- `5. 구현`
+- `6. 배포 확인 [게이트]`
+- `7. main 반영`
+- `8. 완료`
+
 ### Discovery 단계
 
 - `다음 단계로 진행`
@@ -112,22 +123,32 @@ bot은 단계에 따라 다르게 반응한다.
 - `다음 단계로 진행`
 - `파기 후 종료`
 
-즉 사람이 직접 결정하는 버튼은 두 군데뿐이다.
+### Preview 단계
+
+- `수정 더 하기`
+- `완료, main 반영`
+- `파기 후 종료`
+
+즉 사람이 직접 결정하는 버튼은 세 군데뿐이다.
 
 - Discovery
 - Demo Review
+- Preview Review
 
 자동 진행 단계에서는 필요하면 `파기 후 종료`만 사용할 수 있다.
 
 단계가 넘어갈 때는 바로 이전 단계에서 정리된 내용을 짧게 요약해서 같이 보여준다.
 
 - Discovery -> Design Pack
-- Design Pack -> Demo Build
-- Demo Build -> Demo Review
+- Design Pack -> Demo Review
 - Demo Review -> Technical Freeze
 - Technical Freeze -> Implementation
-- Implementation -> Merge
+- Implementation -> Preview Review
+- Preview Review -> Technical Freeze 또는 Merge
 - Merge -> Done
+
+`수정 더 하기`를 누르면 `4. 구현 준비`로 돌아간다.
+그래서 `4 -> 5 -> 6 -> 4 -> 5 -> 6 ...` 사이클을 필요한 만큼 반복할 수 있다.
 
 ## /status 사용법
 
@@ -142,10 +163,12 @@ bot은 단계에 따라 다르게 반응한다.
 - codex session
 - worktree
 - branch
+- preview URL
 - 직전 단계 요약
 
 그리고 이 메시지에서도 바로:
-- `다음 단계로 진행`
+- Discovery / Demo에서는 `다음 단계로 진행`
+- Preview에서는 `수정 더 하기`, `완료, main 반영`
 - `파기 후 종료`
 
 를 누를 수 있다.
@@ -224,7 +247,6 @@ toda-discord logs
 `ACTIVE`는 이제 그냥 이름만 바뀐 상태가 아니다.
 
 - `DESIGN_PACK`
-- `DEMO_BUILD`
 - `TECHNICAL_FREEZE`
 - `IMPLEMENTATION`
 - `MERGE`
@@ -237,16 +259,17 @@ job은:
 - 끝나면 다음 단계로 자동 전환하거나
 - 실패하면 `BLOCKED`로 멈춘다
 
-여러 스프린트 데모를 한 preview에서 같이 확인하려면 데스크탑에서:
-
-```bash
-pnpm preview:demo
-```
-
-이 명령은 active sprint branch들을 `codex/demo-preview`에 모은 뒤
-`/design-system` preview URL을 출력한다.
-
 `BLOCKED`가 되면 thread 안의 버튼이나 `/status`에서 `다시 시도`를 누르면 된다.
+
+## 데모 확인 자료
+
+`2. 흐름 정리`가 끝나서 `3. 데모 확인 [게이트]`로 넘어가면 bot이 아래 자료를 함께 보낸다.
+
+- 스프린트 문서 markdown 파일
+- assets 디렉터리 안의 핵심 흐름 자료
+- 직전 단계 요약
+
+즉 Discord 안에서 바로 다운로드해서 보거나, 첨부가 없으면 요약만 보고 방향을 정할 수 있다.
 
 ## 로그는 어디서 보나
 

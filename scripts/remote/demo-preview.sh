@@ -80,8 +80,8 @@ for branch in "${branches[@]}"; do
   fi
 
   echo "Merging $branch into $PREVIEW_BRANCH..."
-  if ! git merge --no-edit -X theirs "$branch"; then
-    echo "Merge stopped because git still has conflicts after the automatic theirs strategy." >&2
+  if ! git merge --no-edit "$branch"; then
+    echo "Merge stopped because git reported conflicts." >&2
     echo "Resolve the conflict or abort the merge, then rerun this command." >&2
     git status --short >&2
     exit 1

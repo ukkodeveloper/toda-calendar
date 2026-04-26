@@ -5,6 +5,7 @@ export const sprintStages = [
   "DEMO_REVIEW",
   "TECHNICAL_FREEZE",
   "IMPLEMENTATION",
+  "PREVIEW_REVIEW",
   "MERGE",
   "DONE",
 ] as const
@@ -23,12 +24,19 @@ export type SprintJobState = {
   updatedAt?: string
   summary?: string
   error?: string
+  detailLines?: string[]
 }
 
 export type SprintStageSummary = {
   stage: SprintStage
   content: string
   updatedAt: string
+}
+
+export type SprintPreviewDeployment = {
+  url: string
+  ready: boolean
+  deployedAt: string
 }
 
 export type SprintThreadState = {
@@ -49,7 +57,9 @@ export type SprintThreadState = {
   job?: SprintJobState
   stageStartedAt?: string
   latestStageSummary?: SprintStageSummary
+  preview?: SprintPreviewDeployment
   checkpointMessageId?: string
+  activityMessageId?: string
   lastOperatorMessageId?: string
   createdAt: string
   updatedAt: string

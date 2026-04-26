@@ -121,10 +121,23 @@ flowchart LR
 
 ## 수동 게이트
 
-사람이 직접 승인하는 단계는 둘뿐이다.
+사람이 직접 승인하는 단계는 셋이다.
+
+Discord에서 보이는 단계 이름은 아래 순서를 따른다.
+
+1. `1. 방향 정리 [게이트]`
+2. `2. 흐름 정리`
+3. `3. 데모 구현`
+4. `4. 데모 확인 [게이트]`
+5. `5. 구현 준비`
+6. `6. 구현`
+7. `7. 배포 확인 [게이트]`
+8. `8. main 반영`
+9. `9. 완료`
 
 1. Discovery alignment
 2. Demo review
+3. Preview review
 
 버튼 예시:
 
@@ -134,8 +147,15 @@ flowchart LR
 - Demo
   - `다음 단계로 진행`
   - `파기 후 종료`
+- Preview
+  - `수정 더 하기`
+  - `완료, main 반영`
+  - `파기 후 종료`
 
 자동 진행 단계에서는 `파기 후 종료`만 남긴다.
+
+`수정 더 하기`를 누르면 `5. 구현 준비`로 돌아가서 preview 전 사이클을 다시 돈다.
+따라서 `5 -> 6 -> 7 -> 5 -> 6 -> 7 ...` 반복이 가능하다.
 
 ## 안정성 설계
 
@@ -148,6 +168,8 @@ bridge 계층은 아래를 기본으로 갖춘다.
 - `/status`는 thread 안에서는 상세 상태, 채널에서는 전체 스프린트 요약을 보여준다
 - 자동 단계는 실제 stage job을 돌리고, job 이력은 `jobs.jsonl`에 남긴다
 - 단계가 넘어갈 때는 직전 단계에서 결정된 내용을 handoff summary로 같이 남긴다
+- 구현이 끝나면 `pnpm preview:vercel`로 preview를 배포하고, URL을 Preview Review 단계에 붙인다
+- Demo Review로 넘어갈 때는 스프린트 문서와 핵심 흐름 자료를 첨부해서 Discord에서 바로 내려받을 수 있게 한다
 
 ## health check 모델
 
@@ -175,7 +197,7 @@ health는 두 겹으로 확인한다.
 - local health file 기반 상태 점검
 - `/design-system` demo surface
 - Demo Build 단계에서 `/design-system/examples/<sprint-key>` 데모를 만들도록 하는 stage 계약
-- `pnpm preview:demo`로 active sprint branch를 `codex/demo-preview`에 모아 Vercel preview를 만드는 로컬 스크립트
+- `pnpm preview:demo`로 active sprint branch와 worktree demo 폴더를 `codex/demo-preview`에 모아 Vercel preview를 만드는 로컬 스크립트
 
 ## Demo Build 계약
 

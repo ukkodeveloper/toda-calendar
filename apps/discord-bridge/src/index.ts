@@ -2,6 +2,7 @@ import fs from "node:fs"
 
 import {
   ActionRowBuilder,
+  AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
@@ -20,10 +21,12 @@ import { BridgeHealthReporter } from "./health.js"
 import { ensureRuntimeDir, getBridgeHealthFile, getBridgeJobLogFile } from "./runtime-files.js"
 import { JobLogger } from "./job-log.js"
 import { ThreadStore } from "./thread-store.js"
-import type { SprintStage, SprintStageSummary, SprintStatus, SprintThreadState } from "./types.js"
+import type { SprintPreviewDeployment, SprintStage, SprintStageSummary, SprintStatus, SprintThreadState } from "./types.js"
 import { getBranchName, getRunSprintKey, getSprintKey, getWorktreeName, getWorktreePath, ensureGitWorktree } from "./worktree.js"
 import { runCodexDiscussionReply, runCodexStageTransitionSummary } from "./codex-runner.js"
+import { runVercelPreviewDeployment } from "./preview-deployer.js"
 import { runCodexStageWorker } from "./stage-worker.js"
+import { getSprintAssetsDirAbsolutePath, getSprintDocAbsolutePath } from "./sprint-files.js"
 
 const env = loadEnv()
 ensureRuntimeDir(env.repoRoot)
@@ -43,6 +46,8 @@ const runningAutomationThreads = new Set<string>()
 const DISCORD_MESSAGE_LIMIT = 1_900
 
 const GATE_APPROVE_ID = "sprint:gate:approve"
+const PREVIEW_REVISE_ID = "sprint:preview:revise"
+const PREVIEW_APPROVE_ID = "sprint:preview:approve"
 const AUTONOMOUS_RETRY_ID = "sprint:job:retry"
 const TERMINATE_REQUEST_ID = "sprint:terminate:request"
 const TERMINATE_CONFIRM_PREFIX = "sprint:terminate:confirm"
@@ -126,6 +131,69 @@ async function sendChunkedThreadMessage(thread: ThreadChannel, content: string) 
   }
 }
 
+function listFilesRecursively(dirPath: string) {
+  if (!fs.existsSync(dirPath)) {
+    return []
+  }
+
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true })
+  const files: string[] = []
+
+  for (const entry of entries) {
+    const absolutePath = `${dirPath}/${entry.name}`
+
+    if (entry.isDirectory()) {
+      files.push(...listFilesRecursively(absolutePath))
+      continue
+    }
+
+    files.push(absolutePath)
+  }
+
+  return files
+}
+
+function buildDemoReviewAttachments(state: SprintThreadState) {
+  const files: AttachmentBuilder[] = []
+  const sprintDocPath = getSprintDocAbsolutePath(state.worktreePath, state)
+
+  if (fs.existsSync(sprintDocPath)) {
+    files.push(new AttachmentBuilder(sprintDocPath, { name: `${state.sprintId}-${state.featureSlug}.md` }))
+  }
+
+  const assetDir = getSprintAssetsDirAbsolutePath(state.worktreePath, state)
+  const assetFiles = listFilesRecursively(assetDir)
+    .filter((filePath) => /\.(md|html|txt|png|jpg|jpeg|webp)$/i.test(filePath))
+    .slice(0, 6)
+
+  for (const filePath of assetFiles) {
+    files.push(new AttachmentBuilder(filePath))
+  }
+
+  return files
+}
+
+async function sendDemoReviewPack(thread: ThreadChannel, state: SprintThreadState) {
+  const attachments = buildDemoReviewAttachments(state)
+
+  const content = [
+    "데모 확인 자료를 같이 보낼게요.",
+    "- 스프린트 문서와 핵심 흐름 자료를 첨부했어요.",
+    "- 문서 다운로드가 번거로우면 아래 요약만 보고 방향을 정해도 돼요.",
+    ...buildLatestStageSummarySection(state.latestStageSummary),
+  ].join("\n")
+
+  if (attachments.length === 0) {
+    await sendChunkedThreadMessage(thread, content)
+    return
+  }
+
+  await thread.send({
+    content,
+    files: attachments,
+  })
+}
+
 async function replyWithChunkedMessage(message: Message, content: string) {
   const chunks = splitDiscordContent(content)
   const [first, ...rest] = chunks
@@ -144,40 +212,44 @@ async function replyWithChunkedMessage(message: Message, content: string) {
 function stageLabel(stage: SprintStage) {
   switch (stage) {
     case "DISCOVERY_WORKSHOP":
-      return "방향 정리"
+      return "1. 방향 정리 [게이트]"
     case "DESIGN_PACK":
-      return "핵심 흐름 정리"
+      return "2. 흐름 정리"
     case "DEMO_BUILD":
-      return "데모 구현"
+      return "3. 데모 구현"
     case "DEMO_REVIEW":
-      return "데모 확인"
+      return "4. 데모 확인 [게이트]"
     case "TECHNICAL_FREEZE":
-      return "기술 범위 확정"
+      return "5. 구현 준비"
     case "IMPLEMENTATION":
-      return "구현"
+      return "6. 구현"
+    case "PREVIEW_REVIEW":
+      return "7. 배포 확인 [게이트]"
     case "MERGE":
-      return "반영"
+      return "8. main 반영"
     case "DONE":
-      return "완료"
+      return "9. 완료"
   }
 }
 
 function stageSummary(stage: SprintStage) {
   switch (stage) {
     case "DISCOVERY_WORKSHOP":
-      return "왜 필요한지, 성공 기준이 뭔지, 이번에 안 할 건 뭔지 정해요."
+      return "왜 필요한지, 성공 기준, 이번에 안 할 것을 정해요."
     case "DESIGN_PACK":
-      return "핵심 경로만 빠르게 정리해요. 길게 벌리지 않아요."
+      return "핵심 흐름만 좁혀서 정리해요."
     case "DEMO_BUILD":
       return "진입점과 화면 흐름이 담긴 `/design-system` 데모를 만들어요."
     case "DEMO_REVIEW":
       return "진입점, 화면 이동, 완료 상태, 디자인 일관성을 보고 방향을 결정해요."
     case "TECHNICAL_FREEZE":
-      return "구현 범위와 경계를 확정해요."
+      return "구현 범위와 검증 기준을 확정해요."
     case "IMPLEMENTATION":
-      return "구현, 검증, 리뷰를 병렬로 진행해요."
+      return "기능 구현과 1차 검증을 진행해요."
+    case "PREVIEW_REVIEW":
+      return "배포된 결과를 보고 더 고칠지, 이대로 반영할지 정해요."
     case "MERGE":
-      return "최신 main 기준으로 정리하고 반영해요."
+      return "최종 확인 후 main에 반영해요."
     case "DONE":
       return "이 스프린트는 마무리됐어요."
   }
@@ -190,8 +262,13 @@ function nextHumanGate(stage: SprintStage): SprintStage | null {
     case "DESIGN_PACK":
     case "DEMO_BUILD":
       return "DEMO_REVIEW"
+    case "TECHNICAL_FREEZE":
+    case "IMPLEMENTATION":
+      return "PREVIEW_REVIEW"
     case "DEMO_REVIEW":
       return "DEMO_REVIEW"
+    case "PREVIEW_REVIEW":
+      return "PREVIEW_REVIEW"
     default:
       return null
   }
@@ -229,12 +306,29 @@ function formatRunLabel(state: SprintThreadState) {
   return runNumber <= 1 ? "기본 실행" : `${runNumber}차 실행`
 }
 
+function formatUpdatedClock(iso?: string) {
+  if (!iso) {
+    return "방금 전"
+  }
+
+  const date = new Date(iso)
+
+  if (Number.isNaN(date.getTime())) {
+    return iso
+  }
+
+  return date.toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
 function statusFromStage(stage: SprintStage): SprintStatus {
   if (stage === "DONE") {
     return "DONE"
   }
 
-  if (stage === "DISCOVERY_WORKSHOP" || stage === "DEMO_REVIEW") {
+  if (stage === "DISCOVERY_WORKSHOP" || stage === "DEMO_REVIEW" || stage === "PREVIEW_REVIEW") {
     return "WAITING_FOR_APPROVAL"
   }
 
@@ -247,6 +341,8 @@ function nextAutomaticStage(stage: SprintStage): SprintStage | null {
       return "DESIGN_PACK"
     case "DEMO_REVIEW":
       return "TECHNICAL_FREEZE"
+    case "PREVIEW_REVIEW":
+      return "MERGE"
     default:
       return null
   }
@@ -262,6 +358,10 @@ function getGateConfig(stage: SprintStage) {
       return {
         gateLabel: "Demo 승인",
       }
+    case "PREVIEW_REVIEW":
+      return {
+        gateLabel: "Preview 확인",
+      }
     default:
       return null
   }
@@ -275,7 +375,20 @@ function buildStageButtons(state: SprintThreadState, disabled = false) {
   const gate = getGateConfig(state.stage)
   const row = new ActionRowBuilder<ButtonBuilder>()
 
-  if (gate) {
+  if (state.stage === "PREVIEW_REVIEW") {
+    row.addComponents(
+      new ButtonBuilder()
+        .setCustomId(PREVIEW_REVISE_ID)
+        .setLabel("수정 더 하기")
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(disabled),
+      new ButtonBuilder()
+        .setCustomId(PREVIEW_APPROVE_ID)
+        .setLabel("완료, main 반영")
+        .setStyle(ButtonStyle.Success)
+        .setDisabled(disabled),
+    )
+  } else if (gate) {
     row.addComponents(
       new ButtonBuilder()
         .setCustomId(GATE_APPROVE_ID)
@@ -306,6 +419,86 @@ function buildStageButtons(state: SprintThreadState, disabled = false) {
   return [row]
 }
 
+function formatPreviewReviewLine(preview?: SprintPreviewDeployment) {
+  if (!preview) {
+    return "preview URL이 아직 없어요."
+  }
+
+  return `preview: ${preview.url}${preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`
+}
+
+function buildActivityCard(state: SprintThreadState) {
+  const lines = [
+    "**진행 현황**",
+    `- 단계: ${stageLabel(state.stage)}`,
+    `- 상태: ${statusLabel(state.status)}`,
+  ]
+
+  if (state.preview?.url) {
+    lines.push(`- preview: ${state.preview.url}${state.preview.ready ? "" : " (준비 중일 수 있어요)"}`)
+  }
+
+  if (state.status === "WAITING_FOR_APPROVAL") {
+    const gate = getGateConfig(state.stage)
+
+    if (gate) {
+      lines.push(`- 지금 정할 것: ${gate.gateLabel}`)
+    }
+  }
+
+  if (state.job?.status === "RUNNING" && state.job.detailLines?.length) {
+    lines.push("", "지금 하는 일")
+    lines.push(...state.job.detailLines.map((line) => `- ${line}`))
+  } else if (state.job?.status === "FAILED" && state.job.error) {
+    lines.push("", "막힌 이유")
+    lines.push(`- ${state.job.error}`)
+  } else if (state.job?.summary) {
+    lines.push("", "최근 작업")
+    lines.push(`- ${state.job.summary}`)
+  }
+
+  if (state.latestStageSummary?.content) {
+    lines.push("", `${stageLabel(state.latestStageSummary.stage)}에서 정리된 내용`)
+    lines.push(state.latestStageSummary.content)
+  }
+
+  lines.push("", `- 마지막 업데이트: ${formatUpdatedClock(state.job?.updatedAt ?? state.updatedAt)}`)
+  return lines.join("\n")
+}
+
+async function syncActivityCard(thread: ThreadChannel, state: SprintThreadState) {
+  const content = buildActivityCard(state)
+
+  if (state.activityMessageId) {
+    const existing = await thread.messages.fetch(state.activityMessageId).catch(() => null)
+
+    if (existing) {
+      await existing.edit({ content, components: [] })
+      return state
+    }
+  }
+
+  const message = await thread.send({ content, components: [] })
+  const nextState = {
+    ...state,
+    activityMessageId: message.id,
+  }
+  store.upsert(nextState)
+  return nextState
+}
+
+function withJobDetail(state: SprintThreadState, detailLines: string[]): SprintThreadState {
+  return {
+    ...state,
+    job: {
+      ...(state.job ?? { status: "IDLE" as const }),
+      detailLines,
+      updatedAt: nowIso(),
+    },
+    updatedAt: nowIso(),
+  }
+}
+
 function buildStageControlCard(state: SprintThreadState) {
   if (state.stage === "DONE") {
     return null
@@ -314,8 +507,22 @@ function buildStageControlCard(state: SprintThreadState) {
   const gate = getGateConfig(state.stage)
 
   return {
-    content: gate
-      ? [
+    content:
+      state.stage === "PREVIEW_REVIEW"
+        ? [
+            `지금은 **${stageLabel(state.stage)}** 단계예요.`,
+            ...buildLatestStageSummarySection(state.latestStageSummary),
+            "",
+            `- ${formatPreviewReviewLine(state.preview)}`,
+            `- ${stageSummary(state.stage)}`,
+            "",
+            "배포된 화면을 보고 결정하면 돼요.",
+            "- 더 고칠 게 있으면 `수정 더 하기`",
+            "- 이대로 괜찮으면 `완료, main 반영`",
+            "- 여기서 접고 싶으면 `파기 후 종료`",
+          ].join("\n")
+        : gate
+          ? [
           `지금은 **${stageLabel(state.stage)}** 단계예요.`,
           ...buildLatestStageSummarySection(state.latestStageSummary),
           "",
@@ -324,14 +531,15 @@ function buildStageControlCard(state: SprintThreadState) {
           "",
           "계속 이야기하다가 방향이 정리되면 버튼을 눌러주세요.",
           "이번 스프린트를 여기서 접고 싶으면 `파기 후 종료`를 누르면 돼요.",
-        ].join("\n")
-      : [
-          `지금은 **${stageLabel(state.stage)}** 단계예요.`,
-          `- ${stageSummary(state.stage)}`,
-          "",
-          "이 구간은 내가 알아서 진행할게요.",
-          "다만 여기서 멈추고 싶다면 `파기 후 종료`로 정리할 수 있어요.",
-        ].join("\n"),
+          ].join("\n")
+          : [
+            `지금은 **${stageLabel(state.stage)}** 단계예요.`,
+            `- ${stageSummary(state.stage)}`,
+            ...buildLatestStageSummarySection(state.latestStageSummary),
+            "",
+            "이 구간은 내가 알아서 진행할게요.",
+            "다만 여기서 멈추고 싶다면 `파기 후 종료`로 정리할 수 있어요.",
+          ].join("\n"),
     components: buildStageButtons(state),
   }
 }
@@ -369,22 +577,28 @@ function formatDetailStatus(state: SprintThreadState) {
     : "job: `IDLE`"
   const jobSummaryLine = state.job?.summary ? `최근 작업 요약: ${state.job.summary}` : null
   const jobErrorLine = state.job?.error ? `최근 작업 오류: ${state.job.error}` : null
+  const jobDetailLine = state.job?.detailLines?.length
+    ? ["현재 작업 단계:", ...state.job.detailLines.map((line) => `- ${line}`)].join("\n")
+    : null
   const stageSummaryLine = state.latestStageSummary?.content
     ? [`직전 단계 요약 (${stageLabel(state.latestStageSummary.stage)}):`, state.latestStageSummary.content].join("\n")
     : null
+  const previewLine = state.preview ? `preview URL: ${state.preview.url}${state.preview.ready ? "" : " (준비 중일 수 있어요)"}` : null
 
   return [
     `스프린트: \`${state.sprintId}/${state.featureSlug}\``,
     `실행: ${formatRunLabel(state)}`,
-    `현재 단계: \`${state.stage}\` (${stageLabel(state.stage)})`,
+    `현재 단계: ${stageLabel(state.stage)}`,
     `상태: \`${state.status}\` (${statusLabel(state.status)})`,
     jobLine,
-    `다음 사람 체크포인트: ${nextGate ? `\`${nextGate}\` (${stageLabel(nextGate)})` : "없음"}`,
+    `다음 사람 체크포인트: ${nextGate ? stageLabel(nextGate) : "없음"}`,
     `worktree: \`${state.worktreeName}\``,
     `branch: \`${state.branchName}\``,
     `codex session: ${state.codexSessionId ? `\`${state.codexSessionId}\`` : "아직 생성 전"}`,
     `worktree path: \`${state.worktreePath}\``,
     `마지막 업데이트: \`${state.updatedAt}\``,
+    previewLine,
+    jobDetailLine,
     jobSummaryLine,
     jobErrorLine,
     stageSummaryLine,
@@ -409,10 +623,11 @@ function formatChannelSummary(states: SprintThreadState[]) {
       return [
         `- <#${state.threadId}>`,
         `  실행: ${formatRunLabel(state)}`,
-        `  단계: \`${state.stage}\` (${stageLabel(state.stage)}) / 상태: ${statusLabel(state.status)}`,
+        `  단계: ${stageLabel(state.stage)} / 상태: ${statusLabel(state.status)}`,
         `  작업: ${state.job?.status ?? "IDLE"}${state.job?.label ? ` (${state.job.label})` : ""}`,
-        `  다음 체크포인트: ${nextGate ? `\`${nextGate}\`` : "없음"}`,
+        `  다음 체크포인트: ${nextGate ? stageLabel(nextGate) : "없음"}`,
         `  worktree: \`${state.worktreeName}\` / branch: \`${state.branchName}\``,
+        ...(state.preview ? [`  preview: ${state.preview.url}`] : []),
       ].join("\n")
     }),
   ].join("\n")
@@ -454,11 +669,6 @@ function isLikelyQuestion(content: string) {
     "어때",
     "괜찮",
   ].some((token) => normalized.includes(token))
-}
-
-function looksLikeDecisionNote(content: string) {
-  const compact = content.trim()
-  return compact.length >= 140 || compact.split(/\r?\n/).filter((line) => line.trim()).length >= 3
 }
 
 function buildDiscoveryFacilitatorReply(content: string) {
@@ -596,6 +806,14 @@ function buildAutonomousStageStartReply(state: SprintThreadState) {
     case "IMPLEMENTATION":
     case "MERGE":
       return buildAutonomousStageReply(state)
+    case "PREVIEW_REVIEW":
+      return [
+        `좋아요. 이제 **${stageLabel(state.stage)}** 단계예요.`,
+        ...buildLatestStageSummarySection(state.latestStageSummary),
+        "",
+        `- ${formatPreviewReviewLine(state.preview)}`,
+        "- 링크를 직접 보고 더 고칠지, 이대로 반영할지 정하면 돼요.",
+      ].join("\n")
     case "DONE":
       return "이번 스프린트는 끝났어요."
     case "DISCOVERY_WORKSHOP":
@@ -622,6 +840,17 @@ function buildConversationFallbackReply(state: SprintThreadState, content: strin
 
   if (state.stage === "DEMO_REVIEW") {
     return isLikelyQuestion(content) ? buildDemoFacilitatorReply() : buildDemoNoteReply(content)
+  }
+
+  if (state.stage === "PREVIEW_REVIEW") {
+    return [
+      "배포 화면 기준으로 바로 판단해볼게요.",
+      "- 지금 수정이 필요한 부분",
+      "- 이번 사이클에서 고칠지",
+      "- 이대로 반영해도 되는지",
+      "",
+      "더 고칠 게 있으면 그대로 말해주고, 준비되면 버튼으로 다음 단계를 고르면 돼요.",
+    ].join("\n")
   }
 
   return buildAutonomousStageReply(state)
@@ -734,6 +963,8 @@ function buildFallbackStageSummary(params: {
         return "- 구현 범위와 검증 계획을 확인했어요."
       case "IMPLEMENTATION":
         return "- 구현 결과와 검증 상태를 확인했어요."
+      case "PREVIEW_REVIEW":
+        return "- preview 확인 결과를 다시 확인해야 해요."
       case "MERGE":
         return "- 최종 반영 결과를 다시 확인해야 해요."
       case "DONE":
@@ -814,6 +1045,16 @@ function buildLatestStageSummarySection(summary?: SprintStageSummary) {
   ]
 }
 
+async function deployPreviewForState(state: SprintThreadState) {
+  const result = await runVercelPreviewDeployment(state.worktreePath)
+
+  return {
+    url: result.url,
+    ready: result.ready,
+    deployedAt: nowIso(),
+  } satisfies SprintPreviewDeployment
+}
+
 function summarizeJobText(text: string, maxLength = 180) {
   const compact = text.replace(/\s+/g, " ").trim()
   return compact.length <= maxLength ? compact : `${compact.slice(0, maxLength - 3)}...`
@@ -832,6 +1073,7 @@ function buildRunningJobState(state: SprintThreadState) {
       updatedAt: timestamp,
       summary: state.job?.summary,
       error: undefined,
+      detailLines: state.job?.detailLines,
     },
     updatedAt: timestamp,
   }
@@ -851,6 +1093,7 @@ function buildFailedJobState(state: SprintThreadState, error: string) {
       updatedAt: timestamp,
       summary: state.job?.summary,
       error: summarizeJobText(error, 240),
+      detailLines: state.job?.detailLines,
     },
     updatedAt: timestamp,
   }
@@ -923,6 +1166,7 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
         ...buildLatestStageSummarySection(stageSummary),
       ].join("\n"),
     )
+    await sendDemoReviewPack(thread, nextState)
     return postStageControlMessage(thread, nextState)
   }
 
@@ -939,6 +1183,11 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
       stage: "IMPLEMENTATION",
       status: "ACTIVE",
       latestStageSummary: stageSummary,
+      preview: undefined,
+      job: {
+        ...baseState.job,
+        detailLines: ["구현 준비 중", "구현과 1차 검증을 시작할게요."],
+      },
       stageStartedAt: timestamp,
       checkpointMessageId: undefined,
     }
@@ -950,26 +1199,49 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
   }
 
   if (state.stage === "IMPLEMENTATION") {
+    const deployingState = withJobDetail(baseState, [
+      "구현과 1차 검증 정리 완료",
+      "Vercel preview를 배포하고 있어요.",
+    ])
+    store.upsert(deployingState)
+    await syncActivityCard(thread, deployingState)
+
+    const preview = await deployPreviewForState(deployingState)
     const stageSummary = await summarizeStageTransition({
       thread,
       state,
-      toStage: "MERGE",
+      toStage: "PREVIEW_REVIEW",
       stageReply: reply,
     })
 
     const nextState: SprintThreadState = {
       ...baseState,
-      stage: "MERGE",
-      status: "ACTIVE",
+      stage: "PREVIEW_REVIEW",
+      status: "WAITING_FOR_APPROVAL",
       latestStageSummary: stageSummary,
+      preview,
+      job: {
+        ...baseState.job,
+        detailLines: ["preview 배포 완료", "이제 링크를 보고 수정할지 결정하면 돼요."],
+      },
       stageStartedAt: timestamp,
       checkpointMessageId: undefined,
     }
 
     store.upsert(nextState)
     await sendChunkedThreadMessage(thread, reply)
-    await sendChunkedThreadMessage(thread, buildAutonomousStageStartReply(nextState))
-    return nextState
+    await sendChunkedThreadMessage(
+      thread,
+      [
+        "배포 확인 링크를 만들었어요. 직접 보고 다음 결정을 내려주세요.",
+        ...buildLatestStageSummarySection(stageSummary),
+        "",
+        `- preview: ${preview.url}${preview.ready ? "" : " (아직 준비 중일 수 있어요)"}`,
+        "- 더 고칠 게 있으면 `수정 더 하기`",
+        "- 이대로 괜찮으면 `완료, main 반영`",
+      ].join("\n"),
+    )
+    return postStageControlMessage(thread, nextState)
   }
 
   if (state.stage === "MERGE") {
@@ -985,6 +1257,10 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
       stage: "DONE",
       status: "DONE",
       latestStageSummary: stageSummary,
+      job: {
+        ...baseState.job,
+        detailLines: ["main 반영 정리 완료"],
+      },
       stageStartedAt: timestamp,
       checkpointMessageId: undefined,
     }
@@ -1028,8 +1304,9 @@ async function runAutonomousStageCycle(threadId: string) {
       }
 
       const thread = channel
-      const runningState = buildRunningJobState(state)
+      let runningState: SprintThreadState = withJobDetail(buildRunningJobState(state), ["작업 준비 중", "worktree 상태를 확인하고 있어요."])
       store.upsert(runningState)
+      runningState = await syncActivityCard(thread, runningState)
       jobLogger.append({
         at: nowIso(),
         threadId: runningState.threadId,
@@ -1045,6 +1322,13 @@ async function runAutonomousStageCycle(threadId: string) {
           branchName: runningState.branchName,
           worktreePath: runningState.worktreePath,
         })
+
+        runningState = withJobDetail(runningState, [
+          "worktree 준비 완료",
+          `${stageLabel(runningState.stage)} 작업을 Codex가 진행 중이에요.`,
+        ])
+        store.upsert(runningState)
+        runningState = await syncActivityCard(thread, runningState)
 
         const transcript = await buildAutomationTranscript(thread)
         const result = await runCodexStageWorker({
@@ -1070,6 +1354,7 @@ async function runAutonomousStageCycle(threadId: string) {
         const message = error instanceof Error ? error.message : "알 수 없는 오류"
         const failedState = buildFailedJobState(runningState, message)
         store.upsert(failedState)
+        await syncActivityCard(thread, failedState)
         jobLogger.append({
           at: nowIso(),
           threadId: failedState.threadId,
@@ -1323,21 +1608,25 @@ async function sendKickoff(thread: ThreadChannel, state: SprintThreadState) {
   const gateCard = buildStageControlCard(state)
 
   if (!gateCard) {
+    await syncActivityCard(thread, state)
     return
   }
 
   const gateMessage = await thread.send(gateCard)
-
-  store.upsert({
+  const nextState = {
     ...state,
     checkpointMessageId: gateMessage.id,
-  })
+  }
+
+  store.upsert(nextState)
+  await syncActivityCard(thread, nextState)
 }
 
 async function postStageControlMessage(thread: ThreadChannel, state: SprintThreadState) {
   const controlCard = buildStageControlCard(state)
 
   if (!controlCard) {
+    await syncActivityCard(thread, state)
     return state
   }
 
@@ -1349,7 +1638,7 @@ async function postStageControlMessage(thread: ThreadChannel, state: SprintThrea
   }
 
   store.upsert(nextState)
-  return nextState
+  return syncActivityCard(thread, nextState)
 }
 
 async function handleSprint(interaction: ChatInputCommandInteraction) {
@@ -1581,6 +1870,7 @@ async function finalizeSprintTermination(thread: ThreadChannel, state: SprintThr
   }
 
   store.upsert(nextState)
+  await syncActivityCard(thread, nextState)
 
   await sendChunkedThreadMessage(
     thread,
@@ -1751,9 +2041,84 @@ async function handleGateApprove(interaction: ButtonInteraction) {
   await sendChunkedThreadMessage(interaction.channel, buildAutonomousStageStartReply(nextState))
 
   await postStageControlMessage(interaction.channel, nextState)
+  await syncActivityCard(interaction.channel, nextState)
 
   await interaction.editReply({
     content: "다음 자동 단계로 넘겼어요.",
+  })
+
+  if (isAutonomousStage(nextState.stage) && nextState.status === "ACTIVE") {
+    scheduleAutonomousStage(nextState.threadId)
+  }
+}
+
+async function handlePreviewDecision(interaction: ButtonInteraction, mode: "revise" | "approve") {
+  if (!interaction.channel?.isThread()) {
+    await interaction.reply({
+      content: "이 버튼은 스프린트 스레드 안에서만 사용할 수 있어요.",
+      flags: MessageFlags.Ephemeral,
+    })
+    return
+  }
+
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral })
+
+  const state = store.get(interaction.channel.id)
+
+  if (!state) {
+    await interaction.editReply({
+      content: "이 스레드는 아직 스프린트 스레드로 등록되지 않았어요.",
+    })
+    return
+  }
+
+  if (state.stage !== "PREVIEW_REVIEW") {
+    await interaction.editReply({
+      content: "지금은 preview 확인 단계가 아니에요.",
+    })
+    return
+  }
+
+  const nextStage: SprintStage = mode === "revise" ? "TECHNICAL_FREEZE" : "MERGE"
+  const disabledStatusText = mode === "revise" ? "수정 작업으로 돌아감" : "main 반영으로 진행됨"
+
+  await disableStageControlMessage(interaction, state, disabledStatusText)
+
+  if (interaction.message.id !== state.checkpointMessageId && interaction.channel.isThread()) {
+    await disableStoredControlMessage(interaction.channel, state, disabledStatusText)
+  }
+
+  const stageSummary = await summarizeStageTransition({
+    thread: interaction.channel,
+    state,
+    toStage: nextStage,
+  })
+
+  const nextStartedAt = nowIso()
+  const nextState: SprintThreadState = {
+    ...state,
+    stage: nextStage,
+    status: statusFromStage(nextStage),
+    latestStageSummary: stageSummary,
+    preview: mode === "revise" ? undefined : state.preview,
+    job: {
+      status: "IDLE",
+      stage: nextStage,
+      label: stageLabel(nextStage),
+      updatedAt: nextStartedAt,
+    },
+    stageStartedAt: nextStartedAt,
+    checkpointMessageId: undefined,
+    lastOperatorMessageId: interaction.user.id,
+    updatedAt: nextStartedAt,
+  }
+
+  await sendChunkedThreadMessage(interaction.channel, buildAutonomousStageStartReply(nextState))
+  await postStageControlMessage(interaction.channel, nextState)
+  await syncActivityCard(interaction.channel, nextState)
+
+  await interaction.editReply({
+    content: mode === "revise" ? "좋아요. 수정 사이클을 한 번 더 돌릴게요." : "좋아요. 이제 main 반영으로 넘어갈게요.",
   })
 
   if (isAutonomousStage(nextState.stage) && nextState.status === "ACTIVE") {
@@ -1803,6 +2168,7 @@ async function handleAutonomousRetry(interaction: ButtonInteraction) {
   }
 
   store.upsert(nextState)
+  await syncActivityCard(interaction.channel, nextState)
   await interaction.editReply({
     content: "좋아요. 같은 단계에서 다시 시도할게요.",
   })
@@ -1842,12 +2208,15 @@ async function handleThreadMessage(message: Message) {
       updatedAt: nowIso(),
     })
 
+    const trimmedContent = message.content.trim()
+    const contentForBridge =
+      trimmedContent ||
+      (message.attachments.size > 0 ? "사용자가 첨부 파일이나 이미지를 올렸어. 첨부 자료를 보고 방향을 같이 정리해달라는 뜻으로 이해해줘." : "")
+
     const shouldReply =
-      state.stage === "DISCOVERY_WORKSHOP"
-        ? isLikelyQuestion(message.content) || looksLikeDecisionNote(message.content)
-        : state.stage === "DEMO_REVIEW"
-          ? isLikelyQuestion(message.content) || looksLikeDecisionNote(message.content)
-          : isLikelyQuestion(message.content)
+      state.status === "WAITING_FOR_APPROVAL"
+        ? Boolean(contentForBridge)
+        : isLikelyQuestion(trimmedContent)
 
     if (!shouldReply) {
       return
@@ -1855,7 +2224,7 @@ async function handleThreadMessage(message: Message) {
 
     await safeReact(message, "⏳")
     await message.channel.sendTyping()
-    const conversation = await buildConversationReply(message.channel, state, message.content, message.id)
+    const conversation = await buildConversationReply(message.channel, state, contentForBridge, message.id)
 
     if (conversation.nextState !== state) {
       store.upsert(conversation.nextState)
@@ -1931,6 +2300,16 @@ client.on("interactionCreate", async (interaction) => {
 
       if (interaction.customId === TERMINATE_REQUEST_ID) {
         await handleTerminateRequest(interaction)
+        return
+      }
+
+      if (interaction.customId === PREVIEW_REVISE_ID) {
+        await handlePreviewDecision(interaction, "revise")
+        return
+      }
+
+      if (interaction.customId === PREVIEW_APPROVE_ID) {
+        await handlePreviewDecision(interaction, "approve")
         return
       }
 

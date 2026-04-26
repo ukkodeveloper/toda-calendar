@@ -64,6 +64,12 @@ function stageGuide(stage: SprintStage) {
         "완성도 평가보다 기능 진입점, 화면 흐름, 완료/취소 위치, 디자인 일관성 확인이 중요하다.",
         "유지할 것, 바꿀 것, 지금 바로 결정할 것을 나눠서 말한다.",
       ].join("\n")
+    case "PREVIEW_REVIEW":
+      return [
+        "지금은 Preview Review 단계다.",
+        "배포된 결과를 보고 수정할지, 이대로 반영할지 함께 정하는 단계다.",
+        "눈에 띄는 문제, 수정 우선순위, 지금 반영해도 되는지 판단을 같이 준다.",
+      ].join("\n")
     case "DESIGN_PACK":
     case "DEMO_BUILD":
     case "TECHNICAL_FREEZE":
@@ -108,6 +114,14 @@ function responseStyleGuide(params: { stage: SprintStage; latestMessage: string 
     return [
       "지금은 Demo Review다.",
       "완성도 감상보다 진입점, 화면 이동, 완료/취소 상태, 디자인 시스템 일관성을 중심으로 답한다.",
+    ].join("\n")
+  }
+
+  if (params.stage === "PREVIEW_REVIEW") {
+    return [
+      "지금은 Preview Review다.",
+      "배포 링크에서 본 문제를 기준으로 수정할 것과 지금 반영해도 되는 것을 나눠서 답한다.",
+      "필요하면 우선순위까지 짧게 정리한다.",
     ].join("\n")
   }
 
@@ -196,6 +210,12 @@ function stageSummaryGuide(stage: SprintStage) {
         "- 유지할 것",
         "- 바꿀 것",
         "- 지금 확정한 방향",
+      ].join("\n")
+    case "PREVIEW_REVIEW":
+      return [
+        "- preview에서 확인한 핵심 이슈",
+        "- 바로 고칠 것",
+        "- 이대로 반영 가능한지 여부",
       ].join("\n")
     case "TECHNICAL_FREEZE":
       return [

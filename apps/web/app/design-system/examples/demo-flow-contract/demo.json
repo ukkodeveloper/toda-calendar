@@ -1,0 +1,97 @@
+{
+  "slug": "demo-flow-contract",
+  "sprintId": "foundation",
+  "featureSlug": "demo-flow-contract",
+  "title": "Sprint demo flow contract",
+  "summary": "A reference example that shows how sprint demos should capture entry points, the intended user journey, reviewable screens, and design-system usage before implementation starts.",
+  "status": "ready",
+  "updatedAt": "2026-04-26",
+  "entryPoints": [
+    {
+      "label": "Calendar surface",
+      "location": "Month view or settings surface where the feature naturally appears.",
+      "userIntent": "The user notices a contextual action without leaving the primary calendar task."
+    },
+    {
+      "label": "Prompt or control",
+      "location": "A visible button, sheet, banner, or menu item that starts the feature.",
+      "userIntent": "The user understands why this action is available and what will happen next."
+    }
+  ],
+  "flowSteps": [
+    {
+      "label": "Discover",
+      "screen": "Entry screen",
+      "userAction": "User reaches the feature from the normal product path.",
+      "systemResponse": "The app presents a calm, contextual call to action."
+    },
+    {
+      "label": "Start",
+      "screen": "Decision screen",
+      "userAction": "User chooses the primary action or backs out.",
+      "systemResponse": "The app opens the smallest screen needed to continue the task."
+    },
+    {
+      "label": "Complete",
+      "screen": "Result screen",
+      "userAction": "User confirms the feature action.",
+      "systemResponse": "The app returns to the right product location with the new state visible."
+    }
+  ],
+  "screens": [
+    {
+      "name": "Entry screen",
+      "role": "Discovery",
+      "primaryAction": "Start the feature from the calendar context.",
+      "secondaryAction": "Ignore the prompt and keep using the current screen.",
+      "stateNotes": [
+        "The entry point should not hide the user's existing calendar task.",
+        "The call to action should use shared button, surface, and spacing tokens."
+      ]
+    },
+    {
+      "name": "Decision screen",
+      "role": "Core action",
+      "primaryAction": "Confirm the main user intent.",
+      "secondaryAction": "Cancel and return to the entry point.",
+      "stateNotes": [
+        "The user should know what will change before confirming.",
+        "The cancel path should preserve the user's previous context."
+      ]
+    },
+    {
+      "name": "Result screen",
+      "role": "Completion",
+      "primaryAction": "Continue from the updated product state.",
+      "secondaryAction": "Review or adjust the result if the feature needs it.",
+      "stateNotes": [
+        "The completed state should be visible without a toast-only confirmation.",
+        "Any follow-up action should feel optional, not required."
+      ]
+    }
+  ],
+  "designSystem": {
+    "components": [
+      "Shared surface treatment",
+      "Primary and secondary action styles",
+      "Existing calendar spacing and foreground tokens"
+    ],
+    "tokens": [
+      "background",
+      "foreground",
+      "calendar-app-bg",
+      "ring"
+    ],
+    "notes": [
+      "Demo pages should avoid production data, auth, persistence, and API calls.",
+      "Custom UI is allowed only when the gap is recorded for the design system."
+    ]
+  },
+  "reviewChecklist": [
+    "The feature entry point is obvious but not disruptive.",
+    "The user can move from start to completion without a missing screen.",
+    "Cancel, empty, or fallback states are represented when they affect the flow.",
+    "The demo names the design-system components and tokens it relies on.",
+    "Any visual inconsistency is captured before implementation planning."
+  ]
+}
