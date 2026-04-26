@@ -75,6 +75,8 @@ export function DayEditorSheet({
   const stageTimerRef = React.useRef<number | null>(null)
   const latestDraftRef = React.useRef<EditorDraft | null>(record)
   const latestRecordRef = React.useRef(record)
+  const isMountedRef = React.useRef(false)
+  const isDismissingRef = React.useRef(false)
   const dockLaunchFrame = getDockHandoffFrame(initialLift, viewportWidth)
   const dockExitFrame = getDockHandoffFrame(0, viewportWidth)
   const { expanded: expandedFrame, peek: peekFrame } = getFloatingSheetDetents({
@@ -84,7 +86,12 @@ export function DayEditorSheet({
   })
 
   React.useEffect(() => {
+    isMountedRef.current = true
     setMounted(true)
+
+    return () => {
+      isMountedRef.current = false
+    }
   }, [])
 
   React.useEffect(() => {
@@ -144,6 +151,7 @@ export function DayEditorSheet({
     })
 
     if (record) {
+      isDismissingRef.current = false
       setActiveTab(record.currentPreviewType)
       setStage("peek")
       setContentStage("peek")
@@ -168,6 +176,7 @@ export function DayEditorSheet({
   React.useEffect(() => {
     if (!open) {
       setIsDrawing(false)
+      isDismissingRef.current = false
     }
   }, [open])
 
@@ -266,36 +275,41 @@ export function DayEditorSheet({
     setDraft((current) => (current ? { ...current, text: nextSlot } : current))
   }
 
-  async function persistDraft() {
-    if (!draft) {
+  async function persistDraft({ trackSaving = true } = {}) {
+    const nextDraft = latestDraftRef.current
+
+    if (!nextDraft) {
       return
     }
 
-    setIsSaving(true)
+    if (trackSaving) {
+      setIsSaving(true)
+    }
 
     try {
       await onSave({
-        ...draft,
+        ...nextDraft,
         currentPreviewType: activeTab,
       })
     } finally {
-      setIsSaving(false)
+      if (trackSaving && isMountedRef.current) {
+        setIsSaving(false)
+      }
     }
   }
 
-  async function closeEditor() {
-    if (isSaving) {
+  function closeEditor() {
+    if (isSaving || isDismissingRef.current) {
       return
     }
 
+    isDismissingRef.current = true
     clearStageTimer()
+    setStage("peek")
+    setContentStage("peek")
+    onOpenChange(false)
 
-    try {
-      await persistDraft()
-      onOpenChange(false)
-    } catch {
-      return
-    }
+    void persistDraft({ trackSaving: false }).catch(() => {})
   }
 
   function handleDragEnd(
@@ -312,7 +326,7 @@ export function DayEditorSheet({
         info.offset.y > motionTokens.gesture.sheetDismissOffset ||
         info.velocity.y > motionTokens.gesture.sheetDismissVelocity
       ) {
-        void closeEditor()
+        closeEditor()
         return
       }
 
@@ -392,7 +406,7 @@ export function DayEditorSheet({
             }}
             onClick={() => {
               if (!isDrawing && !isSaving) {
-                void closeEditor()
+                closeEditor()
               }
             }}
           />
