@@ -8,6 +8,7 @@ import {
   motion,
   useReducedMotion,
 } from "framer-motion"
+import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 
 import {
@@ -1357,7 +1358,7 @@ export function DesignSystemDemo({
   }
 
   return (
-    <main className="min-h-dvh bg-[var(--calendar-app-bg)] text-foreground">
+    <main className="min-h-dvh overflow-x-hidden bg-[var(--ds-surface-inset)] text-foreground">
       <div className="grid min-h-dvh grid-rows-[auto_minmax(0,1fr)]">
         <TopBar activeComponent={activeComponent} />
         <div className="grid min-h-0 grid-cols-1 lg:grid-cols-[13.5rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_21rem]">
@@ -1381,10 +1382,10 @@ export function DesignSystemDemo({
           />
           <section
             ref={previewScrollRef}
-            className="min-h-0 overflow-y-auto px-3 py-4 lg:px-6 lg:py-5"
+            className="min-h-0 overflow-y-auto bg-[var(--ds-surface-inset)] px-0 py-0 sm:px-3 sm:py-4 lg:px-6 lg:py-5"
           >
-            <div className="mx-auto max-w-[28rem]">
-              <MobileFrame>
+            <div className="mx-auto w-full sm:max-w-[28rem]">
+              <PreviewCanvas>
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
                     key={
@@ -1463,7 +1464,7 @@ export function DesignSystemDemo({
                     />
                   </motion.div>
                 </AnimatePresence>
-              </MobileFrame>
+              </PreviewCanvas>
               <ComponentUsage item={activeComponent} />
             </div>
           </section>
@@ -1584,7 +1585,7 @@ export function DesignSystemDemo({
           </div>
         }
       >
-        <div className="rounded-[22px] bg-white/58 p-4 text-sm leading-6 text-foreground/62">
+        <div className="rounded-[22px] bg-background/58 p-4 text-sm leading-6 text-foreground/62">
           시트 안의 콘텐츠는 도메인과 무관하게 제목, 설명, 선택지, 확인 행동으로
           조합할 수 있습니다.
         </div>
@@ -1595,7 +1596,7 @@ export function DesignSystemDemo({
 
 function TopBar({ activeComponent }: { activeComponent: ComponentItem }) {
   return (
-    <header className="border-b border-black/[0.06] bg-white/72 px-4 py-3 backdrop-blur-2xl lg:px-5">
+    <header className="border-b border-foreground/[0.08] bg-[var(--surface-panel)] px-4 py-3 backdrop-blur-2xl lg:px-5">
       <div className="flex min-w-0 items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
@@ -1605,9 +1606,42 @@ function TopBar({ activeComponent }: { activeComponent: ComponentItem }) {
             {activeComponent.title}
           </h1>
         </div>
-        <StatusBadge status={activeComponent.status} />
+        <div className="flex min-w-0 shrink-0 items-center gap-2">
+          <ThemeModeToggle />
+          <span className="hidden sm:inline-flex">
+            <StatusBadge status={activeComponent.status} />
+          </span>
+        </div>
       </div>
     </header>
+  )
+}
+
+function ThemeModeToggle() {
+  const { resolvedTheme, setTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const isDark = mounted && resolvedTheme === "dark"
+
+  return (
+    <button
+      type="button"
+      className="inline-flex size-9 items-center justify-center gap-1.5 rounded-full border border-foreground/[0.08] bg-background/64 text-xs font-semibold text-foreground/70 shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35 sm:w-auto sm:px-2.5"
+      aria-label={isDark ? "라이트 모드로 전환" : "다크 모드로 전환"}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+    >
+      <span
+        aria-hidden="true"
+        className="grid size-5 place-items-center rounded-full bg-foreground/[0.08] text-[0.72rem]"
+      >
+        {isDark ? "D" : "L"}
+      </span>
+      <span className="hidden sm:inline">{isDark ? "Dark" : "Light"}</span>
+    </button>
   )
 }
 
@@ -1677,7 +1711,7 @@ function ComponentSidebar({
     "컴포넌트"
 
   return (
-    <aside className="hidden min-h-0 overflow-y-auto border-r border-black/[0.06] bg-white/58 px-3 py-3 backdrop-blur-2xl lg:block">
+    <aside className="hidden min-h-0 overflow-y-auto border-r border-foreground/[0.08] bg-[var(--surface-subtle)] px-3 py-3 backdrop-blur-2xl lg:block">
       <div className="mb-3 px-2">
         <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
           Design System
@@ -1687,7 +1721,7 @@ function ComponentSidebar({
         </p>
       </div>
       <LayoutGroup id="design-system-section-tabs">
-        <div className="mb-4 grid gap-1 rounded-[18px] bg-black/[0.045] p-1">
+        <div className="mb-4 grid gap-1 rounded-[18px] bg-foreground/[0.045] p-1">
           {designNavSections.map((section) => {
             const selected = activeSection === section.id
 
@@ -1707,7 +1741,7 @@ function ComponentSidebar({
                   <motion.span
                     layoutId="sidebar-active-section"
                     aria-hidden="true"
-                    className="absolute inset-0 rounded-[14px] bg-white shadow-[var(--ds-elevation-1)]"
+                    className="absolute inset-0 rounded-[14px] bg-background shadow-[var(--ds-elevation-1)]"
                     transition={motionTokens.intent.selectionFlow}
                   />
                 ) : null}
@@ -1728,7 +1762,7 @@ function ComponentSidebar({
         </label>
         <input
           id="design-system-component-search"
-          className="h-11 w-full rounded-full border border-black/[0.06] bg-white/72 px-4 text-sm font-medium text-foreground transition-shadow outline-none placeholder:text-foreground/32 focus:ring-2 focus:ring-[var(--ds-accent)]/25"
+          className="h-11 w-full rounded-full border border-foreground/[0.08] bg-background/72 px-4 text-sm font-medium text-foreground transition-shadow outline-none placeholder:text-foreground/32 focus:ring-2 focus:ring-[var(--ds-accent)]/25"
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder={`${activeSectionLabel} 검색`}
           type="search"
@@ -1751,7 +1785,7 @@ function ComponentSidebar({
                       "relative w-full rounded-[18px] px-3 py-2.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
                       selected
                         ? "text-foreground"
-                        : "text-foreground/62 hover:bg-white/46"
+                        : "text-foreground/62 hover:bg-background/46"
                     )}
                     onClick={() => onSelectExample(page)}
                   >
@@ -1759,7 +1793,7 @@ function ComponentSidebar({
                       <motion.span
                         layoutId="sidebar-active-example"
                         aria-hidden="true"
-                        className="absolute inset-0 rounded-[18px] bg-white shadow-[var(--ds-elevation-1)]"
+                        className="absolute inset-0 rounded-[18px] bg-background shadow-[var(--ds-elevation-1)]"
                         transition={motionTokens.intent.selectionFlow}
                       />
                     ) : null}
@@ -1781,7 +1815,7 @@ function ComponentSidebar({
               })}
             </div>
           ) : (
-            <div className="rounded-[18px] bg-white/58 px-3 py-4 text-sm leading-5 text-foreground/50">
+            <div className="rounded-[18px] bg-background/58 px-3 py-4 text-sm leading-5 text-foreground/50">
               검색 결과가 없습니다.
             </div>
           )
@@ -1790,7 +1824,7 @@ function ComponentSidebar({
             {visibleGroups.map(({ group, items }) => (
               <div
                 key={group}
-                className="min-w-0 border-t border-black/[0.06] pt-4 first:border-t-0 first:pt-0"
+                className="min-w-0 border-t border-foreground/[0.08] pt-4 first:border-t-0 first:pt-0"
               >
                 <p className="mb-1 px-2 text-[0.68rem] font-semibold tracking-normal text-foreground/38 uppercase">
                   {componentCategoryLabels[group]}
@@ -1807,7 +1841,7 @@ function ComponentSidebar({
                           "relative w-full rounded-[18px] px-3 py-2.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
                           selected
                             ? "text-foreground"
-                            : "text-foreground/62 hover:bg-white/46"
+                            : "text-foreground/62 hover:bg-background/46"
                         )}
                         onClick={() => onSelect(item.id)}
                       >
@@ -1815,7 +1849,7 @@ function ComponentSidebar({
                           <motion.span
                             layoutId="sidebar-active-component"
                             aria-hidden="true"
-                            className="absolute inset-0 rounded-[18px] bg-white shadow-[var(--ds-elevation-1)]"
+                            className="absolute inset-0 rounded-[18px] bg-background shadow-[var(--ds-elevation-1)]"
                             transition={motionTokens.intent.selectionFlow}
                           />
                         ) : null}
@@ -1840,7 +1874,7 @@ function ComponentSidebar({
             ))}
           </div>
         ) : (
-          <div className="rounded-[18px] bg-white/58 px-3 py-4 text-sm leading-5 text-foreground/50">
+          <div className="rounded-[18px] bg-background/58 px-3 py-4 text-sm leading-5 text-foreground/50">
             검색 결과가 없습니다.
           </div>
         )}
@@ -1878,9 +1912,9 @@ function MobileComponentNav({
       : getComponentItem(activeComponentId)
 
   return (
-    <nav className="border-b border-black/[0.06] bg-white/66 px-3 py-3 backdrop-blur-2xl lg:hidden">
+    <nav className="border-b border-foreground/[0.08] bg-[var(--surface-panel)] px-3 py-3 backdrop-blur-2xl lg:hidden">
       <div className="mx-auto max-w-[28rem] space-y-3">
-        <div className="grid grid-cols-4 gap-1 rounded-[18px] bg-black/[0.045] p-1">
+        <div className="grid grid-cols-4 gap-1 rounded-[18px] bg-foreground/[0.045] p-1">
           {designNavSections.map((section) => {
             const selected = activeSection === section.id
 
@@ -1891,7 +1925,7 @@ function MobileComponentNav({
                 className={cn(
                   "min-h-10 min-w-0 rounded-[14px] px-1.5 text-center text-[0.86rem] font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
                   selected
-                    ? "bg-white text-foreground shadow-[var(--ds-elevation-1)]"
+                    ? "bg-background text-foreground shadow-[var(--ds-elevation-1)]"
                     : "text-foreground/48"
                 )}
                 onClick={() => onSelectSection(section.id)}
@@ -1902,7 +1936,7 @@ function MobileComponentNav({
           })}
         </div>
 
-        <div className="rounded-[22px] bg-white/64 p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
+        <div className="rounded-[22px] bg-background/64 p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
           <div className="mb-2 flex items-center justify-between gap-3">
             <span className="truncate text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
               {activeSection === "examples" ? "Example" : "Component"}
@@ -1916,7 +1950,7 @@ function MobileComponentNav({
               {activeSection === "examples" ? "예시 페이지" : "컴포넌트"} 선택
             </span>
             <select
-              className="h-11 w-full appearance-none rounded-full border border-black/[0.06] bg-white/82 pr-11 pl-4 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-[var(--ds-accent)]/25"
+              className="h-11 w-full appearance-none rounded-full border border-foreground/[0.08] bg-background/82 pr-11 pl-4 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-[var(--ds-accent)]/25"
               value={
                 activeSection === "examples" ? examplePage : activeComponentId
               }
@@ -2837,7 +2871,7 @@ function ControlsPanel(props: {
     componentItems[0]!
 
   return (
-    <aside className="border-t border-black/[0.06] bg-white/62 px-4 py-4 backdrop-blur-2xl lg:col-start-2 xl:col-auto xl:min-h-0 xl:overflow-y-auto xl:border-t-0 xl:border-l">
+    <aside className="border-t border-foreground/[0.08] bg-[var(--surface-subtle)] px-4 py-4 backdrop-blur-2xl lg:col-start-2 xl:col-auto xl:min-h-0 xl:overflow-y-auto xl:border-t-0 xl:border-l">
       <div className="mb-4">
         <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
           Controls
@@ -3243,7 +3277,7 @@ function ControlsPanel(props: {
 
         {props.activeComponentId === "example-pages" ? (
           <>
-            <div className="rounded-[22px] bg-white/58 p-4">
+            <div className="rounded-[22px] bg-background/58 p-4">
               <p className="text-sm font-semibold">
                 {examplePageItems[props.examplePage].title}
               </p>
@@ -3276,7 +3310,7 @@ function ControlsPanel(props: {
         ) : null}
       </ControlGroup>
 
-      <div className="mt-6 rounded-[22px] bg-white/58 p-4">
+      <div className="mt-6 rounded-[22px] bg-background/58 p-4">
         <p className="text-sm font-semibold">Variant 축</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {activeItem.variantAxes.map((axis) => (
@@ -3303,7 +3337,7 @@ function ExampleComponentLinks({
   const usedComponents = examplePageComponentMap[examplePage]
 
   return (
-    <div className="rounded-[22px] bg-white/58 p-4">
+    <div className="rounded-[22px] bg-background/58 p-4">
       <p className="text-sm font-semibold">이 예시가 쓰는 컴포넌트</p>
       <p className="mt-1 text-xs leading-5 text-foreground/48">
         항목을 누르면 해당 컴포넌트 문서로 이동합니다.
@@ -3320,7 +3354,7 @@ function ExampleComponentLinks({
             <button
               key={component.id}
               type="button"
-              className="flex min-h-12 items-center justify-between gap-3 rounded-[16px] bg-white/72 px-3 text-left text-sm font-semibold text-foreground transition-colors outline-none hover:bg-white focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35"
+              className="flex min-h-12 items-center justify-between gap-3 rounded-[16px] bg-background/72 px-3 text-left text-sm font-semibold text-foreground transition-colors outline-none hover:bg-background focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35"
               onClick={() => onNavigate(component.id)}
             >
               <span className="min-w-0">
@@ -4603,11 +4637,10 @@ function ExampleScreen({
   )
 }
 
-function MobileFrame({ children }: { children: React.ReactNode }) {
+function PreviewCanvas({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto w-[402px] max-w-full rounded-[40px] bg-neutral-950 p-[5px] shadow-[0_22px_62px_rgba(15,23,42,0.22)] sm:rounded-[52px] sm:p-[7px] sm:shadow-[0_28px_80px_rgba(15,23,42,0.24)]">
-      <div className="relative h-[min(760px,calc(100dvh-12.25rem))] min-h-[520px] overflow-hidden rounded-[34px] bg-[var(--calendar-app-bg)] sm:h-[874px] sm:max-h-[calc(100dvh-7rem)] sm:rounded-[44px]">
-        <div className="absolute top-2.5 left-1/2 z-20 h-6 w-[6.4rem] -translate-x-1/2 rounded-full bg-neutral-950 sm:top-3 sm:h-7 sm:w-[7.4rem]" />
+    <div className="w-full bg-[var(--ds-surface-inset)] sm:mx-auto sm:rounded-[34px] sm:p-2 sm:shadow-[0_28px_80px_rgba(15,23,42,0.16)]">
+      <div className="relative h-[calc(100dvh-13.75rem)] min-h-[560px] overflow-hidden bg-[var(--calendar-app-bg)] sm:h-[780px] sm:max-h-[calc(100dvh-7rem)] sm:rounded-[28px] sm:ring-1 sm:ring-foreground/[0.08]">
         {children}
       </div>
     </div>
@@ -4672,7 +4705,7 @@ function PhoneSection({
 
 function ComponentUsage({ item }: { item: ComponentItem }) {
   return (
-    <section className="mt-5 rounded-[28px] bg-white/58 p-4 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)] backdrop-blur-xl">
+    <section className="mx-3 mt-4 rounded-[28px] bg-background/58 p-4 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)] backdrop-blur-xl sm:mx-0 sm:mt-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
@@ -4728,7 +4761,7 @@ function GridPreviewTile({ label, value }: { label: string; value: string }) {
       layout
       variants={listItemVariants}
       transition={motionTokens.intent.selectionFlow}
-      className="min-h-[7.5rem] rounded-[24px] bg-white/62 p-4 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]"
+      className="min-h-[7.5rem] rounded-[24px] bg-background/62 p-4 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]"
     >
       <Text variant="caption" tone="muted">
         {label}
@@ -4842,7 +4875,7 @@ function ToggleControl({
   onChange: (checked: boolean) => void
 }) {
   return (
-    <label className="flex min-h-12 items-center justify-between gap-3 rounded-[18px] bg-white/58 px-3">
+    <label className="flex min-h-12 items-center justify-between gap-3 rounded-[18px] bg-background/58 px-3">
       <span className="text-sm font-medium text-foreground/72">{label}</span>
       <input
         checked={checked}
