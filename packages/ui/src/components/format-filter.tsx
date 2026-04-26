@@ -16,6 +16,7 @@ export type FormatFilterOption<T extends string> = {
 type FormatFilterProps<T extends string> = {
   options: Array<FormatFilterOption<T>>
   selected: Record<T, boolean>
+  triggerLabel?: string
   title?: string
   description?: string
   onToggle: (value: T) => void
@@ -24,7 +25,14 @@ type FormatFilterProps<T extends string> = {
 
 function FilterIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-[1.05rem]" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="size-[1.05rem]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
       <path d="M4 7h16" strokeLinecap="round" />
       <path d="M7 12h10" strokeLinecap="round" />
       <path d="M10 17h4" strokeLinecap="round" />
@@ -38,6 +46,7 @@ function FormatFilter<T extends string>({
   onToggle,
   options,
   selected,
+  triggerLabel = "필터 열기",
   title = "Preview filter",
 }: FormatFilterProps<T>) {
   const [open, setOpen] = React.useState(false)
@@ -85,7 +94,7 @@ function FormatFilter<T extends string>({
       <IconButton
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label="Open preview filter"
+        aria-label={triggerLabel}
         size="sm"
         onClick={() => setOpen((current) => !current)}
       >
@@ -97,9 +106,19 @@ function FormatFilter<T extends string>({
             role="menu"
             aria-label={title}
             className="absolute top-11 right-0 z-30 w-[min(12rem,calc(100vw-1.5rem))] rounded-[20px] border border-black/6 bg-[var(--surface-panel)] p-1.5 text-left shadow-[0_18px_38px_rgba(15,23,42,0.14)] backdrop-blur-2xl"
-            initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
-            animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
+            initial={
+              reducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, y: -6, scale: 0.98 }
+            }
+            animate={
+              reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }
+            }
+            exit={
+              reducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, y: -6, scale: 0.98 }
+            }
             transition={{
               duration: reducedMotion
                 ? motionTokens.duration.instant
@@ -108,11 +127,13 @@ function FormatFilter<T extends string>({
             }}
           >
             <div className="px-2.5 pt-2 pb-1.5">
-              <p className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-foreground/46">
+              <p className="text-[0.74rem] font-semibold tracking-[0.12em] text-foreground/46 uppercase">
                 {title}
               </p>
               {description ? (
-                <p className="mt-1 text-[0.72rem] leading-4 text-foreground/54">{description}</p>
+                <p className="mt-1 text-[0.72rem] leading-4 text-foreground/54">
+                  {description}
+                </p>
               ) : null}
             </div>
             <div className="space-y-1">
@@ -130,7 +151,7 @@ function FormatFilter<T extends string>({
                   )}
                   onClick={() => onToggle(option.value)}
                 >
-                  <span className="text-[0.92rem] font-medium tracking-[-0.02em]">
+                  <span className="text-[0.92rem] font-medium">
                     {option.label}
                   </span>
                   <span

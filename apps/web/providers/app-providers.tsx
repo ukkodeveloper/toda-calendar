@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react"
 
+import { MotionConfig } from "framer-motion"
+
 import { ThemeProvider } from "@/components/theme-provider"
 
 type AppProvidersProps = {
@@ -9,5 +11,9 @@ type AppProvidersProps = {
 }
 
 export function AppProviders({ children }: AppProvidersProps) {
-  return <ThemeProvider>{children}</ThemeProvider>
+  return (
+    <MotionConfig reducedMotion="user">
+      <ThemeProvider>{children}</ThemeProvider>
+    </MotionConfig>
+  )
 }
