@@ -242,6 +242,7 @@ async function createApp(options: { allowPublicAccess?: boolean } = {}) {
   const { app } = await buildApiApp({
     allowPublicAccess: options.allowPublicAccess,
     env: {
+      authMode: "mock",
       dataFilePath: join(directory, "store.json"),
       host: "127.0.0.1",
       port: 0,
