@@ -61,10 +61,11 @@ function stageGuide(stage: SprintStage) {
     case "DEMO_REVIEW":
       return [
         "지금은 Demo Review 단계다.",
-        "완성도 평가보다 방향 확인이 중요하다.",
+        "완성도 평가보다 기능 진입점, 화면 흐름, 완료/취소 위치, 디자인 일관성 확인이 중요하다.",
         "유지할 것, 바꿀 것, 지금 바로 결정할 것을 나눠서 말한다.",
       ].join("\n")
     case "DESIGN_PACK":
+    case "DEMO_BUILD":
     case "TECHNICAL_FREEZE":
     case "IMPLEMENTATION":
     case "MERGE":
@@ -106,7 +107,7 @@ function responseStyleGuide(params: { stage: SprintStage; latestMessage: string 
   if (params.stage === "DEMO_REVIEW") {
     return [
       "지금은 Demo Review다.",
-      "완성도 감상보다 유지할 것, 바꿀 것, 지금 결정할 것을 중심으로 답한다.",
+      "완성도 감상보다 진입점, 화면 이동, 완료/취소 상태, 디자인 시스템 일관성을 중심으로 답한다.",
     ].join("\n")
   }
 
@@ -179,8 +180,16 @@ function stageSummaryGuide(stage: SprintStage) {
     case "DESIGN_PACK":
       return [
         "- 핵심 사용자 흐름",
+        "- 기능 진입점",
         "- 꼭 필요한 화면 또는 상태",
         "- 데모에서 확인할 포인트",
+      ].join("\n")
+    case "DEMO_BUILD":
+      return [
+        "- `/design-system` 데모 위치",
+        "- 사용자가 기능에 진입하는 지점",
+        "- 화면 사이 이동과 완료/취소 상태",
+        "- 디자인 시스템 컴포넌트와 토큰 사용",
       ].join("\n")
     case "DEMO_REVIEW":
       return [

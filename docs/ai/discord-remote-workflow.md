@@ -109,6 +109,7 @@ flowchart LR
 
 2. 내가 알아서 진행하는 구간
 - Design Pack
+- Demo Build
 - Technical Freeze
 - Implementation
 - Merge
@@ -172,12 +173,36 @@ health는 두 겹으로 확인한다.
 - typing / reaction
 - shell supervisor 기반 상주 실행
 - local health file 기반 상태 점검
+- `/design-system` demo surface
+- Demo Build 단계에서 `/design-system/examples/<sprint-key>` 데모를 만들도록 하는 stage 계약
+- `pnpm preview:demo`로 active sprint branch를 `codex/demo-preview`에 모아 Vercel preview를 만드는 로컬 스크립트
+
+## Demo Build 계약
+
+Demo Build는 단일 화면 시안이 아니라 작은 기능 사용 시나리오를 만든다.
+
+- 전체 demo index: `/design-system`
+- 개별 demo route: `/design-system/examples/<sprint-key>`
+- demo는 고유 폴더에 둔다.
+- demo metadata에는 아래를 포함한다.
+  - 기능 진입점
+  - 사용자가 기능을 시작하는 trigger
+  - 화면 사이 이동
+  - 완료 상태
+  - 중요한 취소, 빈 상태, fallback 중 최소 하나
+  - 사용한 디자인 시스템 컴포넌트와 token
+  - review checklist
+
+이 구조는 병렬 스프린트 branch가 서로 다른 demo 폴더만 추가하게 만들어
+preview branch에서 merge conflict를 줄인다. 여러 데모를 함께 확인할 때는
+`pnpm preview:demo`를 실행해 active sprint branch와 각 worktree의 고유 demo
+폴더를 `codex/demo-preview`에 모은 뒤 preview URL을 공유한다.
 
 ## 다음 확장 포인트
 
 다음 단계에서 붙일 수 있는 것:
 
 - stage별 전문가 skill 자동 라우팅
-- preview 링크 자동 회신
+- aggregation preview 링크 자동 회신
 - merge / deploy 결과 회신
 - 오래된 thread 자동 정리 정책

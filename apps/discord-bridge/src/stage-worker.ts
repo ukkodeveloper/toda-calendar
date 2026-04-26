@@ -20,6 +20,8 @@ function timeoutForStage(stage: SprintStage) {
   switch (stage) {
     case "DESIGN_PACK":
       return 180_000
+    case "DEMO_BUILD":
+      return 600_000
     case "TECHNICAL_FREEZE":
       return 180_000
     case "IMPLEMENTATION":
@@ -35,6 +37,8 @@ function stageTaskLabel(stage: SprintStage) {
   switch (stage) {
     case "DESIGN_PACK":
       return "핵심 흐름 정리"
+    case "DEMO_BUILD":
+      return "데모 구현"
     case "TECHNICAL_FREEZE":
       return "기술 범위 확정"
     case "IMPLEMENTATION":
@@ -88,12 +92,36 @@ function buildStagePrompt(params: {
         "- 아직 제품 코드 구현은 하지 않는다.",
         "",
         "완료 기준",
-        "- Demo Review 전에 봐야 할 핵심 흐름이 문서에 정리되어 있다.",
-        "- 사용자가 어떤 화면 3~5개를 확인하면 되는지 분명하다.",
+        "- Demo Build 전에 봐야 할 핵심 흐름이 문서에 정리되어 있다.",
+        "- 사용자가 어떤 진입점과 화면 3~5개를 확인하면 되는지 분명하다.",
         "",
         "마지막 답변 형식",
         "- 첫 줄: `핵심 흐름 정리를 끝냈어요.`",
-        "- 다음 줄들: 무엇을 정리했는지, 확인할 파일 경로, 데모 리뷰 준비 여부",
+        "- 다음 줄들: 무엇을 정리했는지, 확인할 파일 경로, 데모 구현 준비 여부",
+      ].join("\n")
+    case "DEMO_BUILD":
+      return [
+        ...common,
+        "",
+        "이번 단계 목표",
+        `- 스프린트 데모를 \`/design-system/examples/${params.state.sprintKey}\`에서 확인 가능하게 만든다.`,
+        "- 데모는 예쁜 화면 하나가 아니라, 기능 진입점부터 완료/취소 이후 위치까지 이어지는 작은 사용 시나리오여야 한다.",
+        "- 새 데모는 `apps/web/app/design-system/examples/<sprint-key>/` 아래에 고유 폴더로 만든다.",
+        "- 새 데모 폴더에는 최소 `demo.json`과 `page.tsx`를 둔다.",
+        "- `page.tsx`는 기본적으로 `DemoExamplePage`를 재사용해도 되고, 꼭 필요한 경우에만 고유 UI를 만든다.",
+        "- 고유 UI, helper, fixture, asset이 필요하면 같은 `<sprint-key>` 폴더 안에 둔다.",
+        "- demo metadata에는 entryPoints, flowSteps, screens, designSystem, reviewChecklist를 채운다.",
+        "- API, auth, persistence, production business logic은 넣지 않는다.",
+        "- 디자인 시스템 컴포넌트와 토큰을 우선 쓰고, 새 패턴이 필요하면 reviewChecklist나 designSystem.notes에 남긴다.",
+        "",
+        "검증",
+        "- 가능하면 `pnpm --filter web lint`와 `pnpm --filter web typecheck`를 실행한다.",
+        "- 가능하면 `pnpm preview:vercel`을 실행해서 preview URL을 마지막 답변에 포함한다.",
+        "- preview 배포가 환경 문제로 실패해도 demo route와 실패 원인을 명확히 남긴다.",
+        "",
+        "마지막 답변 형식",
+        "- 첫 줄: `데모를 준비했어요.`",
+        `- 다음 줄들: \`/design-system/examples/${params.state.sprintKey}\` 위치, 포함된 진입점/화면, 검증 결과, preview URL이 있으면 URL`,
       ].join("\n")
     case "TECHNICAL_FREEZE":
       return [

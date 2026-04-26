@@ -32,7 +32,13 @@
 
 ### Prototype Location
 
+### Entry Points
+
+### Flow Path
+
 ### Included Screens (`3` to `5` max)
+
+### Design System Usage
 
 ### Review Round (`1` or `2`)
 

@@ -10,8 +10,9 @@ Take a feature from product intent to merge with:
 
 1. one sprint-local master document
 2. two human checkpoints only
-3. one demo review loop by default, two at most
-4. implementation routed through `docs/ai/pipeline.md`
+3. one runnable design-system demo before implementation
+4. one demo review loop by default, two at most
+5. implementation routed through `docs/ai/pipeline.md`
 
 For smaller implementation tasks, stay in `docs/ai/pipeline.md`.
 
@@ -121,9 +122,7 @@ Rules:
 - prefer `3` to `5` screens unless the sprint explicitly needs a wider pass
 - keep design output sprint-local unless it becomes a durable shared pattern
 
-### 2. Demo Markup Review
-
-This is the second human-heavy checkpoint.
+### 2. Demo Build
 
 Primary skill:
 
@@ -131,28 +130,60 @@ Primary skill:
 
 Preferred workspace:
 
-- `apps/demo`
-
-Fallback while the workspace does not exist:
-
-- `docs/sprints/<sprint-id>/assets/<feature-slug>/demo/`
+- `apps/web/app/design-system`
 
 Rules:
 
-- implement only the core `3` to `5` screens
-- markup only
+- build a runnable demo under `/design-system/examples/<sprint-key>`
+- treat the demo as a small product scenario, not a single pretty screen
+- include where the user first meets the feature
+- include the trigger that starts the feature
+- include the core screen-to-screen path
+- include completion and the most important cancel, empty, or fallback state
+- use static or mocked data only
 - no API calls
 - no auth
 - no persistence
 - no production business logic
-- use static or mocked data only
+- use shared web UI components and existing design tokens first
+- if a new visual pattern is needed, record that gap in the demo metadata and sprint doc
+
+Output:
+
+- demo page under `apps/web/app/design-system/examples/<sprint-key>/`
+- custom demo helpers, fixtures, and assets must stay inside that same `<sprint-key>` folder
+- demo metadata with:
+  - entry points
+  - flow steps
+  - included screens
+  - design-system components and tokens used
+  - review checklist
+- update `Demo Review` in the master doc with the route and included flow
+- preview URL from `pnpm preview:vercel`, or combined URL from `pnpm preview:demo` when several demos should be reviewed together
+
+### 3. Demo Review
+
+This is the second human-heavy checkpoint.
+
+Primary skill:
+
+- `toda-mobile-feedback-intake` when feedback comes from mobile
+
+Rules:
+
+- review only the core `3` to `5` screens or states
+- check whether the feature entry point is natural
+- check whether the user can move from start to completion without missing context
+- check whether completion and escape paths return to the right product location
+- check whether the design system is being used consistently
 - allow one design revision loop by default and two at most
 
 Output:
 
-- demo files in the demo workspace or sprint-local fallback
 - update `Demo Review` in the master doc with:
   - prototype location
+  - entry points
+  - flow path
   - included screens
   - feedback
   - revision count
@@ -162,7 +193,7 @@ Gate:
 
 - do not write the technical freeze until the demo pass is accepted
 
-### 3. Technical Freeze
+### 4. Technical Freeze
 
 Participants:
 
@@ -189,7 +220,7 @@ Rules:
 - this is the implementation contract
 - after this stage, scope should not drift unless the escalation policy forces a revisit
 
-### 4. Domain Delivery
+### 5. Domain Delivery
 
 Use `docs/ai/pipeline.md` per surface.
 
@@ -199,7 +230,7 @@ Rules:
 - keep frontend, backend, and mobile tasks parallel only when dependencies are explicit
 - write rollout, verification, and reviewer outcomes into `Delivery Notes`
 
-### 5. Integration And Merge
+### 6. Integration And Merge
 
 Primary skill:
 
@@ -212,7 +243,7 @@ Rules:
 - land only after reviewers have no unresolved `P1` or `P2`
 - treat cross-surface integration as its own automated gate
 
-### 6. Durable Delta
+### 7. Durable Delta
 
 Rules:
 

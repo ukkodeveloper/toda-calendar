@@ -12,6 +12,7 @@
 - `apps/web`
   - Next.js App Router app on Next.js `16.1.x` + React `19`
   - Main product surface for calendar UX and shared web UI consumption
+  - Also hosts sprint design-system demos under `/design-system/examples/<sprint-key>`
 - `apps/api`
   - Fastify TypeScript API service
   - Owns backend domain/application/infrastructure/http layers

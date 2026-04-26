@@ -47,7 +47,8 @@ else
   printf "codex_app=not-running\n"
 fi
 
-printf "demo_workspace=%s\n" "$([[ -d apps/demo ]] && printf 'present' || printf 'absent-use-web-preview-fallback')"
+printf "demo_workspace=%s\n" "$([[ -d apps/demo ]] && printf 'present' || printf 'absent-use-design-system-preview')"
+printf "design_system_demo_surface=%s\n" "$([[ -d apps/web/app/design-system ]] && printf 'present' || printf 'missing')"
 printf "dependencies=%s\n" "$([[ -d node_modules ]] && printf 'installed' || printf 'missing-run-pnpm-install')"
 printf "power_ac=%s %s %s %s\n" \
   "$(print_pmset_value sleep)" \

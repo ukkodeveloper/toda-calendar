@@ -147,6 +147,8 @@ function stageLabel(stage: SprintStage) {
       return "방향 정리"
     case "DESIGN_PACK":
       return "핵심 흐름 정리"
+    case "DEMO_BUILD":
+      return "데모 구현"
     case "DEMO_REVIEW":
       return "데모 확인"
     case "TECHNICAL_FREEZE":
@@ -166,8 +168,10 @@ function stageSummary(stage: SprintStage) {
       return "왜 필요한지, 성공 기준이 뭔지, 이번에 안 할 건 뭔지 정해요."
     case "DESIGN_PACK":
       return "핵심 경로만 빠르게 정리해요. 길게 벌리지 않아요."
+    case "DEMO_BUILD":
+      return "진입점과 화면 흐름이 담긴 `/design-system` 데모를 만들어요."
     case "DEMO_REVIEW":
-      return "핵심 화면 3~5개만 보고 방향이 맞는지 결정해요."
+      return "진입점, 화면 이동, 완료 상태, 디자인 일관성을 보고 방향을 결정해요."
     case "TECHNICAL_FREEZE":
       return "구현 범위와 경계를 확정해요."
     case "IMPLEMENTATION":
@@ -184,6 +188,7 @@ function nextHumanGate(stage: SprintStage): SprintStage | null {
     case "DISCOVERY_WORKSHOP":
       return "DISCOVERY_WORKSHOP"
     case "DESIGN_PACK":
+    case "DEMO_BUILD":
       return "DEMO_REVIEW"
     case "DEMO_REVIEW":
       return "DEMO_REVIEW"
@@ -208,7 +213,7 @@ function statusLabel(status: SprintStatus) {
 }
 
 function isAutonomousStage(stage: SprintStage) {
-  return stage === "DESIGN_PACK" || stage === "TECHNICAL_FREEZE" || stage === "IMPLEMENTATION" || stage === "MERGE"
+  return stage === "DESIGN_PACK" || stage === "DEMO_BUILD" || stage === "TECHNICAL_FREEZE" || stage === "IMPLEMENTATION" || stage === "MERGE"
 }
 
 function getStateBaseSprintKey(state: SprintThreadState) {
@@ -496,12 +501,13 @@ function buildDiscoveryNoteReply(content: string) {
 
 function buildDemoFacilitatorReply() {
   return [
-    "지금은 완성도보다 방향 확인이 더 중요해요.",
+    "지금은 화면 완성도보다 사용 흐름이 자연스러운지 보는 게 더 중요해요.",
     "",
     "지금 보면 좋은 것",
-    "- 첫 화면에서 사용자 행동이 바로 유도되는지",
-    "- 문구가 길어서 망설이게 만들지 않는지",
-    "- 로그인/온보딩 흐름이 한 번에 이해되는지",
+    "- 사용자가 어디서 이 기능을 처음 만나는지",
+    "- 시작, 취소, 완료 후 돌아오는 위치가 자연스러운지",
+    "- 화면 이동 사이에 빠진 상태가 없는지",
+    "- 디자인 시스템 컴포넌트와 토큰을 일관되게 썼는지",
     "",
     "바꾸고 싶은 포인트를 그대로 말해주면, 유지할 것과 바꿀 것을 나눠서 다시 정리해볼게요.",
   ].join("\n")
@@ -514,9 +520,11 @@ function buildDemoNoteReply(content: string) {
     "데모 피드백으로 이렇게 정리할게요.",
     ...bullets.map((line) => `- ${line}`),
     "",
-    "이번 단계에선 이 두 가지만 보면 돼요.",
-    "- 이 흐름으로 가도 되는지",
-    "- 지금 바꿔야 할 게 뭔지",
+    "이번 단계에선 이 네 가지를 보면 돼요.",
+    "- 진입점이 자연스러운지",
+    "- 화면 이동이 끊기지 않는지",
+    "- 완료/취소 후 위치가 어색하지 않은지",
+    "- 디자인 시스템 사용이 일관적인지",
   ].join("\n")
 }
 
@@ -547,13 +555,28 @@ function buildAutonomousStageStartReply(state: SprintThreadState) {
         "",
         "내가 지금 할 일",
         "- 핵심 경로만 좁혀서 정리하기",
-        "- 데모에 꼭 필요한 화면만 남기기",
-        "- 다시 데모 확인 단계로 가져오기",
+        "- 데모에 꼭 필요한 진입점과 화면만 남기기",
+        "- 데모 구현 단계로 넘길 흐름 계약 만들기",
         "",
         "다시 알려드릴 때",
-        "- 데모를 확인해달라고 요청할 때",
+        "- 데모 구현을 시작할 때",
         "- 범위를 줄여야 할 때",
         "- 방향이 갈릴 때",
+      ].join("\n")
+    case "DEMO_BUILD":
+      return [
+        `좋아요. 이제 **${stageLabel(state.stage)}** 단계로 넘어가요.`,
+        ...buildLatestStageSummarySection(state.latestStageSummary),
+        "",
+        "내가 지금 할 일",
+        `- \`/design-system/examples/${state.sprintKey}\` 데모 만들기`,
+        "- 기능 진입점, 화면 이동, 완료/취소 상태 담기",
+        "- 디자인 시스템 사용 지점을 함께 기록하기",
+        "",
+        "다시 알려드릴 때",
+        "- 확인할 데모 URL이 준비됐을 때",
+        "- 공통 디자인 시스템 수정이 필요해 보일 때",
+        "- 데모 구현이 막혔을 때",
       ].join("\n")
     case "TECHNICAL_FREEZE":
       return [
@@ -703,6 +726,8 @@ function buildFallbackStageSummary(params: {
         return "- 문제 정의와 범위를 더 정리해야 해요."
       case "DESIGN_PACK":
         return "- 데모에서 확인할 핵심 흐름만 남겼어요."
+      case "DEMO_BUILD":
+        return "- 진입점과 화면 흐름을 담은 데모를 준비했어요."
       case "DEMO_REVIEW":
         return "- 유지할 것과 바꿀 것을 다시 정리해야 해요."
       case "TECHNICAL_FREEZE":
@@ -851,6 +876,29 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
     const stageSummary = await summarizeStageTransition({
       thread,
       state,
+      toStage: "DEMO_BUILD",
+      stageReply: reply,
+    })
+
+    const nextState: SprintThreadState = {
+      ...baseState,
+      stage: "DEMO_BUILD",
+      status: "ACTIVE",
+      latestStageSummary: stageSummary,
+      stageStartedAt: timestamp,
+      checkpointMessageId: undefined,
+    }
+
+    store.upsert(nextState)
+    await sendChunkedThreadMessage(thread, reply)
+    await sendChunkedThreadMessage(thread, buildAutonomousStageStartReply(nextState))
+    return nextState
+  }
+
+  if (state.stage === "DEMO_BUILD") {
+    const stageSummary = await summarizeStageTransition({
+      thread,
+      state,
       toStage: "DEMO_REVIEW",
       stageReply: reply,
     })
@@ -869,7 +917,9 @@ async function advanceAfterAutonomousStage(thread: ThreadChannel, state: SprintT
     await sendChunkedThreadMessage(
       thread,
       [
-        "핵심 흐름 정리를 끝냈어요. 이제 데모 방향만 확인하면 돼요.",
+        "데모를 준비했어요. 이제 실제 흐름을 보고 방향만 확인하면 돼요.",
+        `- 전체 목록: \`/design-system\``,
+        `- 이번 데모: \`/design-system/examples/${state.sprintKey}\``,
         ...buildLatestStageSummarySection(stageSummary),
       ].join("\n"),
     )

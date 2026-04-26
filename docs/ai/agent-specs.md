@@ -21,7 +21,7 @@ sequentially in one thread when delegation is unnecessary.
 | --- | --- | --- | --- |
 | `sprint-orchestrator` | `default`, `gpt-5.4`, `high` | `toda-sprint-workflow`, `senior-project-owner`, `toda-lean-design-pack` as needed | Leads discovery, keeps the master sprint doc current, drives design/technical freeze, and routes delivery |
 | `design-pack-builder` | `worker`, `gpt-5.4`, `high` | `toda-lean-design-pack`, `ux-flow-designer`, `toss-apple-mobile-design`, `ui-ux-pro-max` | Produces sprint-local flows, clickable wireframes, and visual/motion direction for ambiguous core paths, then updates `UX Decisions` for demo handoff |
-| `demo-markup-builder` | `worker`, `gpt-5.4`, `medium` | `toda-demo-markup` | Builds the markup-only prototype in `apps/demo` or the sprint-local fallback |
+| `demo-markup-builder` | `worker`, `gpt-5.4`, `medium` | `toda-demo-markup` | Builds the runnable `/design-system/examples/<sprint-key>` demo with entry points, flow steps, screens, and design-system usage notes |
 | `preview-reporter` | `default`, `gpt-5.4-mini`, `medium` | `toda-preview-reporter` | Creates Vercel preview links, checks readiness, and returns a compact mobile review note |
 | `mobile-feedback-curator` | `default`, `gpt-5.4`, `medium-high` | `toda-mobile-feedback-intake` | Converts mobile feedback into lean sprint doc updates and implementation deltas |
 
@@ -71,6 +71,7 @@ Must include:
 
 - approved discovery and PRD-lite summary
 - only the ambiguous core paths that still need to be made tangible
+- required feature entry points and starting triggers
 - target screen list capped at `3` to `5`
 - the current demo review round (`1` or `2`)
 
@@ -89,6 +90,7 @@ Must include:
 Must include:
 
 - approved screen inventory and wireframe links
+- the intended entry point and return location after completion or cancel
 - the interaction contract and important state changes
 - visual/material direction and motion notes
 - content tone guidance
@@ -144,3 +146,11 @@ Must include:
 - Keeps artifacts sprint-local and limited to the smallest set that unblocks demo work.
 - Treats wireframes as clarification artifacts, not production UI.
 - Updates `UX Decisions` with only the durable decisions that should survive into demo and technical freeze.
+
+### Demo Markup Builder
+
+- Owns the Demo Build stage after the design pack has narrowed the flow.
+- Builds a runnable demo under `/design-system/examples/<sprint-key>`.
+- Treats the demo as a small product scenario with entry point, trigger, screen path, completion, and important escape/fallback states.
+- Uses shared UI components and existing design tokens first.
+- Keeps each sprint demo in its own route folder to reduce parallel merge conflicts.

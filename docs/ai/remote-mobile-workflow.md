@@ -17,9 +17,10 @@ doc updates, code changes, preview creation, verification, merge, and deploy.
 
 - `apps/web` is the current previewable Next.js surface.
 - `apps/demo` does not exist yet.
-- Until `apps/demo` exists, sprint demo previews should use:
-  - a Vercel preview of the current branch when the demo is implemented in `apps/web`
-  - or sprint-local static assets only when a runnable preview is not needed yet
+- Sprint demo previews should use:
+  - `/design-system` for the full demo index
+  - `/design-system/examples/<sprint-key>` for a specific sprint demo
+  - a Vercel preview of the current demo branch or aggregated demo preview branch
 
 ## Desktop Setup
 
@@ -57,12 +58,24 @@ pnpm preview:vercel
 This creates a Vercel preview deployment, extracts the URL, waits for readiness,
 and prints a small summary.
 
+When multiple sprint demos are running in parallel and should be checked
+together:
+
+```bash
+pnpm preview:demo
+```
+
+This merges active sprint branches from the Discord state file into
+`codex/demo-preview`, copies each active worktree's unique demo folder into that
+preview branch, commits the aggregated demo folders, deploys that combined state,
+and prints the preview URL.
+
 Recommended usage:
 
-1. build the demo or sprint slice in the current branch
-2. run `pnpm preview:vercel`
+1. build the sprint demo under `/design-system/examples/<sprint-key>`
+2. run `pnpm preview:vercel` for one demo branch or `pnpm preview:demo` for the combined demo branch
 3. send the reported URL back into the sprint chat
-4. ask for mobile feedback on that URL
+4. ask for mobile feedback on the entry point, flow, completion state, and visual consistency
 
 ## Mobile Setup
 
@@ -142,6 +155,9 @@ Check:
 
 - the preview URL opens on LTE or Wi-Fi
 - the core `3` to `5` screens are reachable
+- the feature entry point is visible
+- the user can move from start to completion without missing context
+- completion and cancel/fallback states return to the right location
 - feedback can be sent back from the same project/thread
 - after feedback, the sprint master doc and `Technical Freeze` are updated
 

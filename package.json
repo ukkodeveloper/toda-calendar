@@ -12,6 +12,7 @@
     "discord:register": "pnpm --filter discord-bridge run register:commands",
     "lint": "turbo lint",
     "format": "turbo format",
+    "preview:demo": "bash ./scripts/remote/demo-preview.sh",
     "preview:vercel": "bash ./scripts/remote/vercel-preview.sh",
     "remote:doctor": "bash ./scripts/remote/doctor.sh",
     "typecheck": "turbo typecheck",

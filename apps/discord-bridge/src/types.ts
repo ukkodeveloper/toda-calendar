@@ -1,6 +1,7 @@
 export const sprintStages = [
   "DISCOVERY_WORKSHOP",
   "DESIGN_PACK",
+  "DEMO_BUILD",
   "DEMO_REVIEW",
   "TECHNICAL_FREEZE",
   "IMPLEMENTATION",

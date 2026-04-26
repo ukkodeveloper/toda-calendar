@@ -72,7 +72,7 @@ For sprint-scoped feature work, the builder stage starts only after:
 
 - discovery workshop alignment is complete
 - lean UX decisions have clarified the ambiguous core paths
-- the markup-only demo review has clarified the core interaction
+- the runnable design-system demo review has clarified the entry point, core interaction, and completion path
 - the technical freeze is written
 
 ### 5. Verifier

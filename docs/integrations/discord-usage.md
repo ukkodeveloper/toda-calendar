@@ -84,7 +84,7 @@
 bot은 단계에 따라 다르게 반응한다.
 
 - Discovery, Demo에서는 의견과 추천안을 같이 준다.
-- Design Pack, Technical Freeze, Implementation, Merge에서는 불필요한 답장 대신 진행 상황과 다음 알림 시점만 짧게 알려준다.
+- Design Pack, Demo Build, Technical Freeze, Implementation, Merge에서는 불필요한 답장 대신 진행 상황과 다음 알림 시점만 짧게 알려준다.
 
 즉, 같은 스레드 안에서는 Discord 로그만 다시 읽어 붙이는 게 아니라 실제 Codex 세션 맥락도 계속 이어진다.
 앱이 재시작돼도 state store에 저장된 session id를 보고 다시 이어붙인다.
@@ -122,7 +122,8 @@ bot은 단계에 따라 다르게 반응한다.
 단계가 넘어갈 때는 바로 이전 단계에서 정리된 내용을 짧게 요약해서 같이 보여준다.
 
 - Discovery -> Design Pack
-- Design Pack -> Demo Review
+- Design Pack -> Demo Build
+- Demo Build -> Demo Review
 - Demo Review -> Technical Freeze
 - Technical Freeze -> Implementation
 - Implementation -> Merge
@@ -223,6 +224,7 @@ toda-discord logs
 `ACTIVE`는 이제 그냥 이름만 바뀐 상태가 아니다.
 
 - `DESIGN_PACK`
+- `DEMO_BUILD`
 - `TECHNICAL_FREEZE`
 - `IMPLEMENTATION`
 - `MERGE`
@@ -234,6 +236,15 @@ job은:
 - Codex worker를 실행하고
 - 끝나면 다음 단계로 자동 전환하거나
 - 실패하면 `BLOCKED`로 멈춘다
+
+여러 스프린트 데모를 한 preview에서 같이 확인하려면 데스크탑에서:
+
+```bash
+pnpm preview:demo
+```
+
+이 명령은 active sprint branch들을 `codex/demo-preview`에 모은 뒤
+`/design-system` preview URL을 출력한다.
 
 `BLOCKED`가 되면 thread 안의 버튼이나 `/status`에서 `다시 시도`를 누르면 된다.
 

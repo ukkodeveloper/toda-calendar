@@ -50,19 +50,25 @@ entire feature flow when the implementation path is already clear.
 
 Preferred location:
 
-- `apps/demo`
+- `apps/web/app/design-system/examples/<sprint-key>/`
 
-Fallback until a demo workspace exists:
+Each sprint demo should be reviewable at:
 
 ```text
-docs/sprints/sprint1/assets/oauth/demo/
+/design-system/examples/sprint1-oauth
 ```
 
 Demo rules:
 
-- only `3` to `5` core screens
-- markup only
+- only `3` to `5` core screens or states
+- include the feature entry point
+- include the trigger that starts the feature
+- include the path between screens
+- include completion and the most important cancel, empty, or fallback state
 - static or mocked data only
+- no API calls, auth, persistence, or production business logic
+- use shared web UI components and existing design tokens first
+- keep each demo in a unique folder so parallel sprint branches can merge cleanly
 - demo-to-design revision loop defaults to `1`, max `2`
 
 Production code must not depend on sprint-local demo artifacts.
