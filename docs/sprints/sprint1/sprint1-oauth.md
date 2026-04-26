@@ -218,23 +218,30 @@
 - 설정 화면 하단에 현재 기기 기준 `로그아웃` 버튼과 확인 팝업을 추가했다.
 - 첫 일정 저장 직후 비로그인 사용자에게 백업 유도 시트를 노출하도록 구현했다.
 - 로그인 화면 provider 노출을 `Google`, `Apple` 중심으로 정리했다.
+- Supabase SSR 클라이언트와 Next proxy를 연결해 OAuth callback 이후 세션 쿠키가 server/client 양쪽에서 갱신되도록 했다.
+- Supabase public env가 구성된 환경에서는 `AUTH_REQUIRED`/`INVALID_ACCESS_TOKEN` API 응답을 로그인 CTA로 안내한다.
+- 로그인/설정 화면은 큰 카드와 glass panel 대신 모바일 설정 리스트 형태로 정리했다.
 - 백엔드 세션 세부안 협의가 필요한 범위는 문서 계약으로만 유지했다.
 
 ### Verification Summary
 
 - `pnpm --filter web lint`
-  - 실패. `@workspace/eslint-config` 패키지를 찾지 못해 실행 환경에서 ESLint 구성이 로드되지 않았다.
+  - 통과.
 - `pnpm --filter web typecheck`
-  - 실패. `@workspace/typescript-config/nextjs.json`, `next`, `react`, `zod` 등 workspace 의존성이 설치되지 않아 기존 전체 웹 워크스페이스가 타입체크를 시작하지 못했다.
-- 현재 검증 실패는 이번 diff 자체보다 로컬 의존성 미설치 상태에 가깝다.
+  - 통과.
+- `pnpm --filter web test`
+  - 통과. 30개 테스트 통과.
+- `pnpm --filter web build`
+  - 통과. `/`, `/login`, `/settings`, auth route handlers, Next proxy가 빌드에 포함됨을 확인했다.
 
 ### Reviewer Summary
 
-- 별도 리뷰 패스는 아직 실행하지 않았다.
+- 별도 독립 리뷰 패스는 아직 실행하지 않았다.
 
 ### Merge Result
 
-- 아직 없음
+- `sprint1/oauth`의 기존 구현은 local `main`에 squash commit으로 반영됐다.
+- Supabase SSR proxy와 로그인 UX 보완은 후속 마무리 diff로 남아 있다.
 
 ## Durable Delta
 
@@ -246,6 +253,10 @@
 - 사용자 체감 로그인 유지 목표를 `1년`으로 고정하고, 내부 토큰은 별도 단기 정책으로 분리했다.
 - 웹 앱에 `/settings` 화면과 로그아웃 확인 팝업이 추가됐다.
 - 웹 캘린더 홈에서 첫 일정 저장 후 백업 유도 시트가 열리도록 구현됐다.
+- 웹 앱은 `NEXT_PUBLIC_SUPABASE_URL`과 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`가 있으면 Supabase OAuth를 사용한다.
+- legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`도 publishable key fallback으로 지원한다.
+- Supabase 세션 갱신은 `apps/web/proxy.ts`와 `apps/web/lib/supabase/proxy.ts`가 담당한다.
+- 설정/계정/Auth 보조 화면은 카드형 데스크탑 패널보다 모바일 리스트형 UI를 기본으로 둔다.
 
 ### Follow-Up Work
 

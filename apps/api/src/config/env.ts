@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs"
 import { resolve } from "node:path"
 
 import { z } from "zod"
@@ -21,6 +22,16 @@ const envSchema = z.object({
   TODA_API_SUPABASE_PROJECT_URL: z.string().url().optional(),
 })
 
+function loadLocalEnvFiles() {
+  for (const fileName of [".env.local", ".env"]) {
+    const filePath = resolve(process.cwd(), fileName)
+
+    if (existsSync(filePath)) {
+      process.loadEnvFile(filePath)
+    }
+  }
+}
+
 export type ApiEnv = {
   authMode: "mock" | "supabase"
   corsAllowedHeaders: string
@@ -37,6 +48,8 @@ export type ApiEnv = {
 }
 
 export function loadApiEnv(overrides: Partial<ApiEnv> = {}): ApiEnv {
+  loadLocalEnvFiles()
+
   const environment = envSchema.parse(process.env)
   const projectUrl =
     overrides.supabaseProjectUrl ?? environment.TODA_API_SUPABASE_PROJECT_URL

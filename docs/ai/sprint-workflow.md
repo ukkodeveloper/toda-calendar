@@ -101,6 +101,13 @@ Underlying skill stack:
 - `toss-apple-mobile-design`
 - `ui-ux-pro-max`
 
+Mobile-first product guardrails:
+
+- Interpret Apple-like as native hierarchy, direct manipulation, and restrained chrome; do not translate it into generic large rounded cards, glass panels, heavy borders, or desktop dashboard layouts.
+- For settings, account, auth, and calendar utility screens, default to mobile-native list rows, clear spacing, and typography before adding any card container.
+- Use visible cards only when the card itself is the product object, such as a memory preview, photo, or shareable recap. Do not wrap ordinary page sections in cards.
+- Avoid decorative gradients, backdrop blur, and custom shadow stacks unless the sprint explicitly calls for a visual demo surface.
+
 Output:
 
 - update `UX Decisions` in the master doc

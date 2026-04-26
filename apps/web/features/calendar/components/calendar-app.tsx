@@ -65,6 +65,7 @@ export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
     advancePreviewMode,
     closeEditor,
     error,
+    errorCode,
     isInitialLoading,
     openDay,
     reload,
@@ -244,23 +245,41 @@ export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
   }
 
   if (error) {
+    const isAuthError =
+      errorCode === "AUTH_REQUIRED" || errorCode === "INVALID_ACCESS_TOKEN"
+
     return (
       <main className="flex min-h-dvh items-center justify-center bg-[var(--calendar-app-bg)] px-6 text-center text-foreground">
-        <div className="max-w-md space-y-4 rounded-[28px] bg-white/55 px-6 py-7 shadow-[0_20px_48px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+        <div className="max-w-sm space-y-4">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-foreground/42">
-            {appCopy.page.calendar.error.eyebrow}
+            {isAuthError
+              ? appCopy.page.calendar.authRequired.eyebrow
+              : appCopy.page.calendar.error.eyebrow}
           </p>
           <h1 className="text-2xl font-medium tracking-[-0.03em]">
-            {appCopy.page.calendar.error.title}
+            {isAuthError
+              ? appCopy.page.calendar.authRequired.title
+              : appCopy.page.calendar.error.title}
           </h1>
-          <p className="text-sm leading-6 text-foreground/62">{error}</p>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-2 text-sm font-medium text-white"
-            onClick={reload}
-          >
-            {appCopy.page.calendar.error.retry}
-          </button>
+          <p className="text-sm leading-6 text-foreground/62">
+            {isAuthError ? appCopy.page.calendar.authRequired.description : error}
+          </p>
+          {isAuthError ? (
+            <a
+              className="inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold text-foreground underline underline-offset-4"
+              href="/login?next=/"
+            >
+              {appCopy.page.calendar.authRequired.cta}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-2 text-sm font-medium text-white"
+              onClick={reload}
+            >
+              {appCopy.page.calendar.error.retry}
+            </button>
+          )}
         </div>
       </main>
     )
@@ -279,10 +298,12 @@ export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
         <CalendarHeader
           activeMonthLabel={activeMonthLabel}
           activePreviewType={state.activePreviewType}
+          authHref="/login?next=/"
           onAdvancePreviewMode={advancePreviewMode}
           settingsHref="/settings"
           sessionLabel={sessionLabel}
           showSessionLabel={showAuthActions}
+          showSignInLink={!showAuthActions}
         />
 
         <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+5.95rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">

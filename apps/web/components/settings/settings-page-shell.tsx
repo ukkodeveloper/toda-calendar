@@ -27,100 +27,127 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
 
   return (
     <>
-      <main className="min-h-dvh bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.92),rgba(255,255,255,0.54)_28%,transparent_54%),linear-gradient(180deg,#f7f1e9_0%,#eff2f5_42%,#f8f8f5_100%)] px-4 pt-[max(1rem,calc(env(safe-area-inset-top)+0.4rem))] pb-[calc(7rem+env(safe-area-inset-bottom))] text-foreground sm:px-6">
-        <div className="mx-auto max-w-2xl">
-          <header className="flex items-center justify-between gap-3 pb-6">
+      <main className="min-h-dvh bg-background px-5 pt-[max(1rem,calc(env(safe-area-inset-top)+0.5rem))] pb-[calc(5rem+env(safe-area-inset-bottom))] text-foreground">
+        <div className="mx-auto w-full max-w-[28rem]">
+          <header className="flex items-center justify-between gap-3 py-2">
             <Link
-              className="inline-flex items-center gap-2 rounded-full bg-white/82 px-4 py-2 text-sm font-medium text-foreground shadow-[0_12px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+              className="inline-flex min-h-11 items-center gap-1.5 pr-3 text-[1.05rem] font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]/40"
               href="/"
             >
               <BackIcon />
               {appCopy.page.settings.backToCalendar}
             </Link>
-            <h1 className="text-lg font-semibold tracking-[-0.04em]">
+            <h1 className="text-[1.08rem] font-semibold">
               {appCopy.page.settings.title}
             </h1>
           </header>
 
-          <div className="space-y-4">
-            <section className="rounded-[2rem] border border-white/60 bg-white/72 p-5 shadow-[0_20px_48px_rgba(15,23,42,0.08)] backdrop-blur-2xl">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-foreground/42">
-                Account
+          <div className="pt-8">
+            <section>
+              <p className="px-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                계정
               </p>
               {isAuthenticated ? (
-                <div className="mt-3 space-y-3">
-                  <div className="inline-flex rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700">
-                    Connected
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold tracking-[-0.04em] text-foreground">
+                <div className="mt-4 divide-y divide-border/70">
+                  <div className="py-4">
+                    <p className="text-[0.82rem] font-semibold text-emerald-700">
+                      연결됨
+                    </p>
+                    <h2 className="mt-1 text-[1.08rem] font-semibold text-foreground">
                       {appCopy.page.settings.accountLoggedInTitle}
                     </h2>
-                    <p className="mt-2 text-sm leading-6 text-foreground/62">
+                    <p className="mt-2 text-[0.95rem] leading-6 text-muted-foreground">
                       {appCopy.page.settings.accountLoggedInBody}
                     </p>
                   </div>
-                  <div className="rounded-[1.35rem] border border-black/6 bg-white/72 px-4 py-3 text-sm text-foreground/72">
-                    {session.identity?.email ?? "No email"}
+                  <div className="flex min-h-14 items-center justify-between gap-4 py-3 text-[0.95rem]">
+                    <span className="text-muted-foreground">이메일</span>
+                    <span className="min-w-0 truncate text-right font-medium">
+                      {session.identity?.email ?? "No email"}
+                    </span>
                   </div>
                 </div>
               ) : (
-                <div className="mt-3 space-y-4">
-                  <div>
-                    <h2 className="text-xl font-semibold tracking-[-0.04em] text-foreground">
+                <div className="mt-4">
+                  <div className="py-3">
+                    <h2 className="text-[1.08rem] font-semibold text-foreground">
                       {appCopy.page.settings.accountGuestTitle}
                     </h2>
-                    <p className="mt-2 text-sm leading-6 text-foreground/62">
+                    <p className="mt-2 text-[0.95rem] leading-6 text-muted-foreground">
                       {authReady
                         ? appCopy.page.settings.accountGuestBody
                         : appCopy.page.settings.runtimePending}
                     </p>
                   </div>
 
-                  {authReady ? (
-                    <div className="space-y-3">
-                      {PRIMARY_OAUTH_PROVIDERS.map((provider) => (
-                        <a
-                          key={provider.id}
-                          className="flex min-h-15 items-center gap-3 rounded-[1.4rem] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_32px_rgba(15,23,42,0.06)] transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]/50"
-                          href={`/auth/sign-in/${provider.id}?next=${encodeURIComponent("/settings")}`}
-                        >
-                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] bg-[linear-gradient(135deg,#fff_0%,#f4f6f8_100%)] text-base font-semibold text-foreground">
-                            {provider.mark}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block text-sm font-semibold text-foreground">
-                              {provider.actionLabel}
+                  <div className="mt-3 divide-y divide-border/70">
+                    <Link
+                      className="flex min-h-14 items-center gap-3 py-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]/40"
+                      href="/login?next=/settings"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[0.98rem] font-medium text-foreground">
+                          {appCopy.page.settings.accountGuestCta}
+                        </span>
+                        <span className="mt-0.5 block text-[0.84rem] leading-5 text-muted-foreground">
+                          {authReady
+                            ? appCopy.page.settings.accountGuestBody
+                            : appCopy.page.settings.runtimePending}
+                        </span>
+                      </span>
+                      <span aria-hidden="true" className="text-muted-foreground">
+                        <ChevronIcon />
+                      </span>
+                    </Link>
+
+                    {authReady
+                      ? PRIMARY_OAUTH_PROVIDERS.map((provider) => (
+                          <a
+                            key={provider.id}
+                            className="flex min-h-14 items-center gap-3 py-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]/40"
+                            href={`/auth/sign-in/${provider.id}?next=${encodeURIComponent("/settings")}`}
+                          >
+                            <span className="flex size-9 shrink-0 items-center justify-center text-base font-semibold text-foreground">
+                              {provider.mark}
                             </span>
-                            <span className="mt-0.5 block text-xs leading-5 text-foreground/56">
-                              {provider.description}
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-[0.98rem] font-medium text-foreground">
+                                {provider.actionLabel}
+                              </span>
+                              <span className="mt-0.5 block text-[0.84rem] leading-5 text-muted-foreground">
+                                {provider.description}
+                              </span>
                             </span>
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  ) : null}
+                            <span aria-hidden="true" className="text-muted-foreground">
+                              <ChevronIcon />
+                            </span>
+                          </a>
+                        ))
+                      : null}
+                  </div>
                 </div>
               )}
             </section>
 
-            <section className="rounded-[2rem] border border-white/60 bg-white/68 p-5 shadow-[0_20px_48px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-foreground/42">
-                Sync
+            <section className="mt-10">
+              <p className="px-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                동기화
               </p>
-              <h2 className="mt-3 text-xl font-semibold tracking-[-0.04em] text-foreground">
-                {appCopy.page.settings.backupTitle}
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-foreground/62">
-                {appCopy.page.settings.backupBody}
-              </p>
+              <div className="mt-4 py-3">
+                <h2 className="text-[1.08rem] font-semibold text-foreground">
+                  {appCopy.page.settings.backupTitle}
+                </h2>
+                <p className="mt-2 text-[0.95rem] leading-6 text-muted-foreground">
+                  {appCopy.page.settings.backupBody}
+                </p>
+              </div>
             </section>
           </div>
         </div>
 
         {isAuthenticated ? (
-          <div className="pointer-events-none fixed inset-x-0 bottom-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
-            <div className="pointer-events-auto mx-auto max-w-2xl rounded-[1.8rem] border border-white/60 bg-white/86 p-3 shadow-[0_-10px_36px_rgba(15,23,42,0.08)] backdrop-blur-2xl">
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 px-5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="pointer-events-auto mx-auto w-full max-w-[28rem]">
               <Button
                 className="w-full"
                 size="lg"
@@ -162,9 +189,9 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
           </div>
         }
       >
-        <div className="rounded-[1.4rem] border border-black/6 bg-white/68 px-4 py-4 text-sm leading-6 text-foreground/62">
+        <p className="text-sm leading-6 text-muted-foreground">
           현재 기기 세션만 종료돼요. 다른 기기 세션은 그대로 유지돼요.
-        </div>
+        </p>
       </BottomSheet>
     </>
   )
@@ -180,6 +207,25 @@ function BackIcon() {
     >
       <path
         d="m14.5 6.5-5 5 5 5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  )
+}
+
+function ChevronIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-4"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="m9.5 6.5 5 5-5 5"
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"

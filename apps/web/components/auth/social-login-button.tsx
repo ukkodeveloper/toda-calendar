@@ -9,23 +9,19 @@ type SocialLoginButtonProps = {
 
 const providerStyles = {
   apple: {
-    button:
-      "border-white/14 bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(15,23,42,0.8))] text-white shadow-[0_18px_42px_rgba(15,23,42,0.18)]",
-    mark: "bg-white/10 text-white",
-    meta: "text-white/68",
+    button: "text-foreground",
+    mark: "text-foreground",
+    meta: "text-muted-foreground",
   },
   google: {
-    button:
-      "border-white/60 bg-white/92 text-slate-900 shadow-[0_18px_42px_rgba(15,23,42,0.1)]",
-    mark:
-      "bg-[linear-gradient(135deg,#fff_0%,#f6f7fb_100%)] text-[color:#2563eb]",
-    meta: "text-slate-500",
+    button: "text-foreground",
+    mark: "text-[color:#2563eb]",
+    meta: "text-muted-foreground",
   },
   kakao: {
-    button:
-      "border-black/6 bg-[#fee500] text-slate-950 shadow-[0_18px_42px_rgba(254,229,0,0.22)]",
-    mark: "bg-black/8 text-slate-950",
-    meta: "text-slate-800/70",
+    button: "text-foreground",
+    mark: "text-slate-950",
+    meta: "text-muted-foreground",
   },
 } as const
 
@@ -42,12 +38,12 @@ export function SocialLoginButton({
     <>
       <span
         aria-hidden="true"
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] text-base font-semibold tracking-[-0.04em] ${styles.mark}`}
+        className={`flex size-9 shrink-0 items-center justify-center text-base font-semibold ${styles.mark}`}
       >
         {provider.mark}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[0.98rem] font-semibold tracking-[-0.03em]">
+        <span className="block text-[0.98rem] font-medium">
           {provider.actionLabel}
         </span>
         <span
@@ -59,7 +55,7 @@ export function SocialLoginButton({
       </span>
       <span
         aria-hidden="true"
-        className="text-lg font-medium tracking-[-0.04em] opacity-55"
+        className="text-lg font-medium opacity-55"
       >
         {authReady
           ? appCopy.component.socialLoginButton.readyTrailingMark
@@ -74,7 +70,7 @@ export function SocialLoginButton({
         type="button"
         disabled
         aria-describedby={descriptionId}
-        className={`flex min-h-16 w-full items-center gap-3 rounded-[1.7rem] border px-4 py-3 text-left opacity-68 ${styles.button}`}
+        className={`flex min-h-14 w-full items-center gap-3 py-3 text-left opacity-55 ${styles.button}`}
       >
         {content}
       </button>
@@ -85,7 +81,7 @@ export function SocialLoginButton({
     <a
       href={href}
       aria-describedby={descriptionId}
-      className={`flex min-h-16 w-full items-center gap-3 rounded-[1.7rem] border px-4 py-3 transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]/50 ${styles.button}`}
+      className={`flex min-h-14 w-full items-center gap-3 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]/40 ${styles.button}`}
     >
       {content}
     </a>

@@ -25,42 +25,30 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.96),rgba(255,255,255,0.66)_28%,transparent_56%),linear-gradient(180deg,#f6f1ea_0%,#eef3f6_45%,#f8f8f6_100%)] text-foreground">
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.88),transparent_46%),radial-gradient(circle_at_78%_14%,rgba(255,209,163,0.3),transparent_28%),radial-gradient(circle_at_52%_0%,rgba(255,151,138,0.12),transparent_30%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute right-[-4rem] bottom-[12rem] h-52 w-52 rounded-full bg-[rgba(255,255,255,0.5)] blur-3xl"
-      />
-
-      <div className="relative mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-5 pt-[max(2rem,calc(env(safe-area-inset-top)+1.5rem))] pb-[18rem] sm:px-8 lg:px-10">
-        <header className="max-w-[36rem]">
-          <div className="inline-flex rounded-full border border-white/60 bg-white/70 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-foreground/52 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+    <main className="relative min-h-dvh overflow-hidden bg-background text-foreground">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[28rem] flex-col px-5 pt-[max(2rem,calc(env(safe-area-inset-top)+1.5rem))] pb-[18rem]">
+        <header>
+          <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             {appCopy.page.login.badge}
           </div>
-          <h1 className="mt-6 text-[clamp(2.7rem,7vw,5.2rem)] font-semibold leading-[0.94] tracking-[-0.07em] text-foreground">
+          <h1 className="mt-5 text-[2.45rem] font-semibold leading-[1.02] text-foreground">
             {appCopy.page.login.title}
           </h1>
-          <p className="mt-5 max-w-[30rem] text-base leading-7 text-foreground/66 sm:text-lg">
+          <p className="mt-5 text-[1rem] leading-7 text-muted-foreground">
             {appCopy.page.login.description}
           </p>
         </header>
 
         <section
           aria-label={appCopy.page.login.highlightsAriaLabel}
-          className="mt-14 grid gap-4 md:max-w-[44rem] md:grid-cols-3"
+          className="mt-10 divide-y divide-border/70"
         >
           {appCopy.page.login.featureCards.map((card) => (
-            <article
-              key={card.title}
-              className="rounded-[1.75rem] border border-white/55 bg-white/48 px-5 py-5 shadow-[0_20px_48px_rgba(15,23,42,0.06)] backdrop-blur-xl"
-            >
-              <p className="text-sm font-semibold tracking-[-0.03em] text-foreground">
+            <article key={card.title} className="py-4">
+              <p className="text-[0.98rem] font-semibold text-foreground">
                 {card.title}
               </p>
-              <p className="mt-2 text-sm leading-6 text-foreground/60">
+              <p className="mt-1.5 text-[0.92rem] leading-6 text-muted-foreground">
                 {card.body}
               </p>
             </article>

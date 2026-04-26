@@ -71,6 +71,13 @@ export const appCopy = {
       returnHome: "Return home",
     },
     calendar: {
+      authRequired: {
+        cta: "로그인하기",
+        description:
+          "Supabase 로그인이 켜진 환경에서는 계정 연결 후 캘린더를 불러올 수 있어요.",
+        eyebrow: "Sign In Required",
+        title: "로그인이 필요해요",
+      },
       backupPrompt: {
         description:
           "로그인하면 재설치해도 지금 달력을 다시 가져오고, 다른 기기에서도 바로 이어서 쓸 수 있어요.",

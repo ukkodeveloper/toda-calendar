@@ -38,18 +38,22 @@ function createWeekdayLabels(locale: string) {
 type CalendarHeaderProps = {
   activeMonthLabel: string
   activePreviewType: ContentType
+  authHref?: string
   onAdvancePreviewMode: () => void
   settingsHref: string
   sessionLabel?: string | null
+  showSignInLink?: boolean
   showSessionLabel?: boolean
 }
 
 export function CalendarHeader({
   activeMonthLabel,
   activePreviewType,
+  authHref = "/login",
   onAdvancePreviewMode,
   settingsHref,
   sessionLabel,
+  showSignInLink = false,
   showSessionLabel = false,
 }: CalendarHeaderProps) {
   const reducedMotion = useReducedMotion()
@@ -140,6 +144,14 @@ export function CalendarHeader({
               <span className="hidden max-w-[12rem] truncate rounded-full bg-[color:var(--calendar-nav)]/68 px-3 py-1.5 text-[0.76rem] font-medium tracking-[-0.02em] text-foreground/56 backdrop-blur-[18px] sm:inline-flex">
                 {sessionLabel}
               </span>
+            ) : null}
+            {showSignInLink ? (
+              <Link
+                className="inline-flex h-10 items-center justify-center px-2 text-[0.92rem] font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]/45"
+                href={authHref}
+              >
+                로그인
+              </Link>
             ) : null}
             <Link
               aria-label={appCopy.component.calendarHeader.settingsAriaLabel}

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 
+import { ApiClientError } from "@/lib/api/client"
 import { appCopy } from "@/lib/copy"
 import { createApiCalendarRecordRepository } from "../data/api-calendar-record-repository"
 import {
@@ -18,6 +19,10 @@ function toErrorMessage(error: unknown) {
   }
 
   return appCopy.page.calendar.error.fallbackDescription
+}
+
+function toErrorCode(error: unknown) {
+  return error instanceof ApiClientError ? error.code : undefined
 }
 
 type UseCalendarStateOptions = {
@@ -38,6 +43,7 @@ export function useCalendarState(
   )
   const [calendarId, setCalendarId] = React.useState<string | null>(null)
   const [error, setError] = React.useState<string | null>(null)
+  const [errorCode, setErrorCode] = React.useState<string | undefined>()
   const [isBootstrapping, setIsBootstrapping] = React.useState(true)
   const [isHydrating, setIsHydrating] = React.useState(false)
   const [loadedMonths, setLoadedMonths] = React.useState<string[]>([])
@@ -60,6 +66,7 @@ export function useCalendarState(
     setCalendarId(null)
     setLoadedMonths([])
     setError(null)
+    setErrorCode(undefined)
     setIsBootstrapping(true)
 
     repository
@@ -77,6 +84,7 @@ export function useCalendarState(
         }
 
         setError(toErrorMessage(nextError))
+        setErrorCode(toErrorCode(nextError))
       })
       .finally(() => {
         if (!cancelled) {
@@ -134,6 +142,7 @@ export function useCalendarState(
       .catch((nextError) => {
         if (!cancelled) {
           setError(toErrorMessage(nextError))
+          setErrorCode(toErrorCode(nextError))
         }
       })
       .finally(() => {
@@ -194,6 +203,7 @@ export function useCalendarState(
     closeEditor,
     advancePreviewMode,
     error,
+    errorCode,
     isInitialLoading: isBootstrapping || (!loadedMonths.length && isHydrating),
     isSyncingMonths: isHydrating,
     openDay,
