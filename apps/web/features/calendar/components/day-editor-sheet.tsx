@@ -16,41 +16,35 @@ import { createPortal } from "react-dom"
 import { motionTokens } from "@workspace/ui/lib/motion"
 import { cn } from "@workspace/ui/lib/utils"
 
-import { appCopy } from "@/lib/copy"
 import type { CalendarDayRecord, ContentType, EditorDraft } from "../model/types"
-import {
-  createSessionPhotoSlot,
-  releaseSessionPhotoSlot,
-} from "../utils/session-photo"
 import { parseIsoDate } from "../utils/date"
 import {
   floatingSheetUi,
   getDockHandoffFrame,
   getFloatingSheetDetents,
 } from "../utils/sheet-detents"
-import { calendarInteractionUi } from "../utils/interactions"
 import { DoodleCanvas } from "./doodle-canvas"
 import { PhotoEditor } from "./photo-editor"
 import { TextEditor } from "./text-editor"
 
 const editorTabs: Array<{ value: ContentType; label: string }> = [
-  { value: "photo", label: appCopy.component.dayEditorSheet.tabs.photo },
-  { value: "doodle", label: appCopy.component.dayEditorSheet.tabs.doodle },
-  { value: "text", label: appCopy.component.dayEditorSheet.tabs.text },
+  { value: "photo", label: "Photo" },
+  { value: "doodle", label: "Sketch" },
+  { value: "text", label: "Text" },
 ]
 
 type SheetStage = "peek" | "expanded"
 
 type DayEditorSheetProps = {
-  initialLift?: number
+  activePreviewType: ContentType
   onOpenChange: (open: boolean) => void
-  onSave: (record: CalendarDayRecord) => Promise<void> | void
+  onSave: (record: CalendarDayRecord) => void
   open: boolean
   record: CalendarDayRecord | null
 }
 
 export function DayEditorSheet({
-  initialLift = 0,
+  activePreviewType,
   onOpenChange,
   onSave,
   open,
@@ -62,49 +56,34 @@ export function DayEditorSheet({
   const y = useMotionValue(0)
   const [mounted, setMounted] = React.useState(false)
   const [draft, setDraft] = React.useState<EditorDraft | null>(record)
-  const [activeTab, setActiveTab] = React.useState<ContentType>(
-    record?.currentPreviewType ?? "photo"
-  )
+  const [activeTab, setActiveTab] = React.useState<ContentType>(activePreviewType)
   const [stage, setStage] = React.useState<SheetStage>("peek")
   const [contentStage, setContentStage] = React.useState<SheetStage>("peek")
   const [isDrawing, setIsDrawing] = React.useState(false)
-  const [isSaving, setIsSaving] = React.useState(false)
   const [viewportWidth, setViewportWidth] = React.useState(393)
   const [viewportHeight, setViewportHeight] = React.useState(780)
   const [viewportBottomInset, setViewportBottomInset] = React.useState(0)
   const stageTimerRef = React.useRef<number | null>(null)
-  const latestDraftRef = React.useRef<EditorDraft | null>(record)
-  const latestRecordRef = React.useRef(record)
-  const isMountedRef = React.useRef(false)
-  const isDismissingRef = React.useRef(false)
-  const dockLaunchFrame = getDockHandoffFrame(initialLift, viewportWidth)
   const dockExitFrame = getDockHandoffFrame(0, viewportWidth)
   const { expanded: expandedFrame, peek: peekFrame } = getFloatingSheetDetents({
     bottomInset: viewportBottomInset,
     height: viewportHeight,
     width: viewportWidth,
   })
+  const launchFrame = {
+    ...peekFrame,
+    opacity: 0,
+    scale: 0.992,
+  }
 
   React.useEffect(() => {
-    isMountedRef.current = true
     setMounted(true)
-
-    return () => {
-      isMountedRef.current = false
-    }
   }, [])
 
   React.useEffect(() => {
     return () => {
       if (stageTimerRef.current !== null) {
         window.clearTimeout(stageTimerRef.current)
-      }
-
-      const draftPhoto = latestDraftRef.current?.photo
-      const persistedPhoto = latestRecordRef.current?.photo
-
-      if (draftPhoto?.src !== persistedPhoto?.src) {
-        releaseSessionPhotoSlot(draftPhoto)
       }
     }
   }, [])
@@ -142,23 +121,16 @@ export function DayEditorSheet({
   }, [])
 
   React.useEffect(() => {
-    setDraft((current) => {
-      if (current?.photo?.src !== record?.photo?.src) {
-        releaseSessionPhotoSlot(current?.photo)
-      }
-
-      return record
-    })
+    setDraft(record)
 
     if (record) {
-      isDismissingRef.current = false
-      setActiveTab(record.currentPreviewType)
+      setActiveTab(activePreviewType)
       setStage("peek")
       setContentStage("peek")
       x.set(0)
       y.set(0)
     }
-  }, [record, x, y])
+  }, [activePreviewType, record, x, y])
 
   React.useEffect(() => {
     if (!open) {
@@ -176,17 +148,8 @@ export function DayEditorSheet({
   React.useEffect(() => {
     if (!open) {
       setIsDrawing(false)
-      isDismissingRef.current = false
     }
   }, [open])
-
-  React.useEffect(() => {
-    latestDraftRef.current = draft
-  }, [draft])
-
-  React.useEffect(() => {
-    latestRecordRef.current = record
-  }, [record])
 
   function clearStageTimer() {
     if (stageTimerRef.current !== null) {
@@ -251,20 +214,7 @@ export function DayEditorSheet({
   }
 
   function updatePhoto(nextSlot?: EditorDraft["photo"]) {
-    setDraft((current) => {
-      if (!current) {
-        return current
-      }
-
-      if (current.photo?.src !== nextSlot?.src && current.photo?.src !== record?.photo?.src) {
-        releaseSessionPhotoSlot(current.photo)
-      }
-
-      return {
-        ...current,
-        photo: nextSlot,
-      }
-    })
+    setDraft((current) => (current ? { ...current, photo: nextSlot } : current))
   }
 
   function updateDoodle(nextSlot?: EditorDraft["doodle"]) {
@@ -275,48 +225,30 @@ export function DayEditorSheet({
     setDraft((current) => (current ? { ...current, text: nextSlot } : current))
   }
 
-  async function persistDraft({ trackSaving = true } = {}) {
-    const nextDraft = latestDraftRef.current
-
-    if (!nextDraft) {
+  function persistDraft() {
+    if (!draft) {
       return
     }
 
-    if (trackSaving) {
-      setIsSaving(true)
-    }
-
-    try {
-      await onSave({
-        ...nextDraft,
-        currentPreviewType: activeTab,
-      })
-    } finally {
-      if (trackSaving && isMountedRef.current) {
-        setIsSaving(false)
-      }
-    }
+    onSave({
+      ...draft,
+      currentPreviewType: activeTab,
+    })
   }
 
   function closeEditor() {
-    if (isSaving || isDismissingRef.current) {
-      return
-    }
-
-    isDismissingRef.current = true
     clearStageTimer()
-    setStage("peek")
     setContentStage("peek")
+    setStage("peek")
+    persistDraft()
     onOpenChange(false)
-
-    void persistDraft({ trackSaving: false }).catch(() => {})
   }
 
   function handleDragEnd(
     _: PointerEvent | MouseEvent | TouchEvent,
     info: PanInfo
   ) {
-    if (isDrawing || isSaving) {
+    if (isDrawing) {
       settleDrag()
       return
     }
@@ -359,13 +291,7 @@ export function DayEditorSheet({
     }
 
     if (activeTab === "photo") {
-      return (
-        <PhotoEditor
-          mode="peek"
-          onSelectFile={(file) => updatePhoto(createSessionPhotoSlot(file))}
-          slot={draft.photo}
-        />
-      )
+      return <PhotoEditor mode="peek" onChange={updatePhoto} slot={draft.photo} />
     }
 
     if (activeTab === "doodle") {
@@ -393,7 +319,7 @@ export function DayEditorSheet({
         <div className="fixed inset-0 z-50">
           <motion.button
             type="button"
-            aria-label={appCopy.component.dayEditorSheet.closeEditorAriaLabel}
+            aria-label="Close editor"
             className="absolute inset-0 bg-[color:var(--sheet-backdrop)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -405,7 +331,7 @@ export function DayEditorSheet({
               ease: motionTokens.ease.fade,
             }}
             onClick={() => {
-              if (!isDrawing && !isSaving) {
+              if (!isDrawing) {
                 closeEditor()
               }
             }}
@@ -457,7 +383,7 @@ export function DayEditorSheet({
               backgroundColor: "var(--calendar-sheet-surface-strong)",
               boxShadow: "var(--calendar-sheet-shadow), var(--calendar-sheet-inner-shadow)",
             }}
-            initial={reducedMotion ? { opacity: 0 } : dockLaunchFrame}
+            initial={reducedMotion ? { opacity: 0 } : launchFrame}
             animate={
               reducedMotion
                 ? { opacity: 1 }
@@ -493,7 +419,7 @@ export function DayEditorSheet({
               <div className="flex justify-center">
                 <button
                   type="button"
-                  aria-label={appCopy.component.dayEditorSheet.dragEditorAriaLabel}
+                  aria-label="Drag editor"
                   className={cn(
                     "flex w-full cursor-grab items-center justify-center rounded-full active:cursor-grabbing",
                     isDrawing && "cursor-default"
@@ -501,13 +427,13 @@ export function DayEditorSheet({
                   style={{
                     height: floatingSheetUi.handleTouchHeight,
                     maxWidth: 88,
-                    touchAction: isDrawing || isSaving ? "auto" : "none",
+                    touchAction: isDrawing ? "auto" : "none",
                     WebkitTapHighlightColor: "transparent",
                     WebkitUserSelect: "none",
                     userSelect: "none",
                   }}
                   onPointerDown={(event) => {
-                    if (!isDrawing && !isSaving) {
+                    if (!isDrawing) {
                       dragControls.start(event)
                     }
                   }}
@@ -532,19 +458,19 @@ export function DayEditorSheet({
                   }}
                 >
                   {record
-                    ? new Intl.DateTimeFormat(appCopy.common.locale, {
+                    ? new Intl.DateTimeFormat("en-US", {
                         weekday: "short",
                         month: "long",
                         day: "numeric",
                       }).format(parseIsoDate(record.date))
-                    : appCopy.component.dayEditorSheet.emptyTitle}
+                    : "Edit day"}
                 </h2>
               </div>
 
               {contentStage === "peek" ? (
                 <LayoutGroup>
                   <div
-                    className="mt-[10px] grid grid-cols-3 gap-2 bg-black/[0.045] p-[4px]"
+                    className="mt-[10px] grid grid-cols-3 gap-[4px] bg-black/[0.045] p-[4px]"
                     style={{ borderRadius: floatingSheetUi.segmentContainerRadius }}
                   >
                     {editorTabs.map((tab) => (
@@ -556,7 +482,6 @@ export function DayEditorSheet({
                           activeTab === tab.value ? "text-foreground" : "text-foreground/46"
                         )}
                         style={{
-                          minHeight: calendarInteractionUi.minTouchTarget,
                           height: floatingSheetUi.segmentHeight,
                           borderRadius: floatingSheetUi.segmentRadius,
                           fontSize: 12,
@@ -628,15 +553,15 @@ export function DayEditorSheet({
                   <div className="grid h-full min-h-0 grid-cols-2 grid-rows-[auto_minmax(0,1fr)] gap-3">
                     <section className="min-h-0">
                       <PhotoEditor
-                        label={appCopy.component.dayEditorSheet.tabs.photo}
+                        label="Photo"
                         mode="expanded"
-                        onSelectFile={(file) => updatePhoto(createSessionPhotoSlot(file))}
+                        onChange={updatePhoto}
                         slot={draft.photo}
                       />
                     </section>
                     <section className="min-h-0">
                       <DoodleCanvas
-                        label={appCopy.component.dayEditorSheet.tabs.doodle}
+                        label="Sketch"
                         mode="expanded"
                         onChange={updateDoodle}
                         onDrawingChange={setIsDrawing}
@@ -647,7 +572,7 @@ export function DayEditorSheet({
 
                     <section className="col-span-2 min-h-0">
                       <TextEditor
-                        label={appCopy.component.dayEditorSheet.tabs.text}
+                        label="Text"
                         mode="expanded"
                         onChange={updateText}
                         slot={draft.text}

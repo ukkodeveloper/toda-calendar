@@ -92,6 +92,7 @@ export const motionTokens = {
     },
   },
   gesture: {
+    doubleTapMs: 220,
     sheetDismissOffset: 120,
     sheetDismissVelocity: 700,
     sheetExpandOffset: 96,

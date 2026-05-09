@@ -3,18 +3,13 @@ import assert from "node:assert/strict"
 
 import {
   calendarReducer,
+  createEmptyDayRecord,
   createInitialCalendarState,
 } from "../model/calendar-state"
 import type { CalendarDayRecord } from "../model/types"
+import calendarSeed from "../data/calendar-seed.json"
 import { parseCalendarSeed } from "../data/parse-calendar-seed"
-import {
-  buildMonthSection,
-  createInitialMonthRange,
-  expandMonthRange,
-  parseIsoDate,
-  resolveCalendarEntryDate,
-  toIsoDate,
-} from "../utils/date"
+import { buildMonthSection, createInitialMonthRange, expandMonthRange } from "../utils/date"
 import {
   createDefaultPreviewFilter,
   cyclePreviewMode,
@@ -31,28 +26,6 @@ const sampleRecord: CalendarDayRecord = {
     alt: "Sample",
     source: "seed",
   },
-  doodle: {
-    type: "doodle",
-    strokes: [
-      {
-        color: "#5B4636",
-        width: 3,
-        points: [
-          { x: 22, y: 72 },
-          { x: 20, y: 44 },
-          { x: 28, y: 24 },
-          { x: 38, y: 18 },
-          { x: 44, y: 30 },
-          { x: 56, y: 30 },
-          { x: 62, y: 18 },
-          { x: 72, y: 24 },
-          { x: 80, y: 44 },
-          { x: 78, y: 72 },
-          { x: 22, y: 72 },
-        ],
-      },
-    ],
-  },
   text: {
     type: "text",
     body: "Hello",
@@ -68,35 +41,58 @@ test("parseCalendarSeed validates and returns records", () => {
   assert.equal(parsed[0]?.date, "2026-04-21")
 })
 
-test("parseCalendarSeed rejects duplicate local dates", () => {
-  assert.throws(
-    () =>
-      parseCalendarSeed({
-        records: [
-          sampleRecord,
-          {
-            ...sampleRecord,
-            currentPreviewType: "text",
-          },
-        ],
-      }),
-    /Duplicate calendar day record/
+test("calendar seed fills March through yesterday except two days", () => {
+  const parsed = parseCalendarSeed(calendarSeed)
+  const dates = new Set(parsed.map((record) => record.date))
+  const monthCounts = parsed.reduce<Record<string, number>>((counts, record) => {
+    const month = record.date.slice(0, 7)
+    counts[month] = (counts[month] ?? 0) + 1
+    return counts
+  }, {})
+
+  assert.equal(parsed.length, 67)
+  assert.equal(monthCounts["2026-03"], 30)
+  assert.equal(monthCounts["2026-04"], 29)
+  assert.equal(monthCounts["2026-05"], 8)
+  assert.equal(dates.has("2026-03-14"), false)
+  assert.equal(dates.has("2026-04-20"), false)
+  assert.equal(dates.has("2026-05-09"), false)
+})
+
+test("calendar seed fills every included day with photo, sketch, and text", () => {
+  const parsed = parseCalendarSeed(calendarSeed)
+
+  assert.equal(
+    parsed.every((record) => record.photo && record.doodle && record.text),
+    true
   )
 })
 
-test("parseCalendarSeed rejects impossible local dates", () => {
-  assert.throws(
-    () =>
-      parseCalendarSeed({
-        records: [
-          {
-            ...sampleRecord,
-            date: "2026-02-30",
-          },
-        ],
-      }),
-    /Invalid local date/
+test("calendar seed photo and text mocks do not repeat", () => {
+  const parsed = parseCalendarSeed(calendarSeed)
+  const photoSources = parsed.flatMap((record) => (record.photo ? [record.photo.src] : []))
+  const textBodies = parsed.flatMap((record) => (record.text ? [record.text.body] : []))
+
+  assert.equal(new Set(photoSources).size, photoSources.length)
+  assert.equal(new Set(textBodies).size, textBodies.length)
+})
+
+test("calendar seed sketches are red and preserve playback timing", () => {
+  const sketches = parseCalendarSeed(calendarSeed).flatMap((record) =>
+    record.doodle ? [record.doodle] : []
   )
+
+  assert.equal(sketches.length, 67)
+
+  for (const sketch of sketches) {
+    for (const stroke of sketch.strokes) {
+      assert.equal(stroke.color, "#ff3b30")
+      assert.equal(
+        stroke.points.every((point) => typeof point.t === "number"),
+        true
+      )
+    }
+  }
 })
 
 test("cyclePreviewMode rotates only through enabled content types", () => {
@@ -159,41 +155,15 @@ test("expandMonthRange prepends and appends month keys", () => {
   assert.equal(withFuture[withFuture.length - 1], "2026-07-01")
 })
 
-test("buildMonthSection creates a fixed 42-cell month grid with adjacent month dates", () => {
+test("buildMonthSection creates a 7-column month grid", () => {
   const section = buildMonthSection("2026-04-01", "2026-04-21")
 
-  assert.equal(section.weeks.length, 6)
+  assert.equal(section.weeks.length > 3, true)
   assert.equal(section.weeks[0]?.length, 7)
   assert.equal(section.monthLabel, "April 2026")
-  assert.equal(section.weeks.flat().length, 42)
-  assert.equal(section.weeks[0]?.[0]?.date, "2026-03-29")
-  assert.equal(section.weeks[0]?.[0]?.isCurrentMonth, false)
+  assert.equal(section.weeks[0]?.[0]?.isPlaceholder, true)
+  assert.equal(section.weeks[0]?.[0]?.date, null)
   assert.equal(section.weeks[0]?.[3]?.date, "2026-04-01")
-  assert.equal(section.weeks[0]?.[3]?.isCurrentMonth, true)
-  assert.equal(section.weeks[5]?.[6]?.date, "2026-05-09")
-})
-
-test("parseIsoDate round-trips valid local dates", () => {
-  assert.equal(toIsoDate(parseIsoDate("2026-02-28")), "2026-02-28")
-  assert.equal(toIsoDate(parseIsoDate("2028-02-29")), "2028-02-29")
-})
-
-test("parseIsoDate rejects impossible local dates", () => {
-  assert.throws(() => parseIsoDate("2026-02-30"), /Invalid local date/)
-})
-
-test("resolveCalendarEntryDate keeps a valid shared date", () => {
-  const resolved = resolveCalendarEntryDate("2026-04-21", new Date(2026, 3, 1))
-
-  assert.equal(toIsoDate(resolved.anchorDate), "2026-04-21")
-  assert.equal(resolved.selectedDate, "2026-04-21")
-})
-
-test("resolveCalendarEntryDate falls back safely on invalid shared dates", () => {
-  const resolved = resolveCalendarEntryDate("2026-02-30", new Date(2026, 3, 1))
-
-  assert.equal(toIsoDate(resolved.anchorDate), "2026-04-01")
-  assert.equal(resolved.selectedDate, null)
 })
 
 test("calendarReducer prevents disabling the last filter type", () => {
@@ -229,25 +199,10 @@ test("calendarReducer removes empty records on save", () => {
   const initialState = createInitialCalendarState([sampleRecord])
   const nextState = calendarReducer(initialState, {
     type: "save-record",
-    date: "2026-04-21",
-    record: null,
+    record: createEmptyDayRecord("2026-04-21"),
   })
 
   assert.equal(nextState.recordsByDate["2026-04-21"], undefined)
-})
-
-test("createInitialCalendarState rejects duplicate record identities", () => {
-  assert.throws(
-    () =>
-      createInitialCalendarState([
-        sampleRecord,
-        {
-          ...sampleRecord,
-          currentPreviewType: "text",
-        },
-      ]),
-    /Duplicate calendar day record/
-  )
 })
 
 test("createDefaultPreviewFilter enables all types", () => {

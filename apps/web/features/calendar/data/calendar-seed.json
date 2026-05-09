@@ -1,18 +1,3199 @@
 {
   "records": [
     {
+      "date": "2026-03-01",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-01.jpg",
+        "alt": "Phone-style daily photo for 2026-03-01.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 14,
+                "y": 55,
+                "t": 0
+              },
+              {
+                "x": 23,
+                "y": 38,
+                "t": 72
+              },
+              {
+                "x": 37,
+                "y": 28,
+                "t": 144
+              },
+              {
+                "x": 52,
+                "y": 27,
+                "t": 216
+              },
+              {
+                "x": 68,
+                "y": 38,
+                "t": 288
+              },
+              {
+                "x": 82,
+                "y": 55,
+                "t": 360
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 55,
+                "t": 480
+              },
+              {
+                "x": 48,
+                "y": 78,
+                "t": 538
+              },
+              {
+                "x": 43,
+                "y": 82,
+                "t": 596
+              },
+              {
+                "x": 38,
+                "y": 76,
+                "t": 654
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 20,
+                "y": 55,
+                "t": 774
+              },
+              {
+                "x": 76,
+                "y": 55,
+                "t": 846
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Rain on errands"
+      }
+    },
+    {
+      "date": "2026-03-02",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-02.jpg",
+        "alt": "Phone-style daily photo for 2026-03-02.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 25,
+                "y": 22,
+                "t": 0
+              },
+              {
+                "x": 21,
+                "y": 36,
+                "t": 72
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 45,
+                "y": 18,
+                "t": 192
+              },
+              {
+                "x": 41,
+                "y": 34,
+                "t": 250
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 65,
+                "y": 24,
+                "t": 370
+              },
+              {
+                "x": 61,
+                "y": 40,
+                "t": 442
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 27,
+                "y": 58,
+                "t": 562
+              },
+              {
+                "x": 39,
+                "y": 68,
+                "t": 620
+              },
+              {
+                "x": 57,
+                "y": 68,
+                "t": 678
+              },
+              {
+                "x": 73,
+                "y": 58,
+                "t": 736
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 33,
+                "y": 78,
+                "t": 856
+              },
+              {
+                "x": 67,
+                "y": 78,
+                "t": 928
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Fresh desk light"
+      }
+    },
+    {
+      "date": "2026-03-03",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-03.jpg",
+        "alt": "Phone-style daily photo for 2026-03-03.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 20,
+                "t": 0
+              },
+              {
+                "x": 68,
+                "y": 28,
+                "t": 72
+              },
+              {
+                "x": 78,
+                "y": 46,
+                "t": 144
+              },
+              {
+                "x": 72,
+                "y": 68,
+                "t": 216
+              },
+              {
+                "x": 50,
+                "y": 78,
+                "t": 288
+              },
+              {
+                "x": 28,
+                "y": 68,
+                "t": 360
+              },
+              {
+                "x": 22,
+                "y": 46,
+                "t": 432
+              },
+              {
+                "x": 32,
+                "y": 28,
+                "t": 504
+              },
+              {
+                "x": 50,
+                "y": 20,
+                "t": 576
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 38,
+                "y": 44,
+                "t": 696
+              },
+              {
+                "x": 40,
+                "y": 44,
+                "t": 754
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 62,
+                "y": 44,
+                "t": 874
+              },
+              {
+                "x": 64,
+                "y": 44,
+                "t": 946
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 36,
+                "y": 58,
+                "t": 1066
+              },
+              {
+                "x": 46,
+                "y": 66,
+                "t": 1124
+              },
+              {
+                "x": 58,
+                "y": 66,
+                "t": 1182
+              },
+              {
+                "x": 68,
+                "y": 58,
+                "t": 1240
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Walked home slow"
+      }
+    },
+    {
+      "date": "2026-03-04",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-04.jpg",
+        "alt": "Phone-style daily photo for 2026-03-04.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 21,
+                "y": 72,
+                "t": 0
+              },
+              {
+                "x": 67,
+                "y": 26,
+                "t": 72
+              },
+              {
+                "x": 81,
+                "y": 40,
+                "t": 144
+              },
+              {
+                "x": 35,
+                "y": 86,
+                "t": 216
+              },
+              {
+                "x": 21,
+                "y": 72,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 67,
+                "y": 26,
+                "t": 408
+              },
+              {
+                "x": 73,
+                "y": 20,
+                "t": 466
+              },
+              {
+                "x": 87,
+                "y": 34,
+                "t": 524
+              },
+              {
+                "x": 81,
+                "y": 40,
+                "t": 582
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 31,
+                "y": 62,
+                "t": 702
+              },
+              {
+                "x": 45,
+                "y": 76,
+                "t": 774
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Quiet coffee stop"
+      }
+    },
+    {
+      "date": "2026-03-05",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-05.jpg",
+        "alt": "Phone-style daily photo for 2026-03-05.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 28,
+                "y": 36,
+                "t": 0
+              },
+              {
+                "x": 66,
+                "y": 36,
+                "t": 72
+              },
+              {
+                "x": 64,
+                "y": 76,
+                "t": 144
+              },
+              {
+                "x": 32,
+                "y": 76,
+                "t": 216
+              },
+              {
+                "x": 28,
+                "y": 36,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 66,
+                "y": 46,
+                "t": 408
+              },
+              {
+                "x": 82,
+                "y": 48,
+                "t": 466
+              },
+              {
+                "x": 82,
+                "y": 64,
+                "t": 524
+              },
+              {
+                "x": 65,
+                "y": 64,
+                "t": 582
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 36,
+                "y": 28,
+                "t": 702
+              },
+              {
+                "x": 42,
+                "y": 20,
+                "t": 774
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 28,
+                "t": 894
+              },
+              {
+                "x": 58,
+                "y": 20,
+                "t": 952
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Pocket note kept"
+      }
+    },
+    {
+      "date": "2026-03-06",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-06.jpg",
+        "alt": "Phone-style daily photo for 2026-03-06.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 22,
+                "y": 52,
+                "t": 0
+              },
+              {
+                "x": 56,
+                "y": 52,
+                "t": 72
+              },
+              {
+                "x": 76,
+                "y": 72,
+                "t": 144
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 22,
+                "y": 52,
+                "t": 264
+              },
+              {
+                "x": 18,
+                "y": 42,
+                "t": 322
+              },
+              {
+                "x": 26,
+                "y": 34,
+                "t": 380
+              },
+              {
+                "x": 38,
+                "y": 38,
+                "t": 438
+              },
+              {
+                "x": 40,
+                "y": 50,
+                "t": 496
+              },
+              {
+                "x": 32,
+                "y": 58,
+                "t": 554
+              },
+              {
+                "x": 22,
+                "y": 52,
+                "t": 612
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 62,
+                "y": 58,
+                "t": 732
+              },
+              {
+                "x": 56,
+                "y": 64,
+                "t": 804
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 68,
+                "y": 64,
+                "t": 924
+              },
+              {
+                "x": 62,
+                "y": 70,
+                "t": 982
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Called before bed"
+      }
+    },
+    {
+      "date": "2026-03-07",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-07.jpg",
+        "alt": "Phone-style daily photo for 2026-03-07.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 21,
+                "y": 28,
+                "t": 0
+              },
+              {
+                "x": 47,
+                "y": 38,
+                "t": 72
+              },
+              {
+                "x": 47,
+                "y": 80,
+                "t": 144
+              },
+              {
+                "x": 21,
+                "y": 70,
+                "t": 216
+              },
+              {
+                "x": 21,
+                "y": 28,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 38,
+                "t": 408
+              },
+              {
+                "x": 79,
+                "y": 28,
+                "t": 466
+              },
+              {
+                "x": 79,
+                "y": 70,
+                "t": 524
+              },
+              {
+                "x": 51,
+                "y": 80,
+                "t": 582
+              },
+              {
+                "x": 51,
+                "y": 38,
+                "t": 640
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 38,
+                "t": 760
+              },
+              {
+                "x": 49,
+                "y": 80,
+                "t": 832
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Warm bakery air"
+      }
+    },
+    {
+      "date": "2026-03-08",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-08.jpg",
+        "alt": "Phone-style daily photo for 2026-03-08.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 18,
+                "y": 54,
+                "t": 0
+              },
+              {
+                "x": 18,
+                "y": 42,
+                "t": 72
+              },
+              {
+                "x": 30,
+                "y": 34,
+                "t": 144
+              },
+              {
+                "x": 43,
+                "y": 42,
+                "t": 216
+              },
+              {
+                "x": 43,
+                "y": 54,
+                "t": 288
+              },
+              {
+                "x": 31,
+                "y": 62,
+                "t": 360
+              },
+              {
+                "x": 18,
+                "y": 54,
+                "t": 432
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 57,
+                "y": 54,
+                "t": 552
+              },
+              {
+                "x": 57,
+                "y": 42,
+                "t": 610
+              },
+              {
+                "x": 70,
+                "y": 34,
+                "t": 668
+              },
+              {
+                "x": 82,
+                "y": 42,
+                "t": 726
+              },
+              {
+                "x": 82,
+                "y": 54,
+                "t": 784
+              },
+              {
+                "x": 69,
+                "y": 62,
+                "t": 842
+              },
+              {
+                "x": 57,
+                "y": 54,
+                "t": 900
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 43,
+                "y": 48,
+                "t": 1020
+              },
+              {
+                "x": 57,
+                "y": 48,
+                "t": 1092
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Tiny brave reply"
+      }
+    },
+    {
+      "date": "2026-03-09",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-09.jpg",
+        "alt": "Phone-style daily photo for 2026-03-09.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 21,
+                "y": 70,
+                "t": 0
+              },
+              {
+                "x": 33,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 79,
+                "y": 24,
+                "t": 144
+              },
+              {
+                "x": 73,
+                "y": 62,
+                "t": 216
+              },
+              {
+                "x": 21,
+                "y": 70,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 27,
+                "y": 66,
+                "t": 408
+              },
+              {
+                "x": 46,
+                "y": 50,
+                "t": 466
+              },
+              {
+                "x": 75,
+                "y": 26,
+                "t": 524
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 45,
+                "y": 50,
+                "t": 644
+              },
+              {
+                "x": 41,
+                "y": 36,
+                "t": 716
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 57,
+                "y": 42,
+                "t": 836
+              },
+              {
+                "x": 63,
+                "y": 30,
+                "t": 894
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Laundry finished"
+      }
+    },
+    {
+      "date": "2026-03-10",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-10.jpg",
+        "alt": "Phone-style daily photo for 2026-03-10.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 36,
+                "y": 34,
+                "t": 0
+              },
+              {
+                "x": 68,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 64,
+                "y": 58,
+                "t": 144
+              },
+              {
+                "x": 40,
+                "y": 58,
+                "t": 216
+              },
+              {
+                "x": 36,
+                "y": 34,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 40,
+                "y": 58,
+                "t": 408
+              },
+              {
+                "x": 32,
+                "y": 82,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 64,
+                "y": 58,
+                "t": 586
+              },
+              {
+                "x": 72,
+                "y": 82,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 34,
+                "y": 48,
+                "t": 778
+              },
+              {
+                "x": 22,
+                "y": 72,
+                "t": 836
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 70,
+                "y": 48,
+                "t": 956
+              },
+              {
+                "x": 84,
+                "y": 72,
+                "t": 1028
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Good page found"
+      }
+    },
+    {
+      "date": "2026-03-11",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-11.jpg",
+        "alt": "Phone-style daily photo for 2026-03-11.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 36,
+                "y": 24,
+                "t": 0
+              },
+              {
+                "x": 62,
+                "y": 24,
+                "t": 72
+              },
+              {
+                "x": 72,
+                "y": 48,
+                "t": 144
+              },
+              {
+                "x": 26,
+                "y": 48,
+                "t": 216
+              },
+              {
+                "x": 36,
+                "y": 24,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 48,
+                "t": 408
+              },
+              {
+                "x": 48,
+                "y": 76,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 32,
+                "y": 76,
+                "t": 586
+              },
+              {
+                "x": 64,
+                "y": 76,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 18,
+                "t": 778
+              },
+              {
+                "x": 48,
+                "y": 10,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Soft train window"
+      }
+    },
+    {
+      "date": "2026-03-12",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-12.jpg",
+        "alt": "Phone-style daily photo for 2026-03-12.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 65,
+                "y": 20,
+                "t": 0
+              },
+              {
+                "x": 53,
+                "y": 26,
+                "t": 72
+              },
+              {
+                "x": 47,
+                "y": 42,
+                "t": 144
+              },
+              {
+                "x": 51,
+                "y": 60,
+                "t": 216
+              },
+              {
+                "x": 65,
+                "y": 72,
+                "t": 288
+              },
+              {
+                "x": 49,
+                "y": 74,
+                "t": 360
+              },
+              {
+                "x": 33,
+                "y": 66,
+                "t": 432
+              },
+              {
+                "x": 25,
+                "y": 52,
+                "t": 504
+              },
+              {
+                "x": 25,
+                "y": 36,
+                "t": 576
+              },
+              {
+                "x": 33,
+                "y": 24,
+                "t": 648
+              },
+              {
+                "x": 49,
+                "y": 18,
+                "t": 720
+              },
+              {
+                "x": 65,
+                "y": 20,
+                "t": 792
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Early night won"
+      }
+    },
+    {
+      "date": "2026-03-13",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-13.jpg",
+        "alt": "Phone-style daily photo for 2026-03-13.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 30,
+                "t": 0
+              },
+              {
+                "x": 62,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 72,
+                "y": 48,
+                "t": 144
+              },
+              {
+                "x": 68,
+                "y": 68,
+                "t": 216
+              },
+              {
+                "x": 56,
+                "y": 80,
+                "t": 288
+              },
+              {
+                "x": 44,
+                "y": 80,
+                "t": 360
+              },
+              {
+                "x": 32,
+                "y": 68,
+                "t": 432
+              },
+              {
+                "x": 28,
+                "y": 48,
+                "t": 504
+              },
+              {
+                "x": 38,
+                "y": 34,
+                "t": 576
+              },
+              {
+                "x": 50,
+                "y": 30,
+                "t": 648
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 30,
+                "t": 768
+              },
+              {
+                "x": 50,
+                "y": 18,
+                "t": 826
+              },
+              {
+                "x": 60,
+                "y": 14,
+                "t": 884
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 22,
+                "t": 1004
+              },
+              {
+                "x": 64,
+                "y": 22,
+                "t": 1076
+              },
+              {
+                "x": 70,
+                "y": 28,
+                "t": 1148
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Plant drank today"
+      }
+    },
+    {
+      "date": "2026-03-15",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-15.jpg",
+        "alt": "Phone-style daily photo for 2026-03-15.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 18,
+                "t": 0
+              },
+              {
+                "x": 67,
+                "y": 24,
+                "t": 72
+              },
+              {
+                "x": 79,
+                "y": 40,
+                "t": 144
+              },
+              {
+                "x": 79,
+                "y": 60,
+                "t": 216
+              },
+              {
+                "x": 67,
+                "y": 76,
+                "t": 288
+              },
+              {
+                "x": 51,
+                "y": 82,
+                "t": 360
+              },
+              {
+                "x": 35,
+                "y": 76,
+                "t": 432
+              },
+              {
+                "x": 23,
+                "y": 60,
+                "t": 504
+              },
+              {
+                "x": 23,
+                "y": 40,
+                "t": 576
+              },
+              {
+                "x": 35,
+                "y": 24,
+                "t": 648
+              },
+              {
+                "x": 51,
+                "y": 18,
+                "t": 720
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 34,
+                "t": 840
+              },
+              {
+                "x": 51,
+                "y": 54,
+                "t": 898
+              },
+              {
+                "x": 65,
+                "y": 62,
+                "t": 956
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Small budget win"
+      }
+    },
+    {
+      "date": "2026-03-16",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-16.jpg",
+        "alt": "Phone-style daily photo for 2026-03-16.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 54,
+                "t": 0
+              },
+              {
+                "x": 52,
+                "y": 84,
+                "t": 72
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 42,
+                "t": 192
+              },
+              {
+                "x": 42,
+                "y": 30,
+                "t": 250
+              },
+              {
+                "x": 30,
+                "y": 38,
+                "t": 308
+              },
+              {
+                "x": 40,
+                "y": 52,
+                "t": 366
+              },
+              {
+                "x": 52,
+                "y": 42,
+                "t": 424
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 42,
+                "t": 544
+              },
+              {
+                "x": 62,
+                "y": 30,
+                "t": 616
+              },
+              {
+                "x": 74,
+                "y": 38,
+                "t": 688
+              },
+              {
+                "x": 64,
+                "y": 52,
+                "t": 760
+              },
+              {
+                "x": 52,
+                "y": 42,
+                "t": 832
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 42,
+                "t": 952
+              },
+              {
+                "x": 42,
+                "y": 54,
+                "t": 1010
+              },
+              {
+                "x": 52,
+                "y": 66,
+                "t": 1068
+              },
+              {
+                "x": 62,
+                "y": 54,
+                "t": 1126
+              },
+              {
+                "x": 52,
+                "y": 42,
+                "t": 1184
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 46,
+                "y": 72,
+                "t": 1304
+              },
+              {
+                "x": 32,
+                "y": 62,
+                "t": 1376
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 58,
+                "y": 70,
+                "t": 1496
+              },
+              {
+                "x": 74,
+                "y": 62,
+                "t": 1554
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Soup after rain"
+      }
+    },
+    {
+      "date": "2026-03-17",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-17.jpg",
+        "alt": "Phone-style daily photo for 2026-03-17.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 18,
+                "t": 0
+              },
+              {
+                "x": 60,
+                "y": 28,
+                "t": 72
+              },
+              {
+                "x": 58,
+                "y": 48,
+                "t": 144
+              },
+              {
+                "x": 48,
+                "y": 56,
+                "t": 216
+              },
+              {
+                "x": 38,
+                "y": 48,
+                "t": 288
+              },
+              {
+                "x": 36,
+                "y": 28,
+                "t": 360
+              },
+              {
+                "x": 48,
+                "y": 18,
+                "t": 432
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 56,
+                "t": 552
+              },
+              {
+                "x": 48,
+                "y": 86,
+                "t": 610
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "No rush morning"
+      }
+    },
+    {
+      "date": "2026-03-18",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-18.jpg",
+        "alt": "Phone-style daily photo for 2026-03-18.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 37,
+                "y": 40,
+                "t": 0
+              },
+              {
+                "x": 61,
+                "y": 40,
+                "t": 72
+              },
+              {
+                "x": 61,
+                "y": 82,
+                "t": 144
+              },
+              {
+                "x": 37,
+                "y": 82,
+                "t": 216
+              },
+              {
+                "x": 37,
+                "y": 40,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 36,
+                "t": 408
+              },
+              {
+                "x": 43,
+                "y": 26,
+                "t": 466
+              },
+              {
+                "x": 51,
+                "y": 14,
+                "t": 524
+              },
+              {
+                "x": 55,
+                "y": 28,
+                "t": 582
+              },
+              {
+                "x": 49,
+                "y": 36,
+                "t": 640
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 41,
+                "y": 52,
+                "t": 760
+              },
+              {
+                "x": 57,
+                "y": 52,
+                "t": 832
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Inbox finally quiet"
+      }
+    },
+    {
+      "date": "2026-03-19",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-19.jpg",
+        "alt": "Phone-style daily photo for 2026-03-19.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 20,
+                "y": 56,
+                "t": 0
+              },
+              {
+                "x": 24,
+                "y": 44,
+                "t": 72
+              },
+              {
+                "x": 36,
+                "y": 42,
+                "t": 144
+              },
+              {
+                "x": 42,
+                "y": 30,
+                "t": 216
+              },
+              {
+                "x": 58,
+                "y": 32,
+                "t": 288
+              },
+              {
+                "x": 64,
+                "y": 44,
+                "t": 360
+              },
+              {
+                "x": 76,
+                "y": 46,
+                "t": 432
+              },
+              {
+                "x": 82,
+                "y": 58,
+                "t": 504
+              },
+              {
+                "x": 72,
+                "y": 68,
+                "t": 576
+              },
+              {
+                "x": 32,
+                "y": 68,
+                "t": 648
+              },
+              {
+                "x": 20,
+                "y": 56,
+                "t": 720
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "May air before lunch"
+      }
+    },
+    {
+      "date": "2026-03-20",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-20.jpg",
+        "alt": "Phone-style daily photo for 2026-03-20.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 29,
+                "y": 66,
+                "t": 0
+              },
+              {
+                "x": 29,
+                "y": 54,
+                "t": 72
+              },
+              {
+                "x": 41,
+                "y": 44,
+                "t": 144
+              },
+              {
+                "x": 57,
+                "y": 44,
+                "t": 216
+              },
+              {
+                "x": 69,
+                "y": 58,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 29,
+                "y": 66,
+                "t": 408
+              },
+              {
+                "x": 45,
+                "y": 66,
+                "t": 466
+              },
+              {
+                "x": 57,
+                "y": 44,
+                "t": 524
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 45,
+                "y": 66,
+                "t": 644
+              },
+              {
+                "x": 69,
+                "y": 66,
+                "t": 716
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 21,
+                "y": 66,
+                "t": 836
+              },
+              {
+                "x": 29,
+                "y": 78,
+                "t": 894
+              },
+              {
+                "x": 41,
+                "y": 66,
+                "t": 952
+              },
+              {
+                "x": 29,
+                "y": 54,
+                "t": 1010
+              },
+              {
+                "x": 21,
+                "y": 66,
+                "t": 1068
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 61,
+                "y": 66,
+                "t": 1188
+              },
+              {
+                "x": 69,
+                "y": 78,
+                "t": 1260
+              },
+              {
+                "x": 81,
+                "y": 66,
+                "t": 1332
+              },
+              {
+                "x": 69,
+                "y": 54,
+                "t": 1404
+              },
+              {
+                "x": 61,
+                "y": 66,
+                "t": 1476
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Crosswalk in drizzle"
+      }
+    },
+    {
+      "date": "2026-03-21",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-21.jpg",
+        "alt": "Phone-style daily photo for 2026-03-21.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 24,
+                "y": 72,
+                "t": 0
+              },
+              {
+                "x": 32,
+                "y": 48,
+                "t": 72
+              },
+              {
+                "x": 52,
+                "y": 28,
+                "t": 144
+              },
+              {
+                "x": 72,
+                "y": 48,
+                "t": 216
+              },
+              {
+                "x": 80,
+                "y": 72,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 36,
+                "y": 72,
+                "t": 408
+              },
+              {
+                "x": 36,
+                "y": 84,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 68,
+                "y": 72,
+                "t": 586
+              },
+              {
+                "x": 68,
+                "y": 84,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 44,
+                "y": 56,
+                "t": 778
+              },
+              {
+                "x": 60,
+                "y": 56,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Clear water refill"
+      }
+    },
+    {
+      "date": "2026-03-22",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-22.jpg",
+        "alt": "Phone-style daily photo for 2026-03-22.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 18,
+                "y": 70,
+                "t": 0
+              },
+              {
+                "x": 32,
+                "y": 52,
+                "t": 72
+              },
+              {
+                "x": 46,
+                "y": 68,
+                "t": 144
+              },
+              {
+                "x": 60,
+                "y": 44,
+                "t": 216
+              },
+              {
+                "x": 78,
+                "y": 64,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 20,
+                "y": 78,
+                "t": 408
+              },
+              {
+                "x": 78,
+                "y": 78,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 30,
+                "y": 42,
+                "t": 586
+              },
+              {
+                "x": 36,
+                "y": 34,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 56,
+                "y": 36,
+                "t": 778
+              },
+              {
+                "x": 62,
+                "y": 28,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Late bus, good song"
+      }
+    },
+    {
+      "date": "2026-03-23",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-23.jpg",
+        "alt": "Phone-style daily photo for 2026-03-23.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 25,
+                "y": 34,
+                "t": 0
+              },
+              {
+                "x": 73,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 65,
+                "y": 74,
+                "t": 144
+              },
+              {
+                "x": 33,
+                "y": 74,
+                "t": 216
+              },
+              {
+                "x": 25,
+                "y": 34,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 37,
+                "y": 44,
+                "t": 408
+              },
+              {
+                "x": 61,
+                "y": 44,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 43,
+                "y": 56,
+                "t": 586
+              },
+              {
+                "x": 55,
+                "y": 56,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 34,
+                "t": 778
+              },
+              {
+                "x": 49,
+                "y": 24,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Receipt tucked away"
+      }
+    },
+    {
+      "date": "2026-03-24",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-24.jpg",
+        "alt": "Phone-style daily photo for 2026-03-24.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 16,
+                "y": 55,
+                "t": 0
+              },
+              {
+                "x": 25,
+                "y": 38,
+                "t": 72
+              },
+              {
+                "x": 39,
+                "y": 28,
+                "t": 144
+              },
+              {
+                "x": 54,
+                "y": 27,
+                "t": 216
+              },
+              {
+                "x": 70,
+                "y": 38,
+                "t": 288
+              },
+              {
+                "x": 84,
+                "y": 55,
+                "t": 360
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 55,
+                "t": 480
+              },
+              {
+                "x": 50,
+                "y": 78,
+                "t": 538
+              },
+              {
+                "x": 45,
+                "y": 82,
+                "t": 596
+              },
+              {
+                "x": 40,
+                "y": 76,
+                "t": 654
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 22,
+                "y": 55,
+                "t": 774
+              },
+              {
+                "x": 78,
+                "y": 55,
+                "t": 846
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Blue hour kitchen"
+      }
+    },
+    {
+      "date": "2026-03-25",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-25.jpg",
+        "alt": "Phone-style daily photo for 2026-03-25.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 27,
+                "y": 22,
+                "t": 0
+              },
+              {
+                "x": 23,
+                "y": 36,
+                "t": 72
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 47,
+                "y": 18,
+                "t": 192
+              },
+              {
+                "x": 43,
+                "y": 34,
+                "t": 250
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 67,
+                "y": 24,
+                "t": 370
+              },
+              {
+                "x": 63,
+                "y": 40,
+                "t": 442
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 29,
+                "y": 58,
+                "t": 562
+              },
+              {
+                "x": 41,
+                "y": 68,
+                "t": 620
+              },
+              {
+                "x": 59,
+                "y": 68,
+                "t": 678
+              },
+              {
+                "x": 75,
+                "y": 58,
+                "t": 736
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 35,
+                "y": 78,
+                "t": 856
+              },
+              {
+                "x": 69,
+                "y": 78,
+                "t": 928
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Shared umbrella laugh"
+      }
+    },
+    {
+      "date": "2026-03-26",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-26.jpg",
+        "alt": "Phone-style daily photo for 2026-03-26.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 20,
+                "t": 0
+              },
+              {
+                "x": 70,
+                "y": 28,
+                "t": 72
+              },
+              {
+                "x": 80,
+                "y": 46,
+                "t": 144
+              },
+              {
+                "x": 74,
+                "y": 68,
+                "t": 216
+              },
+              {
+                "x": 52,
+                "y": 78,
+                "t": 288
+              },
+              {
+                "x": 30,
+                "y": 68,
+                "t": 360
+              },
+              {
+                "x": 24,
+                "y": 46,
+                "t": 432
+              },
+              {
+                "x": 34,
+                "y": 28,
+                "t": 504
+              },
+              {
+                "x": 52,
+                "y": 20,
+                "t": 576
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 40,
+                "y": 44,
+                "t": 696
+              },
+              {
+                "x": 42,
+                "y": 44,
+                "t": 754
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 64,
+                "y": 44,
+                "t": 874
+              },
+              {
+                "x": 66,
+                "y": 44,
+                "t": 946
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 38,
+                "y": 58,
+                "t": 1066
+              },
+              {
+                "x": 48,
+                "y": 66,
+                "t": 1124
+              },
+              {
+                "x": 60,
+                "y": 66,
+                "t": 1182
+              },
+              {
+                "x": 70,
+                "y": 58,
+                "t": 1240
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Book page folded"
+      }
+    },
+    {
+      "date": "2026-03-27",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-27.jpg",
+        "alt": "Phone-style daily photo for 2026-03-27.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 18,
+                "y": 72,
+                "t": 0
+              },
+              {
+                "x": 64,
+                "y": 26,
+                "t": 72
+              },
+              {
+                "x": 78,
+                "y": 40,
+                "t": 144
+              },
+              {
+                "x": 32,
+                "y": 86,
+                "t": 216
+              },
+              {
+                "x": 18,
+                "y": 72,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 64,
+                "y": 26,
+                "t": 408
+              },
+              {
+                "x": 70,
+                "y": 20,
+                "t": 466
+              },
+              {
+                "x": 84,
+                "y": 34,
+                "t": 524
+              },
+              {
+                "x": 78,
+                "y": 40,
+                "t": 582
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 28,
+                "y": 62,
+                "t": 702
+              },
+              {
+                "x": 42,
+                "y": 76,
+                "t": 774
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Fresh towel stack"
+      }
+    },
+    {
+      "date": "2026-03-28",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-28.jpg",
+        "alt": "Phone-style daily photo for 2026-03-28.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 25,
+                "y": 36,
+                "t": 0
+              },
+              {
+                "x": 63,
+                "y": 36,
+                "t": 72
+              },
+              {
+                "x": 61,
+                "y": 76,
+                "t": 144
+              },
+              {
+                "x": 29,
+                "y": 76,
+                "t": 216
+              },
+              {
+                "x": 25,
+                "y": 36,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 63,
+                "y": 46,
+                "t": 408
+              },
+              {
+                "x": 79,
+                "y": 48,
+                "t": 466
+              },
+              {
+                "x": 79,
+                "y": 64,
+                "t": 524
+              },
+              {
+                "x": 62,
+                "y": 64,
+                "t": 582
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 33,
+                "y": 28,
+                "t": 702
+              },
+              {
+                "x": 39,
+                "y": 20,
+                "t": 774
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 28,
+                "t": 894
+              },
+              {
+                "x": 55,
+                "y": 20,
+                "t": 952
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Desk reset again"
+      }
+    },
+    {
       "date": "2026-03-29",
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/window-light.jpg",
-        "alt": "Soft morning light on a window ledge.",
+        "src": "/calendar/photos/real-day-2026-03-29.jpg",
+        "alt": "Phone-style daily photo for 2026-03-29.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 24,
+                "y": 52,
+                "t": 0
+              },
+              {
+                "x": 58,
+                "y": 52,
+                "t": 72
+              },
+              {
+                "x": 78,
+                "y": 72,
+                "t": 144
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 24,
+                "y": 52,
+                "t": 264
+              },
+              {
+                "x": 20,
+                "y": 42,
+                "t": 322
+              },
+              {
+                "x": 28,
+                "y": 34,
+                "t": 380
+              },
+              {
+                "x": 40,
+                "y": 38,
+                "t": 438
+              },
+              {
+                "x": 42,
+                "y": 50,
+                "t": 496
+              },
+              {
+                "x": 34,
+                "y": 58,
+                "t": 554
+              },
+              {
+                "x": 24,
+                "y": 52,
+                "t": 612
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 64,
+                "y": 58,
+                "t": 732
+              },
+              {
+                "x": 58,
+                "y": 64,
+                "t": 804
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 70,
+                "y": 64,
+                "t": 924
+              },
+              {
+                "x": 64,
+                "y": 70,
+                "t": 982
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Spring light",
-        "body": "Kept the windows open all morning."
+        "body": "Streetlight reflection"
+      }
+    },
+    {
+      "date": "2026-03-30",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-30.jpg",
+        "alt": "Phone-style daily photo for 2026-03-30.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 23,
+                "y": 28,
+                "t": 0
+              },
+              {
+                "x": 49,
+                "y": 38,
+                "t": 72
+              },
+              {
+                "x": 49,
+                "y": 80,
+                "t": 144
+              },
+              {
+                "x": 23,
+                "y": 70,
+                "t": 216
+              },
+              {
+                "x": 23,
+                "y": 28,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 53,
+                "y": 38,
+                "t": 408
+              },
+              {
+                "x": 81,
+                "y": 28,
+                "t": 466
+              },
+              {
+                "x": 81,
+                "y": 70,
+                "t": 524
+              },
+              {
+                "x": 53,
+                "y": 80,
+                "t": 582
+              },
+              {
+                "x": 53,
+                "y": 38,
+                "t": 640
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 38,
+                "t": 760
+              },
+              {
+                "x": 51,
+                "y": 80,
+                "t": 832
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Long call, softer"
+      }
+    },
+    {
+      "date": "2026-03-31",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-03-31.jpg",
+        "alt": "Phone-style daily photo for 2026-03-31.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 20,
+                "y": 54,
+                "t": 0
+              },
+              {
+                "x": 20,
+                "y": 42,
+                "t": 72
+              },
+              {
+                "x": 32,
+                "y": 34,
+                "t": 144
+              },
+              {
+                "x": 45,
+                "y": 42,
+                "t": 216
+              },
+              {
+                "x": 45,
+                "y": 54,
+                "t": 288
+              },
+              {
+                "x": 33,
+                "y": 62,
+                "t": 360
+              },
+              {
+                "x": 20,
+                "y": 54,
+                "t": 432
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 59,
+                "y": 54,
+                "t": 552
+              },
+              {
+                "x": 59,
+                "y": 42,
+                "t": 610
+              },
+              {
+                "x": 72,
+                "y": 34,
+                "t": 668
+              },
+              {
+                "x": 84,
+                "y": 42,
+                "t": 726
+              },
+              {
+                "x": 84,
+                "y": 54,
+                "t": 784
+              },
+              {
+                "x": 71,
+                "y": 62,
+                "t": 842
+              },
+              {
+                "x": 59,
+                "y": 54,
+                "t": 900
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 45,
+                "y": 48,
+                "t": 1020
+              },
+              {
+                "x": 59,
+                "y": 48,
+                "t": 1092
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Quiet alarm morning"
       }
     },
     {
@@ -20,14 +3201,102 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/window-light.jpg",
-        "alt": "Morning light slipping across a curtain and bedside table.",
+        "src": "/calendar/photos/real-day-2026-04-01.jpg",
+        "alt": "Phone-style daily photo for 2026-04-01.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 18,
+                "y": 70,
+                "t": 0
+              },
+              {
+                "x": 30,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 76,
+                "y": 24,
+                "t": 144
+              },
+              {
+                "x": 70,
+                "y": 62,
+                "t": 216
+              },
+              {
+                "x": 18,
+                "y": 70,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 24,
+                "y": 66,
+                "t": 408
+              },
+              {
+                "x": 43,
+                "y": 50,
+                "t": 466
+              },
+              {
+                "x": 72,
+                "y": 26,
+                "t": 524
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 42,
+                "y": 50,
+                "t": 644
+              },
+              {
+                "x": 38,
+                "y": 36,
+                "t": 716
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 54,
+                "y": 42,
+                "t": 836
+              },
+              {
+                "x": 60,
+                "y": 30,
+                "t": 894
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Sunrise",
-        "body": "Curtain light and clean sheets."
+        "body": "Tea before replies"
       }
     },
     {
@@ -35,14 +3304,113 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/breakfast-toast.jpg",
-        "alt": "Toast and coffee set on a pale breakfast table.",
+        "src": "/calendar/photos/real-day-2026-04-02.jpg",
+        "alt": "Phone-style daily photo for 2026-04-02.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 33,
+                "y": 34,
+                "t": 0
+              },
+              {
+                "x": 65,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 61,
+                "y": 58,
+                "t": 144
+              },
+              {
+                "x": 37,
+                "y": 58,
+                "t": 216
+              },
+              {
+                "x": 33,
+                "y": 34,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 37,
+                "y": 58,
+                "t": 408
+              },
+              {
+                "x": 29,
+                "y": 82,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 61,
+                "y": 58,
+                "t": 586
+              },
+              {
+                "x": 69,
+                "y": 82,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 31,
+                "y": 48,
+                "t": 778
+              },
+              {
+                "x": 19,
+                "y": 72,
+                "t": 836
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 67,
+                "y": 48,
+                "t": 956
+              },
+              {
+                "x": 81,
+                "y": 72,
+                "t": 1028
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Toast",
-        "body": "Coffee, butter, nothing urgent."
+        "body": "Tiny grocery run"
       }
     },
     {
@@ -50,14 +3418,97 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/blossom-path.jpg",
-        "alt": "Pink blossom branches leaning over a quiet walking path.",
+        "src": "/calendar/photos/real-day-2026-04-03.jpg",
+        "alt": "Phone-style daily photo for 2026-04-03.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 38,
+                "y": 24,
+                "t": 0
+              },
+              {
+                "x": 64,
+                "y": 24,
+                "t": 72
+              },
+              {
+                "x": 74,
+                "y": 48,
+                "t": 144
+              },
+              {
+                "x": 28,
+                "y": 48,
+                "t": 216
+              },
+              {
+                "x": 38,
+                "y": 24,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 48,
+                "t": 408
+              },
+              {
+                "x": 50,
+                "y": 76,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 34,
+                "y": 76,
+                "t": 586
+              },
+              {
+                "x": 66,
+                "y": 76,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 18,
+                "t": 778
+              },
+              {
+                "x": 50,
+                "y": 10,
+                "t": 836
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Petals",
-        "body": "Walked the long way under blossoms."
+        "body": "Sun on sleeve"
       }
     },
     {
@@ -65,14 +3516,84 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/studio-plant.jpg",
-        "alt": "A plant beside stacked books in a bright studio corner.",
+        "src": "/calendar/photos/real-day-2026-04-04.jpg",
+        "alt": "Phone-style daily photo for 2026-04-04.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 67,
+                "y": 20,
+                "t": 0
+              },
+              {
+                "x": 55,
+                "y": 26,
+                "t": 72
+              },
+              {
+                "x": 49,
+                "y": 42,
+                "t": 144
+              },
+              {
+                "x": 53,
+                "y": 60,
+                "t": 216
+              },
+              {
+                "x": 67,
+                "y": 72,
+                "t": 288
+              },
+              {
+                "x": 51,
+                "y": 74,
+                "t": 360
+              },
+              {
+                "x": 35,
+                "y": 66,
+                "t": 432
+              },
+              {
+                "x": 27,
+                "y": 52,
+                "t": 504
+              },
+              {
+                "x": 27,
+                "y": 36,
+                "t": 576
+              },
+              {
+                "x": 35,
+                "y": 24,
+                "t": 648
+              },
+              {
+                "x": 51,
+                "y": 18,
+                "t": 720
+              },
+              {
+                "x": 67,
+                "y": 20,
+                "t": 792
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Shelf",
-        "body": "Shifted the books and the plant."
+        "body": "Elevator mirror note"
       }
     },
     {
@@ -80,14 +3601,116 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/quiet-desk.jpg",
-        "alt": "Tea, a notebook, and a quiet desk before messages begin.",
+        "src": "/calendar/photos/real-day-2026-04-05.jpg",
+        "alt": "Phone-style daily photo for 2026-04-05.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 30,
+                "t": 0
+              },
+              {
+                "x": 64,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 74,
+                "y": 48,
+                "t": 144
+              },
+              {
+                "x": 70,
+                "y": 68,
+                "t": 216
+              },
+              {
+                "x": 58,
+                "y": 80,
+                "t": 288
+              },
+              {
+                "x": 46,
+                "y": 80,
+                "t": 360
+              },
+              {
+                "x": 34,
+                "y": 68,
+                "t": 432
+              },
+              {
+                "x": 30,
+                "y": 48,
+                "t": 504
+              },
+              {
+                "x": 40,
+                "y": 34,
+                "t": 576
+              },
+              {
+                "x": 52,
+                "y": 30,
+                "t": 648
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 30,
+                "t": 768
+              },
+              {
+                "x": 52,
+                "y": 18,
+                "t": 826
+              },
+              {
+                "x": 62,
+                "y": 14,
+                "t": 884
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 54,
+                "y": 22,
+                "t": 1004
+              },
+              {
+                "x": 66,
+                "y": 22,
+                "t": 1076
+              },
+              {
+                "x": 72,
+                "y": 28,
+                "t": 1148
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Desk",
-        "body": "Tea first, messages later."
+        "body": "Shoes dried slowly"
       }
     },
     {
@@ -95,14 +3718,100 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/subway-window.jpg",
-        "alt": "Blue-hour reflections floating in a subway window.",
+        "src": "/calendar/photos/real-day-2026-04-06.jpg",
+        "alt": "Phone-style daily photo for 2026-04-06.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 18,
+                "t": 0
+              },
+              {
+                "x": 64,
+                "y": 24,
+                "t": 72
+              },
+              {
+                "x": 76,
+                "y": 40,
+                "t": 144
+              },
+              {
+                "x": 76,
+                "y": 60,
+                "t": 216
+              },
+              {
+                "x": 64,
+                "y": 76,
+                "t": 288
+              },
+              {
+                "x": 48,
+                "y": 82,
+                "t": 360
+              },
+              {
+                "x": 32,
+                "y": 76,
+                "t": 432
+              },
+              {
+                "x": 20,
+                "y": 60,
+                "t": 504
+              },
+              {
+                "x": 20,
+                "y": 40,
+                "t": 576
+              },
+              {
+                "x": 32,
+                "y": 24,
+                "t": 648
+              },
+              {
+                "x": 48,
+                "y": 18,
+                "t": 720
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 34,
+                "t": 840
+              },
+              {
+                "x": 48,
+                "y": 54,
+                "t": 898
+              },
+              {
+                "x": 62,
+                "y": 62,
+                "t": 956
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Train",
-        "body": "Watched the blue hour in the window."
+        "body": "Bread still warm"
       }
     },
     {
@@ -110,14 +3819,159 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/evening-lamp.jpg",
-        "alt": "A warm lamp glowing beside an open book at night.",
+        "src": "/calendar/photos/real-day-2026-04-07.jpg",
+        "alt": "Phone-style daily photo for 2026-04-07.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 54,
+                "t": 0
+              },
+              {
+                "x": 49,
+                "y": 84,
+                "t": 72
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 42,
+                "t": 192
+              },
+              {
+                "x": 39,
+                "y": 30,
+                "t": 250
+              },
+              {
+                "x": 27,
+                "y": 38,
+                "t": 308
+              },
+              {
+                "x": 37,
+                "y": 52,
+                "t": 366
+              },
+              {
+                "x": 49,
+                "y": 42,
+                "t": 424
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 42,
+                "t": 544
+              },
+              {
+                "x": 59,
+                "y": 30,
+                "t": 616
+              },
+              {
+                "x": 71,
+                "y": 38,
+                "t": 688
+              },
+              {
+                "x": 61,
+                "y": 52,
+                "t": 760
+              },
+              {
+                "x": 49,
+                "y": 42,
+                "t": 832
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 42,
+                "t": 952
+              },
+              {
+                "x": 39,
+                "y": 54,
+                "t": 1010
+              },
+              {
+                "x": 49,
+                "y": 66,
+                "t": 1068
+              },
+              {
+                "x": 59,
+                "y": 54,
+                "t": 1126
+              },
+              {
+                "x": 49,
+                "y": 42,
+                "t": 1184
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 43,
+                "y": 72,
+                "t": 1304
+              },
+              {
+                "x": 29,
+                "y": 62,
+                "t": 1376
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 55,
+                "y": 70,
+                "t": 1496
+              },
+              {
+                "x": 71,
+                "y": 62,
+                "t": 1554
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Lamp",
-        "body": "Read until the room turned amber."
+        "body": "Window cracked open"
       }
     },
     {
@@ -125,14 +3979,75 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/river-walk.jpg",
-        "alt": "An early evening river walk under a pale blue sky.",
+        "src": "/calendar/photos/real-day-2026-04-08.jpg",
+        "alt": "Phone-style daily photo for 2026-04-08.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 18,
+                "t": 0
+              },
+              {
+                "x": 62,
+                "y": 28,
+                "t": 72
+              },
+              {
+                "x": 60,
+                "y": 48,
+                "t": 144
+              },
+              {
+                "x": 50,
+                "y": 56,
+                "t": 216
+              },
+              {
+                "x": 40,
+                "y": 48,
+                "t": 288
+              },
+              {
+                "x": 38,
+                "y": 28,
+                "t": 360
+              },
+              {
+                "x": 50,
+                "y": 18,
+                "t": 432
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 56,
+                "t": 552
+              },
+              {
+                "x": 50,
+                "y": 86,
+                "t": 610
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "River",
-        "body": "Cold air, silver water."
+        "body": "Moon over laundry"
       }
     },
     {
@@ -140,14 +4055,96 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/corner-bookstore.svg",
-        "alt": "A warm bookstore corner with stacked books and a green bench.",
+        "src": "/calendar/photos/real-day-2026-04-09.jpg",
+        "alt": "Phone-style daily photo for 2026-04-09.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 39,
+                "y": 40,
+                "t": 0
+              },
+              {
+                "x": 63,
+                "y": 40,
+                "t": 72
+              },
+              {
+                "x": 63,
+                "y": 82,
+                "t": 144
+              },
+              {
+                "x": 39,
+                "y": 82,
+                "t": 216
+              },
+              {
+                "x": 39,
+                "y": 40,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 36,
+                "t": 408
+              },
+              {
+                "x": 45,
+                "y": 26,
+                "t": 466
+              },
+              {
+                "x": 53,
+                "y": 14,
+                "t": 524
+              },
+              {
+                "x": 57,
+                "y": 28,
+                "t": 582
+              },
+              {
+                "x": 51,
+                "y": 36,
+                "t": 640
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 43,
+                "y": 52,
+                "t": 760
+              },
+              {
+                "x": 59,
+                "y": 52,
+                "t": 832
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "Books",
-        "body": "A warm corner stacked with paperbacks."
+        "body": "Two deep breaths"
       }
     },
     {
@@ -155,115 +4152,71 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/laundry-skyline.svg",
-        "alt": "Laundry lines stretching across a pastel city skyline.",
+        "src": "/calendar/photos/real-day-2026-04-10.jpg",
+        "alt": "Phone-style daily photo for 2026-04-10.",
         "source": "seed"
       },
-      "text": {
-        "type": "text",
-        "title": "Laundry",
-        "body": "Wind pulled the shirts into the sky."
-      }
-    },
-    {
-      "date": "2026-04-11",
-      "currentPreviewType": "doodle",
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#5B4636",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
                 "x": 22,
-                "y": 72
+                "y": 56,
+                "t": 0
               },
               {
-                "x": 20,
-                "y": 44
-              },
-              {
-                "x": 28,
-                "y": 24
+                "x": 26,
+                "y": 44,
+                "t": 72
               },
               {
                 "x": 38,
-                "y": 18
+                "y": 42,
+                "t": 144
               },
               {
                 "x": 44,
-                "y": 30
+                "y": 30,
+                "t": 216
               },
               {
-                "x": 56,
-                "y": 30
+                "x": 60,
+                "y": 32,
+                "t": 288
               },
               {
-                "x": 62,
-                "y": 18
-              },
-              {
-                "x": 72,
-                "y": 24
-              },
-              {
-                "x": 80,
-                "y": 44
+                "x": 66,
+                "y": 44,
+                "t": 360
               },
               {
                 "x": 78,
-                "y": 72
+                "y": 46,
+                "t": 432
+              },
+              {
+                "x": 84,
+                "y": 58,
+                "t": 504
+              },
+              {
+                "x": 74,
+                "y": 68,
+                "t": 576
+              },
+              {
+                "x": 34,
+                "y": 68,
+                "t": 648
               },
               {
                 "x": 22,
-                "y": 72
-              }
-            ]
-          },
-          {
-            "color": "#5B4636",
-            "width": 3,
-            "points": [
-              {
-                "x": 38,
-                "y": 50
-              },
-              {
-                "x": 40,
-                "y": 50
-              }
-            ]
-          },
-          {
-            "color": "#5B4636",
-            "width": 3,
-            "points": [
-              {
-                "x": 60,
-                "y": 50
-              },
-              {
-                "x": 62,
-                "y": 50
-              }
-            ]
-          },
-          {
-            "color": "#F59E0B",
-            "width": 3,
-            "points": [
-              {
-                "x": 46,
-                "y": 60
-              },
-              {
-                "x": 50,
-                "y": 64
-              },
-              {
-                "x": 54,
-                "y": 60
+                "y": 56,
+                "t": 720
               }
             ]
           }
@@ -271,7 +4224,156 @@
       },
       "text": {
         "type": "text",
-        "body": "A round little bear face came out better than expected."
+        "body": "Lamp on early"
+      }
+    },
+    {
+      "date": "2026-04-11",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-11.jpg",
+        "alt": "Phone-style daily photo for 2026-04-11.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 26,
+                "y": 66,
+                "t": 0
+              },
+              {
+                "x": 26,
+                "y": 54,
+                "t": 72
+              },
+              {
+                "x": 38,
+                "y": 44,
+                "t": 144
+              },
+              {
+                "x": 54,
+                "y": 44,
+                "t": 216
+              },
+              {
+                "x": 66,
+                "y": 58,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 26,
+                "y": 66,
+                "t": 408
+              },
+              {
+                "x": 42,
+                "y": 66,
+                "t": 466
+              },
+              {
+                "x": 54,
+                "y": 44,
+                "t": 524
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 42,
+                "y": 66,
+                "t": 644
+              },
+              {
+                "x": 66,
+                "y": 66,
+                "t": 716
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 18,
+                "y": 66,
+                "t": 836
+              },
+              {
+                "x": 26,
+                "y": 78,
+                "t": 894
+              },
+              {
+                "x": 38,
+                "y": 66,
+                "t": 952
+              },
+              {
+                "x": 26,
+                "y": 54,
+                "t": 1010
+              },
+              {
+                "x": 18,
+                "y": 66,
+                "t": 1068
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 58,
+                "y": 66,
+                "t": 1188
+              },
+              {
+                "x": 66,
+                "y": 78,
+                "t": 1260
+              },
+              {
+                "x": 78,
+                "y": 66,
+                "t": 1332
+              },
+              {
+                "x": 66,
+                "y": 54,
+                "t": 1404
+              },
+              {
+                "x": 58,
+                "y": 66,
+                "t": 1476
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Pocket full of coins"
       }
     },
     {
@@ -279,193 +4381,285 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/studio-plant.jpg",
-        "alt": "A quiet corner with a plant and stacked books.",
+        "src": "/calendar/photos/real-day-2026-04-12.jpg",
+        "alt": "Phone-style daily photo for 2026-04-12.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 21,
+                "y": 72,
+                "t": 0
+              },
+              {
+                "x": 29,
+                "y": 48,
+                "t": 72
+              },
+              {
+                "x": 49,
+                "y": 28,
+                "t": 144
+              },
+              {
+                "x": 69,
+                "y": 48,
+                "t": 216
+              },
+              {
+                "x": 77,
+                "y": 72,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 33,
+                "y": 72,
+                "t": 408
+              },
+              {
+                "x": 33,
+                "y": 84,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 65,
+                "y": 72,
+                "t": 586
+              },
+              {
+                "x": 65,
+                "y": 84,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 41,
+                "y": 56,
+                "t": 778
+              },
+              {
+                "x": 57,
+                "y": 56,
+                "t": 836
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "body": "Moved the shelf around and the room felt new again."
+        "body": "Notebook margin star"
       }
     },
     {
       "date": "2026-04-13",
-      "currentPreviewType": "text",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-13.jpg",
+        "alt": "Phone-style daily photo for 2026-04-13.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 20,
+                "y": 70,
+                "t": 0
+              },
+              {
+                "x": 34,
+                "y": 52,
+                "t": 72
+              },
+              {
+                "x": 48,
+                "y": 68,
+                "t": 144
+              },
+              {
+                "x": 62,
+                "y": 44,
+                "t": 216
+              },
+              {
+                "x": 80,
+                "y": 64,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 22,
+                "y": 78,
+                "t": 408
+              },
+              {
+                "x": 80,
+                "y": 78,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 32,
+                "y": 42,
+                "t": 586
+              },
+              {
+                "x": 38,
+                "y": 34,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 58,
+                "y": 36,
+                "t": 778
+              },
+              {
+                "x": 64,
+                "y": 28,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
       "text": {
         "type": "text",
-        "body": "A very plain Monday, which was exactly what I needed."
+        "body": "Slow subway home"
       }
     },
     {
       "date": "2026-04-14",
-      "currentPreviewType": "doodle",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-14.jpg",
+        "alt": "Phone-style daily photo for 2026-04-14.",
+        "source": "seed"
+      },
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#2F6B4F",
-            "width": 3.2,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 50,
-                "y": 84,
+                "x": 27,
+                "y": 34,
                 "t": 0
               },
               {
-                "x": 50,
-                "y": 70,
-                "t": 90
+                "x": 75,
+                "y": 34,
+                "t": 72
               },
               {
-                "x": 50,
-                "y": 56,
-                "t": 180
-              },
-              {
-                "x": 50,
-                "y": 42,
-                "t": 270
-              }
-            ]
-          },
-          {
-            "color": "#2F6B4F",
-            "width": 3.2,
-            "points": [
-              {
-                "x": 50,
-                "y": 64,
-                "t": 420
-              },
-              {
-                "x": 39,
-                "y": 56,
-                "t": 510
-              },
-              {
-                "x": 43,
-                "y": 69,
-                "t": 600
-              }
-            ]
-          },
-          {
-            "color": "#2F6B4F",
-            "width": 3.2,
-            "points": [
-              {
-                "x": 50,
-                "y": 57,
-                "t": 690
-              },
-              {
-                "x": 62,
-                "y": 48,
-                "t": 780
-              },
-              {
-                "x": 58,
-                "y": 63,
-                "t": 870
-              }
-            ]
-          },
-          {
-            "color": "#F28C6F",
-            "width": 3.4,
-            "points": [
-              {
-                "x": 50,
-                "y": 40,
-                "t": 960
-              },
-              {
-                "x": 44,
-                "y": 29,
-                "t": 1050
-              },
-              {
-                "x": 50,
-                "y": 22,
-                "t": 1140
-              },
-              {
-                "x": 56,
-                "y": 29,
-                "t": 1230
-              },
-              {
-                "x": 50,
-                "y": 40,
-                "t": 1320
-              }
-            ]
-          },
-          {
-            "color": "#F3B766",
-            "width": 3.2,
-            "points": [
-              {
-                "x": 44,
-                "y": 37,
-                "t": 1410
+                "x": 67,
+                "y": 74,
+                "t": 144
               },
               {
                 "x": 35,
-                "y": 32,
-                "t": 1500
+                "y": 74,
+                "t": 216
               },
               {
-                "x": 32,
-                "y": 41,
-                "t": 1590
-              },
-              {
-                "x": 41,
-                "y": 46,
-                "t": 1680
+                "x": 27,
+                "y": 34,
+                "t": 288
               }
             ]
           },
           {
-            "color": "#F3B766",
-            "width": 3.2,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 56,
-                "y": 37,
-                "t": 1770
+                "x": 39,
+                "y": 44,
+                "t": 408
               },
               {
-                "x": 65,
-                "y": 32,
-                "t": 1860
-              },
-              {
-                "x": 68,
-                "y": 41,
-                "t": 1950
-              },
-              {
-                "x": 59,
-                "y": 46,
-                "t": 2040
+                "x": 63,
+                "y": 44,
+                "t": 466
               }
             ]
           },
           {
-            "color": "#7A3E2E",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 48,
-                "y": 34,
-                "t": 2130
+                "x": 45,
+                "y": 56,
+                "t": 586
               },
               {
-                "x": 52,
+                "x": 57,
+                "y": 56,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
                 "y": 34,
-                "t": 2220
+                "t": 778
+              },
+              {
+                "x": 51,
+                "y": 24,
+                "t": 836
               }
             ]
           }
@@ -473,154 +4667,96 @@
       },
       "text": {
         "type": "text",
-        "title": "Bloom",
-        "body": "A flower sketch that draws itself in."
+        "body": "First peach tea"
       }
     },
     {
       "date": "2026-04-15",
-      "currentPreviewType": "doodle",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-15.jpg",
+        "alt": "Phone-style daily photo for 2026-04-15.",
+        "source": "seed"
+      },
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#1F2937",
-            "width": 3.1,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 20,
-                "y": 72,
+                "x": 18,
+                "y": 55,
                 "t": 0
               },
               {
-                "x": 24,
-                "y": 40,
-                "t": 90
-              },
-              {
-                "x": 34,
-                "y": 22,
-                "t": 180
-              },
-              {
-                "x": 42,
+                "x": 27,
                 "y": 38,
-                "t": 270
+                "t": 72
               },
               {
-                "x": 50,
-                "y": 18,
-                "t": 360
-              },
-              {
-                "x": 58,
-                "y": 38,
-                "t": 450
-              },
-              {
-                "x": 66,
-                "y": 22,
-                "t": 540
-              },
-              {
-                "x": 76,
-                "y": 40,
-                "t": 630
-              },
-              {
-                "x": 80,
-                "y": 72,
-                "t": 720
-              },
-              {
-                "x": 20,
-                "y": 72,
-                "t": 810
-              }
-            ]
-          },
-          {
-            "color": "#1F2937",
-            "width": 3.1,
-            "points": [
-              {
-                "x": 38,
-                "y": 50,
-                "t": 960
-              },
-              {
-                "x": 40,
-                "y": 50,
-                "t": 1050
-              }
-            ]
-          },
-          {
-            "color": "#1F2937",
-            "width": 3.1,
-            "points": [
-              {
-                "x": 60,
-                "y": 50,
-                "t": 1120
-              },
-              {
-                "x": 62,
-                "y": 50,
-                "t": 1210
-              }
-            ]
-          },
-          {
-            "color": "#F97316",
-            "width": 3.1,
-            "points": [
-              {
-                "x": 44,
-                "y": 63,
-                "t": 1280
-              },
-              {
-                "x": 50,
-                "y": 67,
-                "t": 1370
+                "x": 41,
+                "y": 28,
+                "t": 144
               },
               {
                 "x": 56,
-                "y": 63,
-                "t": 1460
+                "y": 27,
+                "t": 216
+              },
+              {
+                "x": 72,
+                "y": 38,
+                "t": 288
+              },
+              {
+                "x": 86,
+                "y": 55,
+                "t": 360
               }
             ]
           },
           {
-            "color": "#1F2937",
-            "width": 2.8,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 30,
-                "y": 58,
-                "t": 1550
+                "x": 52,
+                "y": 55,
+                "t": 480
               },
               {
-                "x": 22,
-                "y": 54,
-                "t": 1640
+                "x": 52,
+                "y": 78,
+                "t": 538
+              },
+              {
+                "x": 47,
+                "y": 82,
+                "t": 596
+              },
+              {
+                "x": 42,
+                "y": 76,
+                "t": 654
               }
             ]
           },
           {
-            "color": "#1F2937",
-            "width": 2.8,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 70,
-                "y": 58,
-                "t": 1710
+                "x": 24,
+                "y": 55,
+                "t": 774
               },
               {
-                "x": 78,
-                "y": 54,
-                "t": 1800
+                "x": 80,
+                "y": 55,
+                "t": 846
               }
             ]
           }
@@ -628,292 +4764,108 @@
       },
       "text": {
         "type": "text",
-        "title": "Cat",
-        "body": "Whiskers and a tiny orange grin."
+        "body": "Sidewalk after rain"
       }
     },
     {
       "date": "2026-04-16",
-      "currentPreviewType": "doodle",
-      "doodle": {
-        "type": "doodle",
-        "strokes": [
-          {
-            "color": "#4B5563",
-            "width": 3.1,
-            "points": [
-              {
-                "x": 26,
-                "y": 76,
-                "t": 0
-              },
-              {
-                "x": 22,
-                "y": 50,
-                "t": 90
-              },
-              {
-                "x": 26,
-                "y": 16,
-                "t": 180
-              },
-              {
-                "x": 34,
-                "y": 12,
-                "t": 270
-              },
-              {
-                "x": 38,
-                "y": 44,
-                "t": 360
-              },
-              {
-                "x": 50,
-                "y": 30,
-                "t": 450
-              },
-              {
-                "x": 62,
-                "y": 44,
-                "t": 540
-              },
-              {
-                "x": 66,
-                "y": 12,
-                "t": 630
-              },
-              {
-                "x": 74,
-                "y": 16,
-                "t": 720
-              },
-              {
-                "x": 78,
-                "y": 50,
-                "t": 810
-              },
-              {
-                "x": 74,
-                "y": 76,
-                "t": 900
-              },
-              {
-                "x": 26,
-                "y": 76,
-                "t": 990
-              }
-            ]
-          },
-          {
-            "color": "#4B5563",
-            "width": 3.1,
-            "points": [
-              {
-                "x": 40,
-                "y": 56,
-                "t": 1100
-              },
-              {
-                "x": 42,
-                "y": 56,
-                "t": 1190
-              }
-            ]
-          },
-          {
-            "color": "#4B5563",
-            "width": 3.1,
-            "points": [
-              {
-                "x": 58,
-                "y": 56,
-                "t": 1260
-              },
-              {
-                "x": 60,
-                "y": 56,
-                "t": 1350
-              }
-            ]
-          },
-          {
-            "color": "#EC4899",
-            "width": 3.1,
-            "points": [
-              {
-                "x": 48,
-                "y": 68,
-                "t": 1420
-              },
-              {
-                "x": 50,
-                "y": 72,
-                "t": 1510
-              },
-              {
-                "x": 52,
-                "y": 68,
-                "t": 1600
-              }
-            ]
-          }
-        ]
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-16.jpg",
+        "alt": "Phone-style daily photo for 2026-04-16.",
+        "source": "seed"
       },
-      "text": {
-        "type": "text",
-        "title": "Bunny",
-        "body": "Long ears and a soft pink nose."
-      }
-    },
-    {
-      "date": "2026-04-17",
-      "currentPreviewType": "doodle",
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#5B4636",
-            "width": 3.1,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 22,
-                "y": 72,
+                "x": 24,
+                "y": 22,
                 "t": 0
               },
               {
                 "x": 20,
-                "y": 44,
-                "t": 90
-              },
-              {
-                "x": 28,
-                "y": 24,
-                "t": 180
-              },
-              {
-                "x": 38,
-                "y": 18,
-                "t": 270
-              },
-              {
-                "x": 44,
-                "y": 30,
-                "t": 360
-              },
-              {
-                "x": 56,
-                "y": 30,
-                "t": 450
-              },
-              {
-                "x": 62,
-                "y": 18,
-                "t": 540
-              },
-              {
-                "x": 72,
-                "y": 24,
-                "t": 630
-              },
-              {
-                "x": 80,
-                "y": 44,
-                "t": 720
-              },
-              {
-                "x": 78,
-                "y": 72,
-                "t": 810
-              },
-              {
-                "x": 22,
-                "y": 72,
-                "t": 900
+                "y": 36,
+                "t": 72
               }
             ]
           },
           {
-            "color": "#5B4636",
-            "width": 3.1,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 38,
-                "y": 50,
-                "t": 980
+                "x": 44,
+                "y": 18,
+                "t": 192
               },
               {
                 "x": 40,
-                "y": 50,
-                "t": 1070
+                "y": 34,
+                "t": 250
               }
             ]
           },
           {
-            "color": "#5B4636",
-            "width": 3.1,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
+              {
+                "x": 64,
+                "y": 24,
+                "t": 370
+              },
               {
                 "x": 60,
-                "y": 50,
-                "t": 1140
-              },
-              {
-                "x": 62,
-                "y": 50,
-                "t": 1230
+                "y": 40,
+                "t": 442
               }
             ]
           },
           {
-            "color": "#F59E0B",
-            "width": 3.1,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 46,
-                "y": 60,
-                "t": 1300
+                "x": 26,
+                "y": 58,
+                "t": 562
               },
               {
-                "x": 50,
-                "y": 64,
-                "t": 1390
+                "x": 38,
+                "y": 68,
+                "t": 620
               },
               {
-                "x": 54,
-                "y": 60,
-                "t": 1480
+                "x": 56,
+                "y": 68,
+                "t": 678
+              },
+              {
+                "x": 72,
+                "y": 58,
+                "t": 736
               }
             ]
           },
           {
-            "color": "#F7C1B4",
-            "width": 2.8,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
                 "x": 32,
-                "y": 60,
-                "t": 1570
+                "y": 78,
+                "t": 856
               },
-              {
-                "x": 34,
-                "y": 62,
-                "t": 1660
-              }
-            ]
-          },
-          {
-            "color": "#F7C1B4",
-            "width": 2.8,
-            "points": [
               {
                 "x": 66,
-                "y": 60,
-                "t": 1730
-              },
-              {
-                "x": 68,
-                "y": 62,
-                "t": 1820
+                "y": 78,
+                "t": 928
               }
             ]
           }
@@ -921,8 +4873,135 @@
       },
       "text": {
         "type": "text",
-        "title": "Bear",
-        "body": "Round cheeks to close the week."
+        "body": "Message sent kindly"
+      }
+    },
+    {
+      "date": "2026-04-17",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-17.jpg",
+        "alt": "Phone-style daily photo for 2026-04-17.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 20,
+                "t": 0
+              },
+              {
+                "x": 67,
+                "y": 28,
+                "t": 72
+              },
+              {
+                "x": 77,
+                "y": 46,
+                "t": 144
+              },
+              {
+                "x": 71,
+                "y": 68,
+                "t": 216
+              },
+              {
+                "x": 49,
+                "y": 78,
+                "t": 288
+              },
+              {
+                "x": 27,
+                "y": 68,
+                "t": 360
+              },
+              {
+                "x": 21,
+                "y": 46,
+                "t": 432
+              },
+              {
+                "x": 31,
+                "y": 28,
+                "t": 504
+              },
+              {
+                "x": 49,
+                "y": 20,
+                "t": 576
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 37,
+                "y": 44,
+                "t": 696
+              },
+              {
+                "x": 39,
+                "y": 44,
+                "t": 754
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 61,
+                "y": 44,
+                "t": 874
+              },
+              {
+                "x": 63,
+                "y": 44,
+                "t": 946
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 35,
+                "y": 58,
+                "t": 1066
+              },
+              {
+                "x": 45,
+                "y": 66,
+                "t": 1124
+              },
+              {
+                "x": 57,
+                "y": 66,
+                "t": 1182
+              },
+              {
+                "x": 67,
+                "y": 58,
+                "t": 1240
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Dinner bowl empty"
       }
     },
     {
@@ -930,126 +5009,83 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/river-walk.jpg",
-        "alt": "An early evening river walk with a pale blue sky.",
+        "src": "/calendar/photos/real-day-2026-04-18.jpg",
+        "alt": "Phone-style daily photo for 2026-04-18.",
         "source": "seed"
       },
-      "text": {
-        "type": "text",
-        "body": "The wind was cold, but the river looked silver."
-      }
-    },
-    {
-      "date": "2026-04-19",
-      "currentPreviewType": "text",
-      "text": {
-        "type": "text",
-        "body": "Used the long way home just to stay outside a little longer."
-      }
-    },
-    {
-      "date": "2026-04-20",
-      "currentPreviewType": "doodle",
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#4B5563",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 26,
-                "y": 76
-              },
-              {
-                "x": 22,
-                "y": 50
-              },
-              {
-                "x": 26,
-                "y": 16
-              },
-              {
-                "x": 34,
-                "y": 12
-              },
-              {
-                "x": 38,
-                "y": 44
-              },
-              {
-                "x": 50,
-                "y": 30
-              },
-              {
-                "x": 62,
-                "y": 44
+                "x": 20,
+                "y": 72,
+                "t": 0
               },
               {
                 "x": 66,
-                "y": 12
+                "y": 26,
+                "t": 72
               },
               {
-                "x": 74,
-                "y": 16
+                "x": 80,
+                "y": 40,
+                "t": 144
               },
               {
-                "x": 78,
-                "y": 50
+                "x": 34,
+                "y": 86,
+                "t": 216
               },
               {
-                "x": 74,
-                "y": 76
-              },
-              {
-                "x": 26,
-                "y": 76
+                "x": 20,
+                "y": 72,
+                "t": 288
               }
             ]
           },
           {
-            "color": "#4B5563",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 40,
-                "y": 56
+                "x": 66,
+                "y": 26,
+                "t": 408
               },
               {
-                "x": 42,
-                "y": 56
+                "x": 72,
+                "y": 20,
+                "t": 466
+              },
+              {
+                "x": 86,
+                "y": 34,
+                "t": 524
+              },
+              {
+                "x": 80,
+                "y": 40,
+                "t": 582
               }
             ]
           },
           {
-            "color": "#4B5563",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 58,
-                "y": 56
+                "x": 30,
+                "y": 62,
+                "t": 702
               },
               {
-                "x": 60,
-                "y": 56
-              }
-            ]
-          },
-          {
-            "color": "#EC4899",
-            "width": 3,
-            "points": [
-              {
-                "x": 48,
-                "y": 68
-              },
-              {
-                "x": 50,
-                "y": 72
-              },
-              {
-                "x": 52,
-                "y": 68
+                "x": 44,
+                "y": 76,
+                "t": 774
               }
             ]
           }
@@ -1057,7 +5093,115 @@
       },
       "text": {
         "type": "text",
-        "body": "Another bunny face, this time with softer ears."
+        "body": "No meeting afternoon"
+      }
+    },
+    {
+      "date": "2026-04-19",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-19.jpg",
+        "alt": "Phone-style daily photo for 2026-04-19.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 27,
+                "y": 36,
+                "t": 0
+              },
+              {
+                "x": 65,
+                "y": 36,
+                "t": 72
+              },
+              {
+                "x": 63,
+                "y": 76,
+                "t": 144
+              },
+              {
+                "x": 31,
+                "y": 76,
+                "t": 216
+              },
+              {
+                "x": 27,
+                "y": 36,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 65,
+                "y": 46,
+                "t": 408
+              },
+              {
+                "x": 81,
+                "y": 48,
+                "t": 466
+              },
+              {
+                "x": 81,
+                "y": 64,
+                "t": 524
+              },
+              {
+                "x": 64,
+                "y": 64,
+                "t": 582
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 35,
+                "y": 28,
+                "t": 702
+              },
+              {
+                "x": 41,
+                "y": 20,
+                "t": 774
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 28,
+                "t": 894
+              },
+              {
+                "x": 57,
+                "y": 20,
+                "t": 952
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Clouds moved fast"
       }
     },
     {
@@ -1065,106 +5209,104 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/quiet-desk.jpg",
-        "alt": "A quiet desk with tea and a notebook.",
+        "src": "/calendar/photos/real-day-2026-04-21.jpg",
+        "alt": "Phone-style daily photo for 2026-04-21.",
         "source": "seed"
       },
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#5B4636",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 22,
-                "y": 72
+                "x": 26,
+                "y": 52,
+                "t": 0
               },
               {
-                "x": 20,
-                "y": 44
-              },
-              {
-                "x": 28,
-                "y": 24
-              },
-              {
-                "x": 38,
-                "y": 18
-              },
-              {
-                "x": 44,
-                "y": 30
-              },
-              {
-                "x": 56,
-                "y": 30
-              },
-              {
-                "x": 62,
-                "y": 18
-              },
-              {
-                "x": 72,
-                "y": 24
+                "x": 60,
+                "y": 52,
+                "t": 72
               },
               {
                 "x": 80,
-                "y": 44
-              },
+                "y": 72,
+                "t": 144
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
               {
-                "x": 78,
-                "y": 72
+                "x": 26,
+                "y": 52,
+                "t": 264
               },
               {
                 "x": 22,
-                "y": 72
-              }
-            ]
-          },
-          {
-            "color": "#5B4636",
-            "width": 3,
-            "points": [
-              {
-                "x": 38,
-                "y": 50
+                "y": 42,
+                "t": 322
               },
               {
-                "x": 40,
-                "y": 50
+                "x": 30,
+                "y": 34,
+                "t": 380
+              },
+              {
+                "x": 42,
+                "y": 38,
+                "t": 438
+              },
+              {
+                "x": 44,
+                "y": 50,
+                "t": 496
+              },
+              {
+                "x": 36,
+                "y": 58,
+                "t": 554
+              },
+              {
+                "x": 26,
+                "y": 52,
+                "t": 612
               }
             ]
           },
           {
-            "color": "#5B4636",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
+              {
+                "x": 66,
+                "y": 58,
+                "t": 732
+              },
               {
                 "x": 60,
-                "y": 50
-              },
-              {
-                "x": 62,
-                "y": 50
+                "y": 64,
+                "t": 804
               }
             ]
           },
           {
-            "color": "#F59E0B",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 46,
-                "y": 60
+                "x": 72,
+                "y": 64,
+                "t": 924
               },
               {
-                "x": 50,
-                "y": 64
-              },
-              {
-                "x": 54,
-                "y": 60
+                "x": 66,
+                "y": 70,
+                "t": 982
               }
             ]
           }
@@ -1172,7 +5314,7 @@
       },
       "text": {
         "type": "text",
-        "body": "Built the first calm draft of the calendar."
+        "body": "Fresh sheets night"
       }
     },
     {
@@ -1180,122 +5322,88 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/window-light.jpg",
-        "alt": "Soft morning light on a window ledge.",
+        "src": "/calendar/photos/real-day-2026-04-22.jpg",
+        "alt": "Phone-style daily photo for 2026-04-22.",
         "source": "seed"
       },
-      "text": {
-        "type": "text",
-        "body": "The light hit the wall so gently that I stopped working for a minute."
-      }
-    },
-    {
-      "date": "2026-04-23",
-      "currentPreviewType": "text",
-      "text": {
-        "type": "text",
-        "body": "A good meeting, a short walk, and dinner before eight."
-      }
-    },
-    {
-      "date": "2026-04-24",
-      "currentPreviewType": "doodle",
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#5B4636",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 22,
-                "y": 72
+                "x": 20,
+                "y": 28,
+                "t": 0
+              },
+              {
+                "x": 46,
+                "y": 38,
+                "t": 72
+              },
+              {
+                "x": 46,
+                "y": 80,
+                "t": 144
               },
               {
                 "x": 20,
-                "y": 44
+                "y": 70,
+                "t": 216
               },
               {
-                "x": 28,
-                "y": 24
-              },
+                "x": 20,
+                "y": 28,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
               {
-                "x": 38,
-                "y": 18
-              },
-              {
-                "x": 44,
-                "y": 30
-              },
-              {
-                "x": 56,
-                "y": 30
-              },
-              {
-                "x": 62,
-                "y": 18
-              },
-              {
-                "x": 72,
-                "y": 24
-              },
-              {
-                "x": 80,
-                "y": 44
+                "x": 50,
+                "y": 38,
+                "t": 408
               },
               {
                 "x": 78,
-                "y": 72
+                "y": 28,
+                "t": 466
               },
               {
-                "x": 22,
-                "y": 72
-              }
-            ]
-          },
-          {
-            "color": "#5B4636",
-            "width": 3,
-            "points": [
-              {
-                "x": 38,
-                "y": 50
-              },
-              {
-                "x": 40,
-                "y": 50
-              }
-            ]
-          },
-          {
-            "color": "#5B4636",
-            "width": 3,
-            "points": [
-              {
-                "x": 60,
-                "y": 50
-              },
-              {
-                "x": 62,
-                "y": 50
-              }
-            ]
-          },
-          {
-            "color": "#F59E0B",
-            "width": 3,
-            "points": [
-              {
-                "x": 46,
-                "y": 60
+                "x": 78,
+                "y": 70,
+                "t": 524
               },
               {
                 "x": 50,
-                "y": 64
+                "y": 80,
+                "t": 582
               },
               {
-                "x": 54,
-                "y": 60
+                "x": 50,
+                "y": 38,
+                "t": 640
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 38,
+                "t": 760
+              },
+              {
+                "x": 48,
+                "y": 80,
+                "t": 832
               }
             ]
           }
@@ -1303,7 +5411,227 @@
       },
       "text": {
         "type": "text",
-        "body": "The bear sketch somehow looked like it was smiling."
+        "body": "Battery at ten"
+      }
+    },
+    {
+      "date": "2026-04-23",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-23.jpg",
+        "alt": "Phone-style daily photo for 2026-04-23.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 17,
+                "y": 54,
+                "t": 0
+              },
+              {
+                "x": 17,
+                "y": 42,
+                "t": 72
+              },
+              {
+                "x": 29,
+                "y": 34,
+                "t": 144
+              },
+              {
+                "x": 42,
+                "y": 42,
+                "t": 216
+              },
+              {
+                "x": 42,
+                "y": 54,
+                "t": 288
+              },
+              {
+                "x": 30,
+                "y": 62,
+                "t": 360
+              },
+              {
+                "x": 17,
+                "y": 54,
+                "t": 432
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 56,
+                "y": 54,
+                "t": 552
+              },
+              {
+                "x": 56,
+                "y": 42,
+                "t": 610
+              },
+              {
+                "x": 69,
+                "y": 34,
+                "t": 668
+              },
+              {
+                "x": 81,
+                "y": 42,
+                "t": 726
+              },
+              {
+                "x": 81,
+                "y": 54,
+                "t": 784
+              },
+              {
+                "x": 68,
+                "y": 62,
+                "t": 842
+              },
+              {
+                "x": 56,
+                "y": 54,
+                "t": 900
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 42,
+                "y": 48,
+                "t": 1020
+              },
+              {
+                "x": 56,
+                "y": 48,
+                "t": 1092
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Found the old pen"
+      }
+    },
+    {
+      "date": "2026-04-24",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-24.jpg",
+        "alt": "Phone-style daily photo for 2026-04-24.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 20,
+                "y": 70,
+                "t": 0
+              },
+              {
+                "x": 32,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 78,
+                "y": 24,
+                "t": 144
+              },
+              {
+                "x": 72,
+                "y": 62,
+                "t": 216
+              },
+              {
+                "x": 20,
+                "y": 70,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 26,
+                "y": 66,
+                "t": 408
+              },
+              {
+                "x": 45,
+                "y": 50,
+                "t": 466
+              },
+              {
+                "x": 74,
+                "y": 26,
+                "t": 524
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 44,
+                "y": 50,
+                "t": 644
+              },
+              {
+                "x": 40,
+                "y": 36,
+                "t": 716
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 56,
+                "y": 42,
+                "t": 836
+              },
+              {
+                "x": 62,
+                "y": 30,
+                "t": 894
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "A calm red light"
       }
     },
     {
@@ -1311,21 +5639,211 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/breakfast-toast.jpg",
-        "alt": "Toast and coffee on a pale table.",
+        "src": "/calendar/photos/real-day-2026-04-25.jpg",
+        "alt": "Phone-style daily photo for 2026-04-25.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 35,
+                "y": 34,
+                "t": 0
+              },
+              {
+                "x": 67,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 63,
+                "y": 58,
+                "t": 144
+              },
+              {
+                "x": 39,
+                "y": 58,
+                "t": 216
+              },
+              {
+                "x": 35,
+                "y": 34,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 39,
+                "y": 58,
+                "t": 408
+              },
+              {
+                "x": 31,
+                "y": 82,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 63,
+                "y": 58,
+                "t": 586
+              },
+              {
+                "x": 71,
+                "y": 82,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 33,
+                "y": 48,
+                "t": 778
+              },
+              {
+                "x": 21,
+                "y": 72,
+                "t": 836
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 69,
+                "y": 48,
+                "t": 956
+              },
+              {
+                "x": 83,
+                "y": 72,
+                "t": 1028
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "body": "Weekend breakfast on the smallest plate I own."
+        "body": "Quiet hallway echo"
       }
     },
     {
       "date": "2026-04-26",
-      "currentPreviewType": "text",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-26.jpg",
+        "alt": "Phone-style daily photo for 2026-04-26.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 40,
+                "y": 24,
+                "t": 0
+              },
+              {
+                "x": 66,
+                "y": 24,
+                "t": 72
+              },
+              {
+                "x": 76,
+                "y": 48,
+                "t": 144
+              },
+              {
+                "x": 30,
+                "y": 48,
+                "t": 216
+              },
+              {
+                "x": 40,
+                "y": 24,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 48,
+                "t": 408
+              },
+              {
+                "x": 52,
+                "y": 76,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 36,
+                "y": 76,
+                "t": 586
+              },
+              {
+                "x": 68,
+                "y": 76,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 18,
+                "t": 778
+              },
+              {
+                "x": 52,
+                "y": 10,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
       "text": {
         "type": "text",
-        "body": "Reset the apartment for Monday and queued up one favorite album."
+        "body": "Clean mug waiting"
       }
     },
     {
@@ -1333,110 +5851,76 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/subway-window.jpg",
-        "alt": "Evening lights reflected in a subway window.",
+        "src": "/calendar/photos/real-day-2026-04-27.jpg",
+        "alt": "Phone-style daily photo for 2026-04-27.",
         "source": "seed"
       },
-      "text": {
-        "type": "text",
-        "body": "Commute home, headphones on, no notifications."
-      }
-    },
-    {
-      "date": "2026-04-28",
-      "currentPreviewType": "doodle",
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#1F2937",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 20,
-                "y": 72
+                "x": 64,
+                "y": 20,
+                "t": 0
+              },
+              {
+                "x": 52,
+                "y": 26,
+                "t": 72
+              },
+              {
+                "x": 46,
+                "y": 42,
+                "t": 144
+              },
+              {
+                "x": 50,
+                "y": 60,
+                "t": 216
+              },
+              {
+                "x": 64,
+                "y": 72,
+                "t": 288
+              },
+              {
+                "x": 48,
+                "y": 74,
+                "t": 360
+              },
+              {
+                "x": 32,
+                "y": 66,
+                "t": 432
               },
               {
                 "x": 24,
-                "y": 40
+                "y": 52,
+                "t": 504
               },
               {
-                "x": 34,
-                "y": 22
+                "x": 24,
+                "y": 36,
+                "t": 576
               },
               {
-                "x": 42,
-                "y": 38
+                "x": 32,
+                "y": 24,
+                "t": 648
               },
               {
-                "x": 50,
-                "y": 18
+                "x": 48,
+                "y": 18,
+                "t": 720
               },
               {
-                "x": 58,
-                "y": 38
-              },
-              {
-                "x": 66,
-                "y": 22
-              },
-              {
-                "x": 76,
-                "y": 40
-              },
-              {
-                "x": 80,
-                "y": 72
-              },
-              {
-                "x": 20,
-                "y": 72
-              }
-            ]
-          },
-          {
-            "color": "#1F2937",
-            "width": 3,
-            "points": [
-              {
-                "x": 38,
-                "y": 50
-              },
-              {
-                "x": 40,
-                "y": 50
-              }
-            ]
-          },
-          {
-            "color": "#1F2937",
-            "width": 3,
-            "points": [
-              {
-                "x": 60,
-                "y": 50
-              },
-              {
-                "x": 62,
-                "y": 50
-              }
-            ]
-          },
-          {
-            "color": "#F97316",
-            "width": 3,
-            "points": [
-              {
-                "x": 44,
-                "y": 63
-              },
-              {
-                "x": 50,
-                "y": 67
-              },
-              {
-                "x": 56,
-                "y": 63
+                "x": 64,
+                "y": 20,
+                "t": 792
               }
             ]
           }
@@ -1444,15 +5928,225 @@
       },
       "text": {
         "type": "text",
-        "body": "One more cat face, mostly because the cheeks were fun to draw."
+        "body": "Five-minute walk"
+      }
+    },
+    {
+      "date": "2026-04-28",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-28.jpg",
+        "alt": "Phone-style daily photo for 2026-04-28.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 30,
+                "t": 0
+              },
+              {
+                "x": 61,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 71,
+                "y": 48,
+                "t": 144
+              },
+              {
+                "x": 67,
+                "y": 68,
+                "t": 216
+              },
+              {
+                "x": 55,
+                "y": 80,
+                "t": 288
+              },
+              {
+                "x": 43,
+                "y": 80,
+                "t": 360
+              },
+              {
+                "x": 31,
+                "y": 68,
+                "t": 432
+              },
+              {
+                "x": 27,
+                "y": 48,
+                "t": 504
+              },
+              {
+                "x": 37,
+                "y": 34,
+                "t": 576
+              },
+              {
+                "x": 49,
+                "y": 30,
+                "t": 648
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 30,
+                "t": 768
+              },
+              {
+                "x": 49,
+                "y": 18,
+                "t": 826
+              },
+              {
+                "x": 59,
+                "y": 14,
+                "t": 884
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 22,
+                "t": 1004
+              },
+              {
+                "x": 63,
+                "y": 22,
+                "t": 1076
+              },
+              {
+                "x": 69,
+                "y": 28,
+                "t": 1148
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Plant leaf shining"
       }
     },
     {
       "date": "2026-04-29",
-      "currentPreviewType": "text",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-04-29.jpg",
+        "alt": "Phone-style daily photo for 2026-04-29.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 18,
+                "t": 0
+              },
+              {
+                "x": 66,
+                "y": 24,
+                "t": 72
+              },
+              {
+                "x": 78,
+                "y": 40,
+                "t": 144
+              },
+              {
+                "x": 78,
+                "y": 60,
+                "t": 216
+              },
+              {
+                "x": 66,
+                "y": 76,
+                "t": 288
+              },
+              {
+                "x": 50,
+                "y": 82,
+                "t": 360
+              },
+              {
+                "x": 34,
+                "y": 76,
+                "t": 432
+              },
+              {
+                "x": 22,
+                "y": 60,
+                "t": 504
+              },
+              {
+                "x": 22,
+                "y": 40,
+                "t": 576
+              },
+              {
+                "x": 34,
+                "y": 24,
+                "t": 648
+              },
+              {
+                "x": 50,
+                "y": 18,
+                "t": 720
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 50,
+                "y": 34,
+                "t": 840
+              },
+              {
+                "x": 50,
+                "y": 54,
+                "t": 898
+              },
+              {
+                "x": 64,
+                "y": 62,
+                "t": 956
+              }
+            ]
+          }
+        ]
+      },
       "text": {
         "type": "text",
-        "body": "Kept the calendar light on purpose and left some space blank."
+        "body": "Slept before midnight"
       }
     },
     {
@@ -1460,14 +6154,159 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/blossom-path.jpg",
-        "alt": "Soft pink blossoms over a walking path.",
+        "src": "/calendar/photos/real-day-2026-04-30.jpg",
+        "alt": "Phone-style daily photo for 2026-04-30.",
         "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 54,
+                "t": 0
+              },
+              {
+                "x": 51,
+                "y": 84,
+                "t": 72
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 42,
+                "t": 192
+              },
+              {
+                "x": 41,
+                "y": 30,
+                "t": 250
+              },
+              {
+                "x": 29,
+                "y": 38,
+                "t": 308
+              },
+              {
+                "x": 39,
+                "y": 52,
+                "t": 366
+              },
+              {
+                "x": 51,
+                "y": 42,
+                "t": 424
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 42,
+                "t": 544
+              },
+              {
+                "x": 61,
+                "y": 30,
+                "t": 616
+              },
+              {
+                "x": 73,
+                "y": 38,
+                "t": 688
+              },
+              {
+                "x": 63,
+                "y": 52,
+                "t": 760
+              },
+              {
+                "x": 51,
+                "y": 42,
+                "t": 832
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 51,
+                "y": 42,
+                "t": 952
+              },
+              {
+                "x": 41,
+                "y": 54,
+                "t": 1010
+              },
+              {
+                "x": 51,
+                "y": 66,
+                "t": 1068
+              },
+              {
+                "x": 61,
+                "y": 54,
+                "t": 1126
+              },
+              {
+                "x": 51,
+                "y": 42,
+                "t": 1184
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 45,
+                "y": 72,
+                "t": 1304
+              },
+              {
+                "x": 31,
+                "y": 62,
+                "t": 1376
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 57,
+                "y": 70,
+                "t": 1496
+              },
+              {
+                "x": 73,
+                "y": 62,
+                "t": 1554
+              }
+            ]
+          }
+        ]
       },
       "text": {
         "type": "text",
-        "title": "April close",
-        "body": "Finished the month outside while the petals kept falling."
+        "body": "Damp jacket drying"
       }
     },
     {
@@ -1475,127 +6314,792 @@
       "currentPreviewType": "photo",
       "photo": {
         "type": "photo",
-        "src": "/calendar/photos/river-walk.jpg",
-        "alt": "An early evening river walk with a pale blue sky.",
+        "src": "/calendar/photos/real-day-2026-05-01.jpg",
+        "alt": "Phone-style daily photo for 2026-05-01.",
         "source": "seed"
-      }
-    },
-    {
-      "date": "2026-05-18",
-      "currentPreviewType": "text",
-      "text": {
-        "type": "text",
-        "title": "Reminder to self",
-        "body": "Make room for the reminder surface next, but keep the calendar calm."
-      }
-    },
-    {
-      "date": "2026-06-07",
-      "currentPreviewType": "doodle",
+      },
       "doodle": {
         "type": "doodle",
         "strokes": [
           {
-            "color": "#4B5563",
-            "width": 3,
+            "color": "#ff3b30",
+            "width": 3.8,
             "points": [
               {
-                "x": 26,
-                "y": 76
+                "x": 52,
+                "y": 18,
+                "t": 0
               },
               {
-                "x": 22,
-                "y": 50
-              },
-              {
-                "x": 26,
-                "y": 16
-              },
-              {
-                "x": 34,
-                "y": 12
-              },
-              {
-                "x": 38,
-                "y": 44
-              },
-              {
-                "x": 50,
-                "y": 30
+                "x": 64,
+                "y": 28,
+                "t": 72
               },
               {
                 "x": 62,
-                "y": 44
-              },
-              {
-                "x": 66,
-                "y": 12
-              },
-              {
-                "x": 74,
-                "y": 16
-              },
-              {
-                "x": 78,
-                "y": 50
-              },
-              {
-                "x": 74,
-                "y": 76
-              },
-              {
-                "x": 26,
-                "y": 76
-              }
-            ]
-          },
-          {
-            "color": "#4B5563",
-            "width": 3,
-            "points": [
-              {
-                "x": 40,
-                "y": 56
-              },
-              {
-                "x": 42,
-                "y": 56
-              }
-            ]
-          },
-          {
-            "color": "#4B5563",
-            "width": 3,
-            "points": [
-              {
-                "x": 58,
-                "y": 56
-              },
-              {
-                "x": 60,
-                "y": 56
-              }
-            ]
-          },
-          {
-            "color": "#EC4899",
-            "width": 3,
-            "points": [
-              {
-                "x": 48,
-                "y": 68
-              },
-              {
-                "x": 50,
-                "y": 72
+                "y": 48,
+                "t": 144
               },
               {
                 "x": 52,
-                "y": 68
+                "y": 56,
+                "t": 216
+              },
+              {
+                "x": 42,
+                "y": 48,
+                "t": 288
+              },
+              {
+                "x": 40,
+                "y": 28,
+                "t": 360
+              },
+              {
+                "x": 52,
+                "y": 18,
+                "t": 432
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 52,
+                "y": 56,
+                "t": 552
+              },
+              {
+                "x": 52,
+                "y": 86,
+                "t": 610
               }
             ]
           }
         ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Small brave no"
+      }
+    },
+    {
+      "date": "2026-05-02",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-05-02.jpg",
+        "alt": "Phone-style daily photo for 2026-05-02.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 36,
+                "y": 40,
+                "t": 0
+              },
+              {
+                "x": 60,
+                "y": 40,
+                "t": 72
+              },
+              {
+                "x": 60,
+                "y": 82,
+                "t": 144
+              },
+              {
+                "x": 36,
+                "y": 82,
+                "t": 216
+              },
+              {
+                "x": 36,
+                "y": 40,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 36,
+                "t": 408
+              },
+              {
+                "x": 42,
+                "y": 26,
+                "t": 466
+              },
+              {
+                "x": 50,
+                "y": 14,
+                "t": 524
+              },
+              {
+                "x": 54,
+                "y": 28,
+                "t": 582
+              },
+              {
+                "x": 48,
+                "y": 36,
+                "t": 640
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 40,
+                "y": 52,
+                "t": 760
+              },
+              {
+                "x": 56,
+                "y": 52,
+                "t": 832
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Table cleared fully"
+      }
+    },
+    {
+      "date": "2026-05-03",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-05-03.jpg",
+        "alt": "Phone-style daily photo for 2026-05-03.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 19,
+                "y": 56,
+                "t": 0
+              },
+              {
+                "x": 23,
+                "y": 44,
+                "t": 72
+              },
+              {
+                "x": 35,
+                "y": 42,
+                "t": 144
+              },
+              {
+                "x": 41,
+                "y": 30,
+                "t": 216
+              },
+              {
+                "x": 57,
+                "y": 32,
+                "t": 288
+              },
+              {
+                "x": 63,
+                "y": 44,
+                "t": 360
+              },
+              {
+                "x": 75,
+                "y": 46,
+                "t": 432
+              },
+              {
+                "x": 81,
+                "y": 58,
+                "t": 504
+              },
+              {
+                "x": 71,
+                "y": 68,
+                "t": 576
+              },
+              {
+                "x": 31,
+                "y": 68,
+                "t": 648
+              },
+              {
+                "x": 19,
+                "y": 56,
+                "t": 720
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Leftover soup saved"
+      }
+    },
+    {
+      "date": "2026-05-04",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-05-04.jpg",
+        "alt": "Phone-style daily photo for 2026-05-04.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 28,
+                "y": 66,
+                "t": 0
+              },
+              {
+                "x": 28,
+                "y": 54,
+                "t": 72
+              },
+              {
+                "x": 40,
+                "y": 44,
+                "t": 144
+              },
+              {
+                "x": 56,
+                "y": 44,
+                "t": 216
+              },
+              {
+                "x": 68,
+                "y": 58,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 28,
+                "y": 66,
+                "t": 408
+              },
+              {
+                "x": 44,
+                "y": 66,
+                "t": 466
+              },
+              {
+                "x": 56,
+                "y": 44,
+                "t": 524
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 44,
+                "y": 66,
+                "t": 644
+              },
+              {
+                "x": 68,
+                "y": 66,
+                "t": 716
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 20,
+                "y": 66,
+                "t": 836
+              },
+              {
+                "x": 28,
+                "y": 78,
+                "t": 894
+              },
+              {
+                "x": 40,
+                "y": 66,
+                "t": 952
+              },
+              {
+                "x": 28,
+                "y": 54,
+                "t": 1010
+              },
+              {
+                "x": 20,
+                "y": 66,
+                "t": 1068
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 60,
+                "y": 66,
+                "t": 1188
+              },
+              {
+                "x": 68,
+                "y": 78,
+                "t": 1260
+              },
+              {
+                "x": 80,
+                "y": 66,
+                "t": 1332
+              },
+              {
+                "x": 68,
+                "y": 54,
+                "t": 1404
+              },
+              {
+                "x": 60,
+                "y": 66,
+                "t": 1476
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Sunset through glass"
+      }
+    },
+    {
+      "date": "2026-05-05",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-05-05.jpg",
+        "alt": "Phone-style daily photo for 2026-05-05.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 23,
+                "y": 72,
+                "t": 0
+              },
+              {
+                "x": 31,
+                "y": 48,
+                "t": 72
+              },
+              {
+                "x": 51,
+                "y": 28,
+                "t": 144
+              },
+              {
+                "x": 71,
+                "y": 48,
+                "t": 216
+              },
+              {
+                "x": 79,
+                "y": 72,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 35,
+                "y": 72,
+                "t": 408
+              },
+              {
+                "x": 35,
+                "y": 84,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 67,
+                "y": 72,
+                "t": 586
+              },
+              {
+                "x": 67,
+                "y": 84,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 43,
+                "y": 56,
+                "t": 778
+              },
+              {
+                "x": 59,
+                "y": 56,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Coffee cooled slowly"
+      }
+    },
+    {
+      "date": "2026-05-06",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-05-06.jpg",
+        "alt": "Phone-style daily photo for 2026-05-06.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 22,
+                "y": 70,
+                "t": 0
+              },
+              {
+                "x": 36,
+                "y": 52,
+                "t": 72
+              },
+              {
+                "x": 50,
+                "y": 68,
+                "t": 144
+              },
+              {
+                "x": 64,
+                "y": 44,
+                "t": 216
+              },
+              {
+                "x": 82,
+                "y": 64,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 24,
+                "y": 78,
+                "t": 408
+              },
+              {
+                "x": 82,
+                "y": 78,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 34,
+                "y": 42,
+                "t": 586
+              },
+              {
+                "x": 40,
+                "y": 34,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 60,
+                "y": 36,
+                "t": 778
+              },
+              {
+                "x": 66,
+                "y": 28,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "May morning quiet"
+      }
+    },
+    {
+      "date": "2026-05-07",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-05-07.jpg",
+        "alt": "Phone-style daily photo for 2026-05-07.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 24,
+                "y": 34,
+                "t": 0
+              },
+              {
+                "x": 72,
+                "y": 34,
+                "t": 72
+              },
+              {
+                "x": 64,
+                "y": 74,
+                "t": 144
+              },
+              {
+                "x": 32,
+                "y": 74,
+                "t": 216
+              },
+              {
+                "x": 24,
+                "y": 34,
+                "t": 288
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 36,
+                "y": 44,
+                "t": 408
+              },
+              {
+                "x": 60,
+                "y": 44,
+                "t": 466
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 42,
+                "y": 56,
+                "t": 586
+              },
+              {
+                "x": 54,
+                "y": 56,
+                "t": 658
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 48,
+                "y": 34,
+                "t": 778
+              },
+              {
+                "x": 48,
+                "y": 24,
+                "t": 836
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Before today pause"
+      }
+    },
+    {
+      "date": "2026-05-08",
+      "currentPreviewType": "photo",
+      "photo": {
+        "type": "photo",
+        "src": "/calendar/photos/real-day-2026-05-08.jpg",
+        "alt": "Phone-style daily photo for 2026-05-08.",
+        "source": "seed"
+      },
+      "doodle": {
+        "type": "doodle",
+        "strokes": [
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 15,
+                "y": 55,
+                "t": 0
+              },
+              {
+                "x": 24,
+                "y": 38,
+                "t": 72
+              },
+              {
+                "x": 38,
+                "y": 28,
+                "t": 144
+              },
+              {
+                "x": 53,
+                "y": 27,
+                "t": 216
+              },
+              {
+                "x": 69,
+                "y": 38,
+                "t": 288
+              },
+              {
+                "x": 83,
+                "y": 55,
+                "t": 360
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 49,
+                "y": 55,
+                "t": 480
+              },
+              {
+                "x": 49,
+                "y": 78,
+                "t": 538
+              },
+              {
+                "x": 44,
+                "y": 82,
+                "t": 596
+              },
+              {
+                "x": 39,
+                "y": 76,
+                "t": 654
+              }
+            ]
+          },
+          {
+            "color": "#ff3b30",
+            "width": 3.8,
+            "points": [
+              {
+                "x": 21,
+                "y": 55,
+                "t": 774
+              },
+              {
+                "x": 77,
+                "y": 55,
+                "t": 846
+              }
+            ]
+          }
+        ]
+      },
+      "text": {
+        "type": "text",
+        "body": "Almost weekend light"
       }
     }
   ]

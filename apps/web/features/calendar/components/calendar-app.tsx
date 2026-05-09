@@ -1,402 +1,481 @@
 "use client"
 
-import { AnimatePresence, LayoutGroup } from "framer-motion"
+import {
+  AnimatePresence,
+  LayoutGroup,
+  animate,
+  motion,
+  useDragControls,
+  useMotionValue,
+  useTransform,
+  useReducedMotion,
+  type PanInfo,
+} from "framer-motion"
 import * as React from "react"
 
-import { cn } from "@workspace/ui/lib/utils"
+import { motionTokens } from "@workspace/ui/lib/motion"
 
-import { BackupPromptSheet } from "@/components/auth/backup-prompt-sheet"
-import { CalendarHeader } from "@/components/calendar/calendar-header"
-import type { AppSession } from "@/lib/auth/app-session"
-import { appCopy } from "@/lib/copy"
-import { ClosedJournalDock } from "@/components/calendar/closed-journal-dock"
+import type { ContentType } from "../model/types"
 import { useMonthRange } from "../hooks/use-month-range"
 import { useCalendarState } from "../hooks/use-calendar-state"
 import { toIsoDate } from "../utils/date"
-import { exceedsTapSlop } from "../utils/interactions"
+import { cyclePreviewMode } from "../utils/preview"
+import { dockDetents, floatingSheetUi } from "../utils/sheet-detents"
 import { CalendarMonthSection } from "./month-section"
 import { DayEditorSheet } from "./day-editor-sheet"
 
-const dockPrompts = appCopy.page.calendar.dockPrompts
-const SURFACE_DOUBLE_TAP_MS = 320
-const BACKUP_PROMPT_STORAGE_KEY = "toda.oauth.backup-prompt-shown.v1"
-
-function getNextPromptIndex(current: number) {
-  if (dockPrompts.length <= 1) {
-    return 0
-  }
-
-  let next = current
-
-  while (next === current) {
-    next = Math.floor(Math.random() * dockPrompts.length)
-  }
-
-  return next
+function splitMonthLabel(label: string) {
+  const [month = "", year = ""] = label.split(" ")
+  return { month, year }
 }
 
-type CalendarAppProps = {
-  initialDate?: string | null
-  session?: AppSession
+function formatModeLabel(mode: ContentType | null) {
+  if (mode === "photo") {
+    return "Photo"
+  }
+
+  if (mode === "doodle") {
+    return "Sketch"
+  }
+
+  if (mode === "text") {
+    return "Text"
+  }
+
+  return ""
 }
 
-export function CalendarApp({ initialDate = null, session }: CalendarAppProps) {
-  const today = React.useMemo(() => new Date(), [])
-  const anchorDate = React.useMemo(() => {
-    if (!initialDate) {
-      return today
-    }
-
-    const [year, month, day] = initialDate.split("-").map(Number)
-    return new Date(year ?? 0, (month ?? 1) - 1, day ?? 1)
-  }, [initialDate, today])
-  const {
-    activeMonthLabel,
-    bottomSentinelRef,
-    registerSection,
-    sections,
-    topSentinelRef,
-  } = useMonthRange({
-    anchorDate,
-    initialFocusDate: anchorDate,
-    todayDate: today,
-  })
-  const {
-    advancePreviewMode,
-    closeEditor,
-    error,
-    errorCode,
-    isInitialLoading,
-    openDay,
-    reload,
-    saveDayRecord,
-    selectedRecord,
-    state,
-  } = useCalendarState(sections.map((section) => section.monthStart.slice(0, 7)), {
-    initialSelectedDate: initialDate,
-  })
-  const [sheetLaunchLift, setSheetLaunchLift] = React.useState(0)
-  const [promptIndex, setPromptIndex] = React.useState(() =>
-    Math.floor(Math.random() * dockPrompts.length)
-  )
-  const [isBackupPromptOpen, setIsBackupPromptOpen] = React.useState(false)
-  const [pendingBackupPrompt, setPendingBackupPrompt] = React.useState(false)
-  const previousOpenRef = React.useRef<boolean | null>(null)
-  const isEditorOpen = Boolean(selectedRecord)
-  const isConfiguredRuntime = session?.runtime === "configured"
-  const showAuthActions = isConfiguredRuntime && session.isAuthenticated
-  const sessionLabel =
-    session?.identity?.email ?? appCopy.page.calendar.sessionFallbackLabel
-  const surfacePointerRef = React.useRef<{
-    id: number
-    moved: boolean
-    startX: number
-    startY: number
-  } | null>(null)
-  const lastSurfaceTapRef = React.useRef<{
-    time: number
-    x: number
-    y: number
-  } | null>(null)
-
-  const openTodayEditor = React.useCallback((lift = 0) => {
-    setSheetLaunchLift(lift)
-    openDay(toIsoDate(new Date()))
-  }, [openDay])
-
-  const handleSurfacePointerDownCapture = React.useCallback(
-    (event: React.PointerEvent<HTMLElement>) => {
-      if (!event.isPrimary || isInteractiveTapTarget(event.target)) {
-        surfacePointerRef.current = null
-        return
-      }
-
-      surfacePointerRef.current = {
-        id: event.pointerId,
-        moved: false,
-        startX: event.clientX,
-        startY: event.clientY,
-      }
-    },
-    []
-  )
-
-  const handleSurfacePointerMoveCapture = React.useCallback(
-    (event: React.PointerEvent<HTMLElement>) => {
-      const current = surfacePointerRef.current
-
-      if (!current || current.id !== event.pointerId) {
-        return
-      }
-
-      if (
-        exceedsTapSlop(
-          { x: current.startX, y: current.startY },
-          { x: event.clientX, y: event.clientY }
-        )
-      ) {
-        current.moved = true
-      }
-    },
-    []
-  )
-
-  const handleSurfacePointerUpCapture = React.useCallback(
-    (event: React.PointerEvent<HTMLElement>) => {
-      const current = surfacePointerRef.current
-      surfacePointerRef.current = null
-
-      if (!current || current.id !== event.pointerId || current.moved) {
-        return
-      }
-
-      const now = Date.now()
-      const lastTap = lastSurfaceTapRef.current
-
-      if (
-        lastTap &&
-        now - lastTap.time <= SURFACE_DOUBLE_TAP_MS &&
-        !exceedsTapSlop(
-          { x: lastTap.x, y: lastTap.y },
-          { x: event.clientX, y: event.clientY },
-          24
-        )
-      ) {
-        lastSurfaceTapRef.current = null
-        advancePreviewMode()
-        return
-      }
-
-      lastSurfaceTapRef.current = {
-        time: now,
-        x: event.clientX,
-        y: event.clientY,
-      }
-    },
-    [advancePreviewMode]
-  )
-
-  const handleSurfacePointerCancelCapture = React.useCallback(() => {
-    surfacePointerRef.current = null
-  }, [])
-
-  React.useEffect(() => {
-    const isOpen = Boolean(selectedRecord)
-
-    if (previousOpenRef.current === null) {
-      previousOpenRef.current = isOpen
-      return
-    }
-
-    if (previousOpenRef.current !== isOpen) {
-      setPromptIndex((current) => getNextPromptIndex(current))
-      previousOpenRef.current = isOpen
-    }
-  }, [selectedRecord])
-
-  React.useEffect(() => {
-    if (!pendingBackupPrompt) {
-      return
-    }
-
-    if (!isConfiguredRuntime || showAuthActions) {
-      setPendingBackupPrompt(false)
-      return
-    }
-
-    if (selectedRecord) {
-      return
-    }
-
-    setIsBackupPromptOpen(true)
-    setPendingBackupPrompt(false)
-  }, [isConfiguredRuntime, pendingBackupPrompt, selectedRecord, showAuthActions])
-
-  const handleSaveDayRecord = React.useCallback(
-    async (record: Parameters<typeof saveDayRecord>[0]) => {
-      await saveDayRecord(record)
-
-      if (!isConfiguredRuntime || showAuthActions || hasShownBackupPrompt()) {
-        return
-      }
-
-      markBackupPromptShown()
-      setPendingBackupPrompt(true)
-    },
-    [isConfiguredRuntime, saveDayRecord, showAuthActions]
-  )
-
-  if (isInitialLoading) {
-    return (
-      <main className="flex min-h-dvh items-center justify-center bg-[var(--calendar-app-bg)] px-6 text-center text-foreground">
-        <div className="max-w-sm space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-foreground/50">
-            {appCopy.page.calendar.loading.eyebrow}
-          </p>
-          <h1 className="text-2xl font-medium tracking-[-0.03em]">
-            {appCopy.page.calendar.loading.title}
-          </h1>
-          <p className="text-sm leading-6 text-foreground/60">
-            {appCopy.page.calendar.loading.description}
-          </p>
-        </div>
-      </main>
-    )
-  }
-
-  if (error) {
-    const isAuthError =
-      errorCode === "AUTH_REQUIRED" || errorCode === "INVALID_ACCESS_TOKEN"
-
-    return (
-      <main className="flex min-h-dvh items-center justify-center bg-[var(--calendar-app-bg)] px-6 text-center text-foreground">
-        <div className="max-w-sm space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-foreground/42">
-            {isAuthError
-              ? appCopy.page.calendar.authRequired.eyebrow
-              : appCopy.page.calendar.error.eyebrow}
-          </p>
-          <h1 className="text-2xl font-medium tracking-[-0.03em]">
-            {isAuthError
-              ? appCopy.page.calendar.authRequired.title
-              : appCopy.page.calendar.error.title}
-          </h1>
-          <p className="text-sm leading-6 text-foreground/62">
-            {isAuthError ? appCopy.page.calendar.authRequired.description : error}
-          </p>
-          {isAuthError ? (
-            <a
-              className="inline-flex min-h-11 items-center justify-center px-4 text-sm font-semibold text-foreground underline underline-offset-4"
-              href="/login?next=/"
-            >
-              {appCopy.page.calendar.authRequired.cta}
-            </a>
-          ) : (
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-2 text-sm font-medium text-white"
-              onClick={reload}
-            >
-              {appCopy.page.calendar.error.retry}
-            </button>
-          )}
-        </div>
-      </main>
-    )
-  }
-
-  return (
-    <main className="min-h-dvh bg-[var(--calendar-app-bg)] text-foreground">
-      <div
-        aria-hidden={isEditorOpen}
-        className={cn("relative", isEditorOpen && "pointer-events-none")}
-        onPointerCancelCapture={handleSurfacePointerCancelCapture}
-        onPointerDownCapture={handleSurfacePointerDownCapture}
-        onPointerMoveCapture={handleSurfacePointerMoveCapture}
-        onPointerUpCapture={handleSurfacePointerUpCapture}
-      >
-        <CalendarHeader
-          activeMonthLabel={activeMonthLabel}
-          activePreviewType={state.activePreviewType}
-          authHref="/login?next=/"
-          onAdvancePreviewMode={advancePreviewMode}
-          settingsHref="/settings"
-          sessionLabel={sessionLabel}
-          showSessionLabel={showAuthActions}
-          showSignInLink={!showAuthActions}
-        />
-
-        <div className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+5.95rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]">
-          <div ref={topSentinelRef} className="h-px" />
-
-          <div className="relative">
-            <LayoutGroup id="calendar-selection-badge">
-              {sections.map((section) => (
-                <CalendarMonthSection
-                  key={section.key}
-                  activePreviewType={state.activePreviewType}
-                  onAdvancePreviewMode={advancePreviewMode}
-                  onOpenDay={(date) => {
-                    setSheetLaunchLift(0)
-                    openDay(date)
-                  }}
-                  registerSection={registerSection}
-                  recordsByDate={state.recordsByDate}
-                  selectedDate={state.selectedDate}
-                  section={section}
-                />
-              ))}
-            </LayoutGroup>
-          </div>
-
-          <div ref={bottomSentinelRef} className="h-8" />
-        </div>
-
-        <AnimatePresence initial={false}>
-          {!selectedRecord ? (
-            <ClosedJournalDock
-              key="closed-journal-dock"
-              onOpenToday={openTodayEditor}
-              prompt={dockPrompts[promptIndex] ?? dockPrompts[0]}
-            />
-          ) : null}
-        </AnimatePresence>
-      </div>
-
-      <DayEditorSheet
-        initialLift={sheetLaunchLift}
-        onOpenChange={(open) => {
-          if (!open) {
-            closeEditor()
-          }
-        }}
-        onSave={handleSaveDayRecord}
-        open={Boolean(selectedRecord)}
-        record={selectedRecord}
-      />
-
-      <BackupPromptSheet
-        authReady={isConfiguredRuntime}
-        nextPath="/"
-        onOpenChange={setIsBackupPromptOpen}
-        open={isBackupPromptOpen}
-      />
-    </main>
-  )
-}
-
-function hasShownBackupPrompt() {
-  if (typeof window === "undefined") {
-    return true
-  }
-
-  try {
-    return window.localStorage.getItem(BACKUP_PROMPT_STORAGE_KEY) === "true"
-  } catch {
-    return false
-  }
-}
-
-function markBackupPromptShown() {
-  if (typeof window === "undefined") {
-    return
-  }
-
-  try {
-    window.localStorage.setItem(BACKUP_PROMPT_STORAGE_KEY, "true")
-  } catch {
-    // Ignore storage failures and continue with the in-memory flow.
-  }
-}
-
-function isInteractiveTapTarget(target: EventTarget | null) {
+function isCalendarSurfaceTapTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) {
-    return true
+    return false
   }
 
   return Boolean(
     target.closest(
       "button, a, input, textarea, select, label, summary, [role='button'], [data-calendar-interactive='true']"
     )
+  )
+}
+
+function ClosedJournalDock({
+  onOpenToday,
+}: {
+  onOpenToday: () => void
+}) {
+  const reducedMotion = useReducedMotion()
+  const dragControls = useDragControls()
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const [viewportWidth, setViewportWidth] = React.useState(393)
+  const sideInset = useTransform(
+    y,
+    [-dockDetents.gestureRange, 0],
+    [dockDetents.liftedInset, dockDetents.restInset],
+    { clamp: true }
+  )
+  const bottomInset = useTransform(
+    y,
+    [-dockDetents.gestureRange, 0],
+    [dockDetents.liftedBottom, 0],
+    { clamp: true }
+  )
+  const topRadius = useTransform(
+    y,
+    [-dockDetents.gestureRange, 0],
+    [dockDetents.liftedRadius, dockDetents.restTopRadius],
+    { clamp: true }
+  )
+  const bottomRadius = useTransform(
+    y,
+    [-dockDetents.gestureRange, 0],
+    [dockDetents.liftedRadius, dockDetents.restBottomRadius],
+    { clamp: true }
+  )
+  const scale = useTransform(
+    y,
+    [-dockDetents.gestureRange, 0],
+    [dockDetents.liftedScale, dockDetents.restScale],
+    { clamp: true }
+  )
+  const dockHeight = useTransform(
+    y,
+    [-dockDetents.gestureRange, 0],
+    [dockDetents.liftedHeight, dockDetents.restHeight],
+    { clamp: true }
+  )
+  React.useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    const syncViewport = () => {
+      setViewportWidth(window.visualViewport?.width ?? window.innerWidth)
+    }
+
+    syncViewport()
+    window.addEventListener("resize", syncViewport)
+    window.visualViewport?.addEventListener("resize", syncViewport)
+
+    return () => {
+      window.removeEventListener("resize", syncViewport)
+      window.visualViewport?.removeEventListener("resize", syncViewport)
+    }
+  }, [])
+
+  function settle() {
+    animate(
+      x,
+      0,
+      reducedMotion
+        ? { duration: motionTokens.duration.instant }
+        : motionTokens.intent.dragFollow
+    )
+    animate(
+      y,
+      0,
+      reducedMotion
+        ? { duration: motionTokens.duration.instant }
+        : motionTokens.spring.drag
+    )
+  }
+
+  function handleDragEnd(
+    _: PointerEvent | MouseEvent | TouchEvent,
+    info: PanInfo
+  ) {
+    if (info.offset.y < -42 || info.velocity.y < -480) {
+      onOpenToday()
+      settle()
+      return
+    }
+
+    settle()
+  }
+
+  return (
+    <motion.div
+      drag
+      dragControls={dragControls}
+      dragConstraints={{
+        top: -Math.max(180, dockDetents.gestureRange * 2),
+        right: Math.max(72, viewportWidth * 0.48),
+        bottom: 40,
+        left: -Math.max(72, viewportWidth * 0.48),
+      }}
+      dragElastic={0.14}
+      dragListener={false}
+      dragMomentum={false}
+      onDragEnd={handleDragEnd}
+      className="pointer-events-auto fixed z-40 overflow-hidden text-foreground shadow-[var(--calendar-sheet-shadow)] backdrop-blur-[28px] backdrop-saturate-[1.35]"
+      style={{
+        x,
+        left: sideInset,
+        right: sideInset,
+        bottom: bottomInset,
+        borderTopLeftRadius: topRadius,
+        borderTopRightRadius: topRadius,
+        borderBottomLeftRadius: bottomRadius,
+        borderBottomRightRadius: bottomRadius,
+        height: dockHeight,
+        scale,
+        y,
+        backgroundColor: "var(--calendar-sheet-surface)",
+        boxShadow: "var(--calendar-sheet-shadow), var(--calendar-sheet-inner-shadow)",
+      }}
+      initial={reducedMotion ? { opacity: 1 } : { y: 18, opacity: 0 }}
+      animate={reducedMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
+      exit={reducedMotion ? { opacity: 0 } : { opacity: 0 }}
+      transition={
+        reducedMotion
+          ? { duration: motionTokens.duration.instant }
+          : {
+              duration: motionTokens.duration.quick,
+              ease: motionTokens.ease.enter,
+            }
+      }
+    >
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[var(--calendar-sheet-surface)]" />
+        <div className="absolute inset-0 bg-[image:var(--calendar-sheet-glass-overlay)]" />
+        <div className="absolute inset-0 bg-[image:var(--calendar-sheet-top-sheen)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-[var(--calendar-sheet-edge-highlight)]" />
+      </div>
+
+      <div className="relative z-10 flex h-full flex-col px-[16px] pt-[8px] pb-[max(10px,env(safe-area-inset-bottom))]">
+        <button
+          type="button"
+          aria-label="Open today's journal drawer"
+          className="flex w-full items-center justify-center rounded-full active:cursor-grabbing"
+          style={{
+            height: floatingSheetUi.handleTouchHeight,
+            touchAction: "none",
+            WebkitTapHighlightColor: "transparent",
+            WebkitUserSelect: "none",
+            userSelect: "none",
+          }}
+          onPointerDown={(event) => {
+            dragControls.start(event)
+          }}
+          onClick={onOpenToday}
+        >
+          <motion.span
+            className="rounded-full"
+            initial={false}
+            animate={{
+              width: floatingSheetUi.handleWidth,
+              height: floatingSheetUi.handleHeight,
+            }}
+            style={{ backgroundColor: "var(--calendar-sheet-handle)" }}
+          />
+        </button>
+      </div>
+    </motion.div>
+  )
+}
+
+export function CalendarApp() {
+  const reducedMotion = useReducedMotion()
+  const {
+    activeMonthLabel,
+    bottomSentinelRef,
+    registerSection,
+    sections,
+    topSentinelRef,
+  } = useMonthRange()
+  const { dispatch, selectedRecord, state } = useCalendarState()
+  const { month, year } = splitMonthLabel(activeMonthLabel)
+  const [modeSwapVersion, setModeSwapVersion] = React.useState(0)
+  const [isModeSwitching, setIsModeSwitching] = React.useState(false)
+  const [modeLabel, setModeLabel] = React.useState<ContentType | null>(null)
+  const modeTimerRef = React.useRef<number | null>(null)
+  const surfaceTapRef = React.useRef<{
+    time: number
+    x: number
+    y: number
+  } | null>(null)
+
+  const openTodayEditor = React.useCallback(() => {
+    dispatch({ type: "open-editor", date: toIsoDate(new Date()) })
+  }, [dispatch])
+
+  React.useEffect(() => {
+    return () => {
+      if (modeTimerRef.current !== null) {
+        window.clearTimeout(modeTimerRef.current)
+      }
+    }
+  }, [])
+
+  const handleCyclePreview = React.useCallback(() => {
+    const nextMode = cyclePreviewMode(state.activePreviewType, state.previewFilter)
+
+    dispatch({ type: "cycle-preview-mode" })
+    setModeSwapVersion((current) => current + 1)
+    setModeLabel(nextMode)
+    setIsModeSwitching(true)
+
+    if (modeTimerRef.current !== null) {
+      window.clearTimeout(modeTimerRef.current)
+    }
+
+    modeTimerRef.current = window.setTimeout(() => {
+      setIsModeSwitching(false)
+      modeTimerRef.current = null
+    }, 320)
+  }, [dispatch, state.activePreviewType, state.previewFilter])
+
+  const handleSurfacePointerUp = React.useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      if (!event.isPrimary || selectedRecord || isCalendarSurfaceTapTarget(event.target)) {
+        surfaceTapRef.current = null
+        return
+      }
+
+      const now = Date.now()
+      const previousTap = surfaceTapRef.current
+
+      if (
+        previousTap &&
+        now - previousTap.time <= motionTokens.gesture.doubleTapMs &&
+        Math.hypot(event.clientX - previousTap.x, event.clientY - previousTap.y) <= 28
+      ) {
+        event.preventDefault()
+        surfaceTapRef.current = null
+        handleCyclePreview()
+        return
+      }
+
+      surfaceTapRef.current = {
+        time: now,
+        x: event.clientX,
+        y: event.clientY,
+      }
+    },
+    [handleCyclePreview, selectedRecord]
+  )
+
+  return (
+    <main className="min-h-dvh bg-[var(--calendar-app-bg)] text-foreground">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-40">
+        <div className="flex items-start justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeMonthLabel}
+              aria-live="polite"
+              className="inline-flex rounded-full bg-[color:var(--calendar-nav)]/88 px-3 py-1.5 text-[0.96rem] font-semibold tracking-[-0.03em] text-foreground shadow-[0_10px_26px_rgba(15,23,42,0.06)] backdrop-blur-[18px]"
+              initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              transition={
+                reducedMotion
+                  ? { duration: motionTokens.duration.instant }
+                  : {
+                      duration: motionTokens.duration.quick,
+                      ease: motionTokens.ease.enter,
+                    }
+              }
+            >
+              {month} {year}
+            </motion.div>
+          </AnimatePresence>
+
+          <AnimatePresence initial={false}>
+            {modeLabel && isModeSwitching ? (
+              <motion.div
+                key={modeLabel}
+                className="inline-flex rounded-full bg-white/82 px-3 py-1.5 text-[0.84rem] font-semibold tracking-[-0.02em] text-foreground/68 shadow-[0_8px_22px_rgba(15,23,42,0.07)] backdrop-blur-[16px]"
+                initial={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985 }}
+                animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985 }}
+                transition={
+                  reducedMotion
+                    ? { duration: motionTokens.duration.instant }
+                    : {
+                        duration: motionTokens.duration.quick,
+                        ease: motionTokens.ease.enter,
+                      }
+                }
+              >
+                {formatModeLabel(modeLabel)}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
+
+        <div className="mt-3 grid grid-cols-7 px-0 text-center text-[0.68rem] font-medium tracking-[0.04em] text-foreground/36">
+          {["S", "M", "T", "W", "T", "F", "S"].map((label, index) => (
+            <div key={`${label}-${index}`}>{label}</div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        className="relative overflow-hidden px-0 pt-[calc(env(safe-area-inset-top)+3.85rem)] pb-[calc(5.6rem+env(safe-area-inset-bottom))]"
+        onPointerUp={handleSurfacePointerUp}
+      >
+        <div ref={topSentinelRef} className="h-px" />
+
+        <div className="relative">
+          <AnimatePresence initial={false}>
+            {isModeSwitching && !reducedMotion ? (
+              <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-10 overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: motionTokens.duration.quick,
+                  ease: motionTokens.ease.fade,
+                }}
+              >
+                <motion.div
+                  className="absolute inset-0 bg-[color:var(--calendar-mode-flash)] backdrop-blur-[4px]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0.02, 0.1, 0] }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    ...motionTokens.intent.modePageSwap,
+                    times: [0, 0.52, 1],
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 bg-[color:var(--calendar-mode-accent-wash)]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 0.42, 0] }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    ...motionTokens.intent.modePageSwap,
+                    times: [0, 0.32, 1],
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-y-[-8%] left-[-12%] w-[36%] bg-[image:var(--calendar-mode-accent-glow)] blur-[16px]"
+                  initial={{ opacity: 0, x: "10%" }}
+                  animate={{ opacity: [0, 0.64, 0], x: ["10%", "0%", "-12%"] }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    ...motionTokens.intent.modePageSwap,
+                    times: [0, 0.42, 1],
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-y-[-8%] left-[-16%] w-[42%] bg-[image:var(--calendar-mode-sweep-glow)] blur-[14px]"
+                  initial={{ opacity: 0, x: "14%" }}
+                  animate={{ opacity: [0, 0.5, 0], x: ["14%", "2%", "-14%"] }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    ...motionTokens.intent.modePageSwap,
+                    times: [0, 0.48, 1],
+                  }}
+                />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
+          <LayoutGroup id="calendar-selection-badge">
+            {sections.map((section) => (
+              <CalendarMonthSection
+                key={section.key}
+                activePreviewType={state.activePreviewType}
+                modeSwapVersion={modeSwapVersion}
+                onCyclePreview={handleCyclePreview}
+                onOpenDay={(date) => {
+                  dispatch({ type: "open-editor", date })
+                }}
+                registerSection={registerSection}
+                recordsByDate={state.recordsByDate}
+                selectedDate={state.selectedDate}
+                section={section}
+              />
+            ))}
+          </LayoutGroup>
+        </div>
+
+        <div ref={bottomSentinelRef} className="h-8" />
+      </div>
+
+      <AnimatePresence initial={false}>
+        {!selectedRecord ? (
+          <ClosedJournalDock
+            key="closed-journal-dock"
+            onOpenToday={openTodayEditor}
+          />
+        ) : null}
+      </AnimatePresence>
+
+      <DayEditorSheet
+        key={selectedRecord?.date ?? "closed-editor"}
+        activePreviewType={state.activePreviewType}
+        onOpenChange={(open) => {
+          if (!open) {
+            dispatch({ type: "close-editor" })
+          }
+        }}
+        onSave={(record) => dispatch({ type: "save-record", record })}
+        open={Boolean(selectedRecord)}
+        record={selectedRecord}
+      />
+    </main>
   )
 }

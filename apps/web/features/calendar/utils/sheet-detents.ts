@@ -1,5 +1,3 @@
-import { calendarInteractionUi } from "./interactions"
-
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
@@ -9,8 +7,10 @@ export const dockDetents = {
   restInset: -1,
   liftedInset: 10,
   liftedBottom: 16,
+  restTopRadius: 24,
+  restBottomRadius: 0,
   liftedRadius: 30,
-  restHeight: 84,
+  restHeight: 54,
   liftedHeight: 116,
   restScale: 1,
   liftedScale: 1,
@@ -19,7 +19,7 @@ export const dockDetents = {
 export const floatingSheetUi = {
   handleWidth: 40,
   handleHeight: 6,
-  handleTouchHeight: calendarInteractionUi.minTouchTarget,
+  handleTouchHeight: 28,
   headerPaddingX: 16,
   headerPaddingTop: 8,
   headerPaddingBottom: 12,
@@ -28,8 +28,8 @@ export const floatingSheetUi = {
   titleSize: 16,
   titleTracking: -0.4,
   actionSize: 13,
-  actionHeight: calendarInteractionUi.minTouchTarget,
-  segmentHeight: calendarInteractionUi.minTouchTarget,
+  actionHeight: 30,
+  segmentHeight: 30,
   segmentRadius: 11,
   segmentContainerRadius: 15,
 } as const
@@ -47,8 +47,8 @@ export function getFloatingSheetDetents({
 }: FloatingSheetViewport) {
   const floatingBottom = Math.max(16, bottomInset + 16)
   const sideInset = clamp(Math.round(width * 0.028), 10, 18)
-  const maxVisibleHeight = Math.max(320, height - floatingBottom - 12)
-  const peekPreferred = clamp(height - floatingBottom - 126, 328, 396)
+  const maxVisibleHeight = Math.max(360, height - floatingBottom - 12)
+  const peekPreferred = clamp(height - floatingBottom - 72, 396, 468)
   const expandedPreferred = clamp(height - floatingBottom - 12, 440, 736)
 
   return {
@@ -87,10 +87,18 @@ export function getDockHandoffFrame(lift: number, width = 393) {
     left: dockDetents.restInset + (sideInset - dockDetents.restInset) * progress,
     right: dockDetents.restInset + (sideInset - dockDetents.restInset) * progress,
     bottom: dockDetents.liftedBottom * progress,
-    borderTopLeftRadius: dockDetents.liftedRadius * progress,
-    borderTopRightRadius: dockDetents.liftedRadius * progress,
-    borderBottomLeftRadius: dockDetents.liftedRadius * progress,
-    borderBottomRightRadius: dockDetents.liftedRadius * progress,
+    borderTopLeftRadius:
+      dockDetents.restTopRadius +
+      (dockDetents.liftedRadius - dockDetents.restTopRadius) * progress,
+    borderTopRightRadius:
+      dockDetents.restTopRadius +
+      (dockDetents.liftedRadius - dockDetents.restTopRadius) * progress,
+    borderBottomLeftRadius:
+      dockDetents.restBottomRadius +
+      (dockDetents.liftedRadius - dockDetents.restBottomRadius) * progress,
+    borderBottomRightRadius:
+      dockDetents.restBottomRadius +
+      (dockDetents.liftedRadius - dockDetents.restBottomRadius) * progress,
     height:
       dockDetents.restHeight +
       (dockDetents.liftedHeight - dockDetents.restHeight) * progress,

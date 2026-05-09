@@ -2,158 +2,65 @@
 
 import * as React from "react"
 
-import { exceedsTapSlop, isActivationKey } from "../utils/interactions"
-
-const DOUBLE_PRESS_DELAY_MS = 240
+import { motionTokens } from "@workspace/ui/lib/motion"
 
 type UseDayCellGestureProps = {
-  onDoublePress?: () => void
-  onPress: () => void
+  onDoubleTap: () => void
+  onSingleTap: () => void
 }
 
 export function useDayCellGesture({
-  onDoublePress,
-  onPress,
+  onDoubleTap,
+  onSingleTap,
 }: UseDayCellGestureProps) {
-  const pointerRef = React.useRef<{
-    id: number
-    moved: boolean
-    startX: number
-    startY: number
-  } | null>(null)
-  const pressTimerRef = React.useRef<number | null>(null)
-  const lastPressRef = React.useRef<{
-    time: number
-    x: number
-    y: number
-  } | null>(null)
-
-  const clearPressTimer = React.useCallback(() => {
-    if (pressTimerRef.current !== null) {
-      window.clearTimeout(pressTimerRef.current)
-      pressTimerRef.current = null
-    }
-  }, [])
+  const timeoutRef = React.useRef<number | null>(null)
+  const lastTapRef = React.useRef(0)
 
   React.useEffect(() => {
     return () => {
-      clearPressTimer()
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current)
+      }
     }
-  }, [clearPressTimer])
-
-  function resetPointer() {
-    pointerRef.current = null
-  }
-
-  function onPointerDown(event: React.PointerEvent<HTMLElement>) {
-    if (!event.isPrimary) {
-      return
-    }
-
-    pointerRef.current = {
-      id: event.pointerId,
-      moved: false,
-      startX: event.clientX,
-      startY: event.clientY,
-    }
-  }
-
-  function onPointerMove(event: React.PointerEvent<HTMLElement>) {
-    const current = pointerRef.current
-
-    if (!current || current.id !== event.pointerId) {
-      return
-    }
-
-    if (
-      exceedsTapSlop(
-        { x: current.startX, y: current.startY },
-        { x: event.clientX, y: event.clientY }
-      )
-    ) {
-      current.moved = true
-    }
-  }
+  }, [])
 
   function onPointerUp(event: React.PointerEvent<HTMLElement>) {
-    const current = pointerRef.current
-    resetPointer()
-
-    if (!current || current.id !== event.pointerId || current.moved) {
-      return
-    }
-
-    if (!onDoublePress) {
-      onPress()
-      return
+    if (event.cancelable) {
+      event.preventDefault()
     }
 
     const now = Date.now()
-    const point = {
-      x: event.clientX,
-      y: event.clientY,
-    }
-    const lastPress = lastPressRef.current
 
-    if (
-      lastPress &&
-      now - lastPress.time <= DOUBLE_PRESS_DELAY_MS &&
-      !exceedsTapSlop(
-        { x: lastPress.x, y: lastPress.y },
-        point,
-        24
-      )
-    ) {
-      clearPressTimer()
-      lastPressRef.current = null
-      onDoublePress()
+    if (now - lastTapRef.current <= motionTokens.gesture.doubleTapMs) {
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current)
+      }
+
+      timeoutRef.current = null
+      lastTapRef.current = 0
+      onDoubleTap()
       return
     }
 
-    lastPressRef.current = {
-      time: now,
-      ...point,
-    }
-
-    clearPressTimer()
-    pressTimerRef.current = window.setTimeout(() => {
-      lastPressRef.current = null
-      pressTimerRef.current = null
-      onPress()
-    }, DOUBLE_PRESS_DELAY_MS)
-  }
-
-  function onPointerCancel() {
-    resetPointer()
-  }
-
-  function onPointerLeave(event: React.PointerEvent<HTMLElement>) {
-    const current = pointerRef.current
-
-    if (!current || current.id !== event.pointerId) {
-      return
-    }
-
-    current.moved = true
+    lastTapRef.current = now
+    timeoutRef.current = window.setTimeout(() => {
+      onSingleTap()
+      timeoutRef.current = null
+      lastTapRef.current = 0
+    }, motionTokens.gesture.doubleTapMs)
   }
 
   function onKeyDown(event: React.KeyboardEvent<HTMLElement>) {
-    if (!isActivationKey(event.key)) {
+    if (event.key !== "Enter" && event.key !== " ") {
       return
     }
 
-    clearPressTimer()
-    lastPressRef.current = null
     event.preventDefault()
-    onPress()
+    onSingleTap()
   }
 
   return {
-    onKeyDown,
-    onPointerCancel,
-    onPointerDown,
-    onPointerLeave,
-    onPointerMove,
     onPointerUp,
+    onKeyDown,
   }
 }

@@ -11,7 +11,8 @@ import { CalendarDayCell } from "./day-cell"
 
 type CalendarMonthSectionProps = {
   activePreviewType: ContentType
-  onAdvancePreviewMode: () => void
+  modeSwapVersion: number
+  onCyclePreview: () => void
   onOpenDay: (date: string) => void
   recordsByDate: Record<string, CalendarDayRecord>
   registerSection: (key: string, node: HTMLElement | null) => void
@@ -21,7 +22,8 @@ type CalendarMonthSectionProps = {
 
 export function CalendarMonthSection({
   activePreviewType,
-  onAdvancePreviewMode,
+  modeSwapVersion,
+  onCyclePreview,
   onOpenDay,
   recordsByDate,
   registerSection,
@@ -44,13 +46,14 @@ export function CalendarMonthSection({
           >
             {week.map((day, dayIndex) => (
               <CalendarDayCell
-                key={day.date}
+                key={day.date ?? `${section.key}-${weekIndex}-${dayIndex}`}
                 activePreviewType={activePreviewType}
                 day={day}
                 isSelected={selectedDate === day.date}
-                onAdvancePreviewMode={onAdvancePreviewMode}
+                modeSwapVersion={modeSwapVersion}
+                onCyclePreview={onCyclePreview}
                 onOpenDay={onOpenDay}
-                record={recordsByDate[day.date]}
+                record={day.date ? recordsByDate[day.date] : undefined}
                 revealDelay={0.018 + 0.004 * (dayIndex % 2)}
               />
             ))}

@@ -1,7 +1,5 @@
 import type { CalendarGridDay, MonthSection } from "../model/types"
 
-const isoLocalDatePattern = /^(\d{4})-(\d{2})-(\d{2})$/
-
 function pad(value: number) {
   return value.toString().padStart(2, "0")
 }
@@ -10,35 +8,7 @@ export function toIsoDate(date: Date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
-export function isValidIsoDate(value: string) {
-  const match = isoLocalDatePattern.exec(value)
-
-  if (!match) {
-    return false
-  }
-
-  const year = Number(match[1])
-  const month = Number(match[2])
-  const day = Number(match[3])
-
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
-    return false
-  }
-
-  const candidate = new Date(year, month - 1, day)
-
-  return (
-    candidate.getFullYear() === year &&
-    candidate.getMonth() === month - 1 &&
-    candidate.getDate() === day
-  )
-}
-
 export function parseIsoDate(value: string) {
-  if (!isValidIsoDate(value)) {
-    throw new Error(`Invalid local date: ${value}`)
-  }
-
   const parts = value.split("-")
   const year = Number(parts[0] ?? 0)
   const month = Number(parts[1] ?? 1)
@@ -60,25 +30,6 @@ export function addMonths(date: Date, amount: number) {
 
 export function monthKey(date: Date) {
   return toIsoDate(startOfMonth(date))
-}
-
-export function resolveCalendarEntryDate(
-  value: string | null | undefined,
-  fallbackDate = new Date()
-) {
-  if (!value || !isValidIsoDate(value)) {
-    return {
-      anchorDate: fallbackDate,
-      selectedDate: null,
-    }
-  }
-
-  const parsed = parseIsoDate(value)
-
-  return {
-    anchorDate: parsed,
-    selectedDate: toIsoDate(parsed),
-  }
 }
 
 export function createInitialMonthRange(anchor: Date, before: number, after: number) {
@@ -127,15 +78,10 @@ export function expandMonthRange(
   return [...monthStarts, ...nextKeys]
 }
 
-function createGridDay(
-  date: Date,
-  monthStart: Date,
-  todayKey: string
-): CalendarGridDay {
+function createGridDay(date: Date, todayKey: string): CalendarGridDay {
   return {
     date: toIsoDate(date),
     dayNumber: date.getDate(),
-    isCurrentMonth: date.getMonth() === monthStart.getMonth(),
     isPlaceholder: false,
     isToday: toIsoDate(date) === todayKey,
   }
@@ -143,14 +89,36 @@ function createGridDay(
 
 export function buildMonthSection(monthStartKey: string, todayKey: string): MonthSection {
   const monthStart = parseIsoDate(monthStartKey)
+  const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0)
   const leadingBlanks = monthStart.getDay()
+  const totalDays = monthEnd.getDate()
+  const trailingBlanks = (7 - ((leadingBlanks + totalDays) % 7)) % 7
+  const totalCells = leadingBlanks + totalDays + trailingBlanks
   const weeks: CalendarGridDay[][] = []
   const cells: CalendarGridDay[] = []
-  const gridStart = addDays(monthStart, -leadingBlanks)
-  const totalCells = 42
 
-  for (let index = 0; index < totalCells; index += 1) {
-    cells.push(createGridDay(addDays(gridStart, index), monthStart, todayKey))
+  for (let index = 0; index < leadingBlanks; index += 1) {
+    cells.push({
+      date: null,
+      dayNumber: null,
+      isPlaceholder: true,
+      isToday: false,
+    })
+  }
+
+  for (let day = 1; day <= totalDays; day += 1) {
+    cells.push(
+      createGridDay(new Date(monthStart.getFullYear(), monthStart.getMonth(), day), todayKey)
+    )
+  }
+
+  for (let index = 0; index < trailingBlanks; index += 1) {
+    cells.push({
+      date: null,
+      dayNumber: null,
+      isPlaceholder: true,
+      isToday: false,
+    })
   }
 
   for (let index = 0; index < totalCells; index += 7) {

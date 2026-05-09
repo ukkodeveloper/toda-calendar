@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build:packages": "pnpm --filter @workspace/app-core build && pnpm --filter @workspace/contracts build",
     "build": "turbo build",
     "dev": "turbo dev",
     "discord:dev": "pnpm --filter discord-bridge run dev",

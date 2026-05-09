@@ -15,20 +15,11 @@ import {
 const INITIAL_MONTHS_BEFORE = 2
 const INITIAL_MONTHS_AFTER = 5
 const CHUNK_SIZE = 4
-const MONTH_TOP_OFFSET = 110
-const ACTIVE_MONTH_OFFSET = 146
+const MONTH_TOP_OFFSET = 84
+const TODAY_FOCUS_OFFSET = 148
+const ACTIVE_MONTH_OFFSET = 120
 
-type UseMonthRangeOptions = {
-  anchorDate?: Date
-  initialFocusDate?: Date
-  todayDate?: Date
-}
-
-export function useMonthRange({
-  anchorDate = new Date(),
-  initialFocusDate = anchorDate,
-  todayDate = new Date(),
-}: UseMonthRangeOptions = {}) {
+export function useMonthRange(anchorDate = new Date()) {
   const topSentinelRef = React.useRef<HTMLDivElement | null>(null)
   const bottomSentinelRef = React.useRef<HTMLDivElement | null>(null)
   const sectionRefs = React.useRef(new Map<string, HTMLElement>())
@@ -44,8 +35,7 @@ export function useMonthRange({
     )
   )
   const [activeMonthKey, setActiveMonthKey] = React.useState(currentMonthKey)
-  const todayKey = toIsoDate(todayDate)
-  const initialFocusDateKey = toIsoDate(initialFocusDate)
+  const todayKey = toIsoDate(anchorDate)
   const sections = React.useMemo(
     () => monthStarts.map((monthStart) => buildMonthSection(monthStart, todayKey)),
     [monthStarts, todayKey]
@@ -71,26 +61,25 @@ export function useMonthRange({
       return
     }
 
-    const initialFocusCell =
-      typeof document === "undefined"
-        ? null
-        : document.querySelector<HTMLElement>(
-            `[data-calendar-date='${initialFocusDateKey}']`
-          )
     const currentMonthSection = sectionRefs.current.get(currentMonthKey)
-    const initialTarget = initialFocusCell ?? currentMonthSection
 
-    if (!initialTarget || typeof window === "undefined") {
+    if (!currentMonthSection || typeof window === "undefined") {
       return
     }
 
+    const todayCell = document.querySelector<HTMLElement>(
+      `[data-calendar-date="${todayKey}"]`
+    )
+    const focusTarget = todayCell ?? currentMonthSection
+
     window.scrollTo({
-      top: Math.max(initialTarget.offsetTop - MONTH_TOP_OFFSET, 0),
+      top: Math.max(focusTarget.offsetTop - TODAY_FOCUS_OFFSET, 0),
       behavior: "auto",
     })
+    todayCell?.focus({ preventScroll: true })
     setActiveMonthKey(currentMonthKey)
     hasInitialScrollRef.current = true
-  }, [currentMonthKey, initialFocusDateKey, monthStarts])
+  }, [currentMonthKey, monthStarts, todayKey])
 
   const prependMonths = useEffectEvent(() => {
     if (typeof window === "undefined") {
