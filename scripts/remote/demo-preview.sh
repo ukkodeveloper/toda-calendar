@@ -90,8 +90,8 @@ done
 
 for entry in "${state_entries[@]}"; do
   IFS=$'\t' read -r _branch_name sprint_key worktree_path <<<"$entry"
-  source_dir="$worktree_path/apps/web/app/design-system/examples/$sprint_key"
-  target_dir="$ROOT_DIR/apps/web/app/design-system/examples/$sprint_key"
+  source_dir="$worktree_path/apps/toda-calendar/app/design-system/examples/$sprint_key"
+  target_dir="$ROOT_DIR/apps/toda-calendar/app/design-system/examples/$sprint_key"
 
   if [[ ! -d "$source_dir" ]]; then
     continue
@@ -103,8 +103,8 @@ for entry in "${state_entries[@]}"; do
   cp -R "$source_dir/." "$target_dir/"
 done
 
-if [[ -n "$(git status --porcelain -- apps/web/app/design-system/examples)" ]]; then
-  git add apps/web/app/design-system/examples
+if [[ -n "$(git status --porcelain -- apps/toda-calendar/app/design-system/examples)" ]]; then
+  git add apps/toda-calendar/app/design-system/examples
   git commit -m "chore(demo): aggregate sprint demos"
 fi
 

@@ -16,14 +16,14 @@
 
 ## Repository shape
 - This repository is a `pnpm` + Turborepo monorepo.
-- The active product surface is `apps/web`, a Next.js App Router app.
+- The active product surface is `apps/toda-calendar`, a Next.js App Router app.
 - Shared code and shared styling live under `packages/*`.
 
 ## Workspace map
-- `apps/web/app`
+- `apps/toda-calendar/app`
   - App Router entrypoints.
   - Start here for page-level UI and layout changes.
-- `apps/web/components`
+- `apps/toda-calendar/components`
   - App-specific React components.
   - Currently only contains the theme provider.
 - `packages/ui/src/components`
@@ -57,7 +57,7 @@ pnpm dev
 
 ### Target only the web app
 ```bash
-pnpm --filter web dev
+pnpm --filter toda-calendar dev
 ```
 
 ## Common commands
@@ -72,18 +72,18 @@ pnpm typecheck
 
 ### Web app commands
 ```bash
-pnpm --filter web dev
-pnpm --filter web build
-pnpm --filter web lint
-pnpm --filter web format
-pnpm --filter web typecheck
+pnpm --filter toda-calendar dev
+pnpm --filter toda-calendar build
+pnpm --filter toda-calendar lint
+pnpm --filter toda-calendar format
+pnpm --filter toda-calendar typecheck
 ```
 
 ## How to route common tasks
 - UI page change:
-  - Inspect `apps/web/app/*` first.
+  - Inspect `apps/toda-calendar/app/*` first.
 - App-wide theme, typography, or global style change:
-  - Inspect `apps/web/app/layout.tsx` and `packages/ui/src/styles/globals.css`.
+  - Inspect `apps/toda-calendar/app/layout.tsx` and `packages/ui/src/styles/globals.css`.
 - Shared component work:
   - Edit `packages/ui/src/components/*` and keep exports aligned with `packages/ui/package.json`.
 - Tooling, lint, or TypeScript change:
@@ -100,9 +100,9 @@ pnpm --filter web typecheck
 ## Validation
 Before finishing a task that changes code, prefer the smallest relevant validation first.
 
-- For changes isolated to `apps/web`, prefer:
-  - `pnpm --filter web lint`
-  - `pnpm --filter web typecheck`
+- For changes isolated to `apps/toda-calendar`, prefer:
+  - `pnpm --filter toda-calendar lint`
+  - `pnpm --filter toda-calendar typecheck`
 - For shared packages or repo-wide changes, prefer:
   - `pnpm lint`
   - `pnpm typecheck`
@@ -112,7 +112,7 @@ Before finishing a task that changes code, prefer the smallest relevant validati
 These observations are based on the current branch and should be re-checked if the repo changes.
 
 - Root scripts are orchestrated through Turborepo.
-- `apps/web` uses Next.js App Router.
+- `apps/toda-calendar` uses Next.js App Router.
 - Shared UI is published locally through the `@workspace/ui` workspace package.
 - No dedicated automated test command is currently declared at the root.
 - The current app is still scaffold-like, so product/domain behavior may need to be introduced rather than extended.
@@ -127,6 +127,6 @@ These observations are based on the current branch and should be re-checked if t
 - For non-trivial implementation work, prefer entering through the `toda-dev-pipeline` skill and then route to the appropriate domain owner.
 - For sprint-scoped feature work, prefer entering through the `toda-sprint-workflow` skill first.
 - Start by locating the narrowest workspace affected by the task.
-- When the request is ambiguous, inspect `apps/web` first because that is the current product surface.
+- When the request is ambiguous, inspect `apps/toda-calendar` first because that is the current product surface.
 - When updating scripts, config, or package relationships, inspect root files before editing workspace code.
 - If a task mentions calendar product behavior but the implementation is not present yet, treat it as greenfield work inside the existing monorepo rather than searching for a hidden domain layer.

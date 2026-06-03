@@ -3,7 +3,7 @@
 `toda-calendar` is a `pnpm` + Turborepo monorepo with:
 
 - `apps/api`: Fastify JSON-store backend
-- `apps/web`: Next.js support surface
+- `apps/toda-calendar`: Next.js support surface
 - `apps/mobile`: Expo WebView shell
 - `packages/app-core`: shared pure TypeScript helpers
 - `packages/contracts`: shared API contracts
@@ -21,12 +21,12 @@ pnpm dev
 To run only the web app:
 
 ```bash
-pnpm --filter web dev
+pnpm --filter toda-calendar dev
 ```
 
 ## Repository map
 
-- `apps/web`
+- `apps/toda-calendar`
   - Next.js App Router app and the current product entrypoint.
 - `apps/api`
   - Fastify backend for calendar data.
@@ -60,11 +60,11 @@ pnpm typecheck
 Workspace-scoped commands for the web app:
 
 ```bash
-pnpm --filter web dev
-pnpm --filter web build
-pnpm --filter web lint
-pnpm --filter web format
-pnpm --filter web typecheck
+pnpm --filter toda-calendar dev
+pnpm --filter toda-calendar build
+pnpm --filter toda-calendar lint
+pnpm --filter toda-calendar format
+pnpm --filter toda-calendar typecheck
 ```
 
 ## Adding shadcn/ui components
@@ -72,7 +72,7 @@ pnpm --filter web typecheck
 Run the generator from the repository root:
 
 ```bash
-pnpm dlx shadcn@latest add button -c apps/web
+pnpm dlx shadcn@latest add button -c apps/toda-calendar
 ```
 
 Generated shared components land in `packages/ui/src/components`.
@@ -95,7 +95,7 @@ import { Button } from "@workspace/ui/components/button";
 - Day-to-day Discord usage lives in [docs/integrations/discord-usage.md](docs/integrations/discord-usage.md).
 - Durable AI workflow context lives in [docs/ai/repo-context.md](docs/ai/repo-context.md), [docs/ai/ownership-map.md](docs/ai/ownership-map.md), and [docs/ai/verification-matrix.md](docs/ai/verification-matrix.md).
 - Sprint-local feature docs live under [docs/sprints/README.md](docs/sprints/README.md).
-- The current product surface is the web app, so most feature work should begin in `apps/web`.
+- The current product surface is the web app, so most feature work should begin in `apps/toda-calendar`.
 - Shared UI work belongs in `packages/ui`.
 
 ## Integration Guide

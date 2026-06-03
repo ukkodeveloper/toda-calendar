@@ -4,18 +4,18 @@
 
 ### What changed
 
-- Added a server-first web auth slice in `apps/web` based on
+- Added a server-first web auth slice in `apps/toda-calendar` based on
   `docs/architecture/mvp-oauth-login-spec.md`.
 - Introduced Toda-owned auth boundaries under:
-  - `apps/web/lib/auth/*`
-  - `apps/web/lib/supabase/*`
+  - `apps/toda-calendar/lib/auth/*`
+  - `apps/toda-calendar/lib/supabase/*`
 - Added web auth routes:
   - `/login`
   - `/auth/sign-in/[provider]`
   - `/auth/callback`
   - `/auth/error`
   - `/auth/sign-out`
-- Gated `apps/web/app/page.tsx` on server session presence before entering the
+- Gated `apps/toda-calendar/app/page.tsx` on server session presence before entering the
   calendar surface.
 - Injected Supabase access tokens into the existing web API client so the
   current calendar fetch flow can move forward without changing feature-level
@@ -38,25 +38,25 @@
 
 ### Important architectural implications
 
-- `apps/web/next.config.mjs`
+- `apps/toda-calendar/next.config.mjs`
   - Removed `output: "export"`.
   - Reason: the new auth flow depends on dynamic route handlers and server-side
     session checks, which are incompatible with static export mode.
 - Shared package builds still matter for production builds.
-  - `pnpm build:packages` may be required before `pnpm --filter web build`
+  - `pnpm build:packages` may be required before `pnpm --filter toda-calendar build`
     when shared workspace packages changed or have not been built yet.
 
 ### Current web auth contract
 
-- `apps/web/lib/auth/providers.ts`
+- `apps/toda-calendar/lib/auth/providers.ts`
   - Toda enum: `kakao | apple | google`
   - Supabase provider mapping is isolated in one place.
-- `apps/web/lib/auth/session.ts`
+- `apps/toda-calendar/lib/auth/session.ts`
   - Exposes a small `AppSession` contract instead of leaking raw Supabase
     session objects into the app.
-- `apps/web/lib/auth/require-session.ts`
+- `apps/toda-calendar/lib/auth/require-session.ts`
   - Redirects unauthenticated requests from `/` to `/login`.
-- `apps/web/lib/api/client.ts`
+- `apps/toda-calendar/lib/api/client.ts`
   - Adds `Authorization: Bearer <access_token>` automatically when a browser
     session exists.
 
@@ -74,10 +74,10 @@ If these are missing, the UI stays usable for frontend work:
 
 ### Validation completed
 
-- `pnpm --filter web lint`
-- `pnpm --filter web typecheck`
+- `pnpm --filter toda-calendar lint`
+- `pnpm --filter toda-calendar typecheck`
 - `pnpm build:packages`
-- `pnpm --filter web build`
+- `pnpm --filter toda-calendar build`
 
 ### Still intentionally not done
 
