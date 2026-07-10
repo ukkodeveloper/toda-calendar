@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 
 import { Avatar } from "@astryxdesign/core/Avatar"
@@ -23,8 +23,7 @@ import { HStack, VStack } from "@astryxdesign/core/Layout"
 import { Text } from "@astryxdesign/core/Text"
 
 import { colorAvatarSrc } from "@/lib/avatar"
-import { chatApi, trialApi } from "@/lib/api"
-import { useTrialSocket } from "@/lib/api/socket"
+import { MOCK_TRIAL_MESSAGES, MOCK_TRIAL_PARTICIPANTS } from "@/lib/mock-chat"
 import type { TrialEndResponse } from "@/lib/api/types"
 
 // ─────────────────────────── 타입 ───────────────────────────
@@ -182,69 +181,12 @@ export function TrialSheet({
     }
   }, [isOpen])
 
-  // 마운트 시 데이터 로드
+  // mock 데이터 로드
   useEffect(() => {
     if (!isOpen) return
-    trialApi
-      .participants(trialId)
-      .then((data) => {
-        setParticipants([
-          {
-            uuid: data.defendant.uuid,
-            nickname: data.defendant.nickname,
-            isDefendant: true,
-          },
-          ...data.witnesses.map((w) => ({
-            uuid: w.uuid,
-            nickname: w.nickname,
-            isDefendant: false,
-          })),
-        ])
-      })
-      .catch(() => {})
-
-    chatApi
-      .messages(roomId)
-      .then((msgs) => {
-        const trialMsgs = msgs
-          .filter((m) => m.caseId === caseId && m.user !== null)
-          .map((m) => ({
-            id: String(m.messageId),
-            senderUuid: m.user!.uuid,
-            nickname: m.user!.nickname,
-            color: m.user!.color,
-            text: m.content,
-            time: formatTime(m.createdAt),
-          }))
-        setMessages(trialMsgs)
-      })
-      .catch(() => {})
-  }, [isOpen, trialId, caseId, roomId])
-
-  // 소켓 연결
-  const socketRef = useTrialSocket(isOpen ? trialId : null, {
-    CHAT: (payload) => {
-      if (payload.caseId !== caseId) return
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: String(payload.messageId),
-          senderUuid: payload.user.uuid,
-          nickname: payload.user.nickname,
-          color: payload.user.color,
-          text: payload.content,
-          time: formatTime(payload.createdAt),
-        },
-      ])
-    },
-    TRIAL_STATUS: (payload) => {
-      setTrialStatus(payload.status)
-    },
-    TRIAL_ENDED: (payload) => {
-      setTrialStatus("ENDED")
-      setVerdictResult(payload)
-    },
-  })
+    setParticipants(MOCK_TRIAL_PARTICIPANTS)
+    setMessages(MOCK_TRIAL_MESSAGES)
+  }, [isOpen])
 
   const isDefendant = currentUserUuid === defendantUuid
   const myVote = votes[currentUserUuid]
@@ -255,15 +197,37 @@ export function TrialSheet({
 
   const { label: statusLabel, badgeVariant } = STATUS_META[trialStatus]
 
+  const now = () => {
+    const d = new Date()
+    const h = d.getHours()
+    const m = d.getMinutes()
+    return (
+      (h < 12 ? "오전" : "오후") +
+      " " +
+      (h % 12 || 12) +
+      ":" +
+      String(m).padStart(2, "0")
+    )
+  }
+
   const handleSend = (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
-    ;(socketRef.current as any)?.sendTrialChat(trimmed)
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: "sent-" + String(prev.length),
+        senderUuid: currentUserUuid,
+        nickname: "나",
+        color: "teal",
+        text: trimmed,
+        time: now(),
+      },
+    ])
     setValue("")
   }
 
-  const handleEndStatement = async () => {
-    await trialApi.endStatement(trialId)
+  const handleEndStatement = () => {
     setTrialStatus("VOTING")
     setMessages((prev) => [
       ...prev,
@@ -272,24 +236,42 @@ export function TrialSheet({
         senderUuid: "system",
         nickname: "",
         text: "⚖️ 최후진술이 종료되었습니다. 평결을 시작합니다.",
-        time: "지금",
+        time: now(),
         isSystem: true,
       },
     ])
   }
 
-  const handleVote = async (guilty: boolean) => {
-    await trialApi.vote(trialId, { guilty })
+  const handleVote = (guilty: boolean) => {
     setVotes((prev) => ({
       ...prev,
       [currentUserUuid]: guilty ? "GUILTY" : "NOT_GUILTY",
     }))
   }
 
-  const handleEndTrial = async () => {
-    const result = await trialApi.endTrial(trialId)
+  const handleEndTrial = () => {
+    const guiltyCount = Object.values(votes).filter(
+      (v) => v === "GUILTY"
+    ).length
+    const notGuiltyCount = Object.values(votes).filter(
+      (v) => v === "NOT_GUILTY"
+    ).length
+    const verdict = guiltyCount >= notGuiltyCount ? "GUILTY" : "NOT_GUILTY"
     setTrialStatus("ENDED")
-    setVerdictResult(result)
+    setVerdictResult({
+      trialId,
+      status: "ENDED",
+      verdict,
+      guiltyCount,
+      notGuiltyCount,
+      defendant: {
+        uuid: "u-penguin",
+        nickname: "성난 펭귄",
+        newTitle: verdict === "GUILTY" ? "EX_CONVICT" : "CITIZEN",
+        convictionCount: verdict === "GUILTY" ? 1 : 0,
+      },
+      caseStatus: "CLOSED",
+    })
   }
 
   const composerAction =

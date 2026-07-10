@@ -1,30 +1,150 @@
 // 임시 mock 데이터 — 실 API/WebSocket 연동 전 데모용
-// 8명의 채팅 + 이벤트 카드(사건 공표) 포함
+
+import type { CaseDetailResponse } from "@/lib/api/types"
 
 export const MOCK_ME_UUID = "u-cat"
 
-export const MOCK_CASES = [
+// ─── 사건 목록 ─────────────────────────────────────────────────────────────────
+
+export const MOCK_CASES: CaseDetailResponse[] = [
   {
     caseId: 1,
     title: "금주 챌린지 60일",
-    status: "DECLARED" as const,
+    content:
+      "두 달 동안 술을 한 모금도 마시지 않겠습니다. 어기면 전원 치킨 사기.",
+    status: "DECLARED",
     nickname: "억울한 호랑이",
+    defendantUuid: "u-tiger",
+    period: "2026-09-10T00:00:00",
+    trialStatus: "STATEMENT",
+    trialId: 0,
   },
   {
     caseId: 2,
     title: "금연 30일",
-    status: "ON_TRIAL" as const,
+    content:
+      "30일 동안 담배를 끊겠습니다. 실패 시 헬스장 한 달 등록비 본인 부담.",
+    status: "ON_TRIAL",
     nickname: "성난 펭귄",
+    defendantUuid: "u-penguin",
+    period: "2026-08-10T00:00:00",
+    trialStatus: "VOTING",
+    trialId: 1,
   },
   {
     caseId: 3,
     title: "아침 6시 기상 한 달",
-    status: "CLOSED" as const,
+    content: "한 달 동안 매일 아침 6시에 기상 인증 사진을 올립니다.",
+    status: "CLOSED",
     nickname: "느긋한 판다",
+    defendantUuid: "u-panda",
+    period: "2026-07-01T00:00:00",
+    trialStatus: "ENDED",
+    trialId: 2,
   },
 ]
 
-type ChatItem = {
+// ─── 재판 참여자 (trialId: 1 — 금연 30일) ─────────────────────────────────────
+
+export const MOCK_TRIAL_PARTICIPANTS = [
+  {
+    uuid: "u-penguin",
+    nickname: "성난 펭귄",
+    color: "blue",
+    isDefendant: true,
+  },
+  {
+    uuid: "u-tiger",
+    nickname: "억울한 호랑이",
+    color: "orange",
+    isDefendant: false,
+  },
+  {
+    uuid: "u-panda",
+    nickname: "느긋한 판다",
+    color: "green",
+    isDefendant: false,
+  },
+  {
+    uuid: "u-rabbit",
+    nickname: "부지런한 토끼",
+    color: "yellow",
+    isDefendant: false,
+  },
+]
+
+// ─── 재판 채팅 (trialId: 1 — 금연 30일) ──────────────────────────────────────
+
+export const MOCK_TRIAL_MESSAGES = [
+  {
+    id: "t1",
+    senderUuid: "system",
+    nickname: "",
+    text: "⚖️ 재판이 시작됩니다. 피고인은 최후진술을 해주세요.",
+    time: "오후 2:00",
+    isSystem: true,
+  },
+  {
+    id: "t2",
+    senderUuid: "u-penguin",
+    nickname: "성난 펭귄",
+    color: "blue",
+    text: "저 정말 열심히 했는데요... 딱 하루 실수한 거예요. 그 날 진짜 너무 힘들었어요 ㅠ",
+    time: "오후 2:01",
+  },
+  {
+    id: "t3",
+    senderUuid: "u-tiger",
+    nickname: "억울한 호랑이",
+    color: "orange",
+    text: "목격자로서 말씀드리면, 지난주 화요일 저녁에 편의점 앞에서 담배 피우는 것을 봤습니다.",
+    time: "오후 2:02",
+  },
+  {
+    id: "t4",
+    senderUuid: "u-panda",
+    nickname: "느긋한 판다",
+    color: "green",
+    text: "저도 봤어요. 같이 있었거든요.",
+    time: "오후 2:02",
+  },
+  {
+    id: "t5",
+    senderUuid: "u-penguin",
+    nickname: "성난 펭귄",
+    color: "blue",
+    text: "그건... 사실이에요. 그 날 진짜 최악의 하루였어요. 스트레스가 너무 심해서",
+    time: "오후 2:03",
+  },
+  {
+    id: "t6",
+    senderUuid: "u-rabbit",
+    nickname: "부지런한 토끼",
+    color: "yellow",
+    text: "이유가 어찌 됐든 규칙을 어긴 건 맞잖아요. 평결로 넘어가야 할 것 같아요.",
+    time: "오후 2:04",
+  },
+  {
+    id: "t7",
+    senderUuid: "u-penguin",
+    nickname: "성난 펭귄",
+    color: "blue",
+    text: "반성하고 있어요 ㅠ 한 번만 봐주세요...",
+    time: "오후 2:04",
+  },
+  {
+    id: "t8",
+    senderUuid: "system",
+    nickname: "",
+    text: "⚖️ 최후진술이 종료되었습니다. 평결을 진행합니다.",
+    time: "오후 2:05",
+    isSystem: true,
+  },
+]
+
+// ─── 채팅 스트림 타입 ──────────────────────────────────────────────────────────
+
+type ChatBubble = {
   id: string
   kind: "chat"
   sender: "user" | "assistant"
@@ -44,7 +164,7 @@ type EventCard = {
   time: string
 }
 
-export type MockListItem = ChatItem | EventCard
+export type MockListItem = ChatBubble | EventCard
 
 function chat(
   id: string,
@@ -53,7 +173,7 @@ function chat(
   text: string,
   time: string,
   uuid: string
-): ChatItem {
+): ChatBubble {
   return {
     id,
     kind: "chat",
@@ -74,6 +194,8 @@ function event(
 ): EventCard {
   return { id, kind: "event", eventType, caseTitle, caseId, time }
 }
+
+// ─── 방 채팅 스트림 ────────────────────────────────────────────────────────────
 
 export const MOCK_CHAT_ITEMS: MockListItem[] = [
   chat(
@@ -278,4 +400,5 @@ export const MOCK_CHAT_ITEMS: MockListItem[] = [
     "오전 10:21",
     "u-cat"
   ),
+  event("ev-3", "TRIAL_STARTED", "금연 30일", 2, "오후 2:00"),
 ]

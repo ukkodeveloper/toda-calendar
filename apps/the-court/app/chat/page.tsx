@@ -26,6 +26,7 @@ import { TrialSheet } from "@/components/trial-sheet"
 import { WitnessDialog } from "@/components/witness-dialog"
 import { colorAvatarSrc } from "@/lib/avatar"
 import {
+  MOCK_CASES,
   MOCK_CHAT_ITEMS,
   MOCK_ME_UUID,
   type MockListItem,
@@ -296,7 +297,10 @@ function ChatPageInner() {
                   <ChatEventCard
                     card={item}
                     onClickDeclared={handleEventDeclared}
-                    onClickTrial={() => {}}
+                    onClickTrial={(caseId) => {
+                      const c = MOCK_CASES.find((mc) => mc.caseId === caseId)
+                      if (c?.trialId) setTrialCase(c)
+                    }}
                   />
                 </div>
               )
