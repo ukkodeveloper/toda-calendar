@@ -7,7 +7,7 @@ import { Badge } from "@astryxdesign/core/Badge"
 import { Button } from "@astryxdesign/core/Button"
 import { ClickableCard } from "@astryxdesign/core/ClickableCard"
 import { Dialog } from "@astryxdesign/core/Dialog"
-import { DropdownMenu } from "@astryxdesign/core/DropdownMenu"
+import { DropdownMenu, DropdownMenuItem } from "@astryxdesign/core/DropdownMenu"
 import { Heading } from "@astryxdesign/core/Heading"
 import { HStack, VStack } from "@astryxdesign/core/Layout"
 import { Spinner } from "@astryxdesign/core/Spinner"
@@ -17,6 +17,25 @@ import { TextInput } from "@astryxdesign/core/TextInput"
 import { AppHeader } from "@/components/app-header"
 import { loadAuth, type AuthUser } from "@/lib/auth"
 import { createRoom, getRooms, joinRoom, type Room } from "@/lib/rooms"
+
+function PlusIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M8 2v12M2 8h12"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
 
 // 온보딩 이후 도착지. 왼쪽 로고 · 오른쪽 + (생성/참여) · 아래 참여중 채팅방 리스트.
 export default function HomePage() {
@@ -46,30 +65,34 @@ export default function HomePage() {
           <DropdownMenu
             hasChevron={false}
             placement="below"
+            menuWidth={256}
             button={{
               label: "채팅방 추가",
               isIconOnly: true,
-              variant: "secondary",
+              variant: "primary",
               size: "lg",
-              icon: (
-                <span style={{ fontSize: 20, lineHeight: 1, fontWeight: 600 }}>
-                  +
-                </span>
-              ),
+              icon: <PlusIcon />,
             }}
-            items={[
-              { label: "채팅방 생성하기", onClick: () => setCreateOpen(true) },
-              { label: "채팅방 참여하기", onClick: () => setJoinOpen(true) },
-            ]}
-          />
+          >
+            <DropdownMenuItem
+              label="채팅방 생성하기"
+              description="새 방을 만들고 초대코드를 공유해요"
+              onClick={() => setCreateOpen(true)}
+            />
+            <DropdownMenuItem
+              label="채팅방 참여하기"
+              description="초대코드로 기존 방에 들어가요"
+              onClick={() => setJoinOpen(true)}
+            />
+          </DropdownMenu>
         }
       />
 
       {/* 참여중인 채팅방 리스트 */}
-      <VStack style={{ gap: 10, padding: "8px 20px 40px", flex: 1 }}>
-        <Text color="secondary" type="label" style={{ paddingInline: 4 }}>
+      <VStack style={{ gap: 12, padding: "20px 20px 40px", flex: 1 }}>
+        <Heading level={6} style={{ paddingInline: 4 }}>
           참여중인 채팅방
-        </Text>
+        </Heading>
 
         {rooms === null ? (
           <HStack justify="center" style={{ padding: 40 }}>
@@ -93,14 +116,18 @@ export default function HomePage() {
               label={room.title}
               href={`/chat?roomId=${room.roomId}`}
             >
-              <HStack align="center" justify="between" style={{ gap: 12 }}>
-                <VStack style={{ gap: 2, minWidth: 0 }}>
+              <HStack
+                align="center"
+                justify="between"
+                style={{ gap: 12, padding: "6px 0" }}
+              >
+                <VStack style={{ gap: 4, minWidth: 0 }}>
                   <Heading level={5}>{room.title}</Heading>
                   <Text color="secondary" type="supporting">
                     {room.participantCount}명 참여 중
                   </Text>
                 </VStack>
-                <Badge variant="neutral" label={`${room.participantCount}명`} />
+                <Badge variant="info" label={`${room.participantCount}명`} />
               </HStack>
             </ClickableCard>
           ))
