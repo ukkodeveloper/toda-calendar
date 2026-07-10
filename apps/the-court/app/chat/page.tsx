@@ -4,7 +4,7 @@ import { useState } from "react"
 
 import { Icon } from "@astryxdesign/core/Icon"
 import { IconButton } from "@astryxdesign/core/IconButton"
-import { VStack } from "@astryxdesign/core/Layout"
+import { HStack, VStack } from "@astryxdesign/core/Layout"
 import { Avatar } from "@astryxdesign/core/Avatar"
 import {
   ChatComposer,
@@ -17,7 +17,10 @@ import {
 } from "@astryxdesign/core/Chat"
 
 import { AppHeader } from "@/components/app-header"
+import { CaseListDrawer } from "@/components/case-list-drawer"
 import { DeclareIcon, WitnessIcon } from "@/components/chat-action-icons"
+import { DeclareCaseDialog } from "@/components/declare-case-dialog"
+import { WitnessDialog } from "@/components/witness-dialog"
 import { colorAvatarSrc } from "@/lib/avatar"
 
 type Sender = "user" | "assistant" | "system"
@@ -60,6 +63,9 @@ const INITIAL_MESSAGES: Message[] = [
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
   const [value, setValue] = useState("")
+  const [isDeclareOpen, setIsDeclareOpen] = useState(false)
+  const [isWitnessOpen, setIsWitnessOpen] = useState(false)
+  const [isCaseListOpen, setIsCaseListOpen] = useState(false)
 
   const handleSubmit = (text: string) => {
     const trimmed = text.trim()
@@ -92,6 +98,7 @@ export default function ChatPage() {
             label="메뉴 열기"
             variant="ghost"
             icon={<Icon icon="menu" size="lg" />}
+            onClick={() => setIsCaseListOpen(true)}
           />
         }
       />
@@ -104,20 +111,22 @@ export default function ChatPage() {
             onSubmit={handleSubmit}
             placeholder="메시지를 입력하세요"
             headerActions={
-              <>
+              <HStack align="center" gap={2}>
                 <IconButton
                   label="공표하기 (사건 등록)"
                   variant="ghost"
                   size="sm"
                   icon={<Icon icon={DeclareIcon} size="md" />}
+                  onClick={() => setIsDeclareOpen(true)}
                 />
                 <IconButton
                   label="고발하기 (목격 등록)"
                   variant="ghost"
                   size="sm"
                   icon={<Icon icon={WitnessIcon} size="md" />}
+                  onClick={() => setIsWitnessOpen(true)}
                 />
-              </>
+              </HStack>
             }
           />
         }
@@ -154,6 +163,22 @@ export default function ChatPage() {
           })}
         </ChatMessageList>
       </ChatLayout>
+
+      <WitnessDialog
+        isOpen={isWitnessOpen}
+        onClose={() => setIsWitnessOpen(false)}
+      />
+
+      <DeclareCaseDialog
+        isOpen={isDeclareOpen}
+        onOpenChange={setIsDeclareOpen}
+        roomId={1}
+      />
+
+      <CaseListDrawer
+        isOpen={isCaseListOpen}
+        onClose={() => setIsCaseListOpen(false)}
+      />
     </VStack>
   )
 }
