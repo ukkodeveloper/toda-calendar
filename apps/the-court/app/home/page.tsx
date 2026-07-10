@@ -3,16 +3,27 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { Text } from "@astryxdesign/core/Text"
+import { Badge } from "@astryxdesign/core/Badge"
+import { Button } from "@astryxdesign/core/Button"
+import { ClickableCard } from "@astryxdesign/core/ClickableCard"
+import { Dialog } from "@astryxdesign/core/Dialog"
+import { DropdownMenu } from "@astryxdesign/core/DropdownMenu"
 import { Heading } from "@astryxdesign/core/Heading"
-import { VStack, HStack } from "@astryxdesign/core/Layout"
+import { HStack, VStack } from "@astryxdesign/core/Layout"
+import { Spinner } from "@astryxdesign/core/Spinner"
+import { Text } from "@astryxdesign/core/Text"
+import { TextInput } from "@astryxdesign/core/TextInput"
 
 import { loadAuth, type AuthUser } from "@/lib/auth"
+import { createRoom, getRooms, joinRoom, type Room } from "@/lib/rooms"
 
-// 온보딩 이후 도착지. 지금은 로그인된 신원만 보여주는 최소 placeholder.
+// 온보딩 이후 도착지. 왼쪽 로고 · 오른쪽 + (생성/참여) · 아래 참여중 채팅방 리스트.
 export default function HomePage() {
   const router = useRouter()
   const [user, setUser] = useState<AuthUser | null>(null)
+  const [rooms, setRooms] = useState<Room[] | null>(null)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [joinOpen, setJoinOpen] = useState(false)
 
   useEffect(() => {
     const auth = loadAuth()
@@ -21,33 +32,206 @@ export default function HomePage() {
       return
     }
     setUser(auth)
+    getRooms().then(setRooms)
   }, [router])
 
   if (!user) return null
 
   return (
-    <VStack
-      align="center"
-      justify="center"
-      minHeight="100dvh"
-      style={{ maxWidth: 420, margin: "0 auto", padding: "24px", gap: 16 }}
-    >
-      <HStack align="center" style={{ gap: 12 }}>
-        <span
-          aria-hidden
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            background: user.color,
-            display: "inline-block",
-          }}
+    <VStack style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh" }}>
+      {/* 헤더 — 왼쪽 로고 · 오른쪽 + 드롭다운 */}
+      <HStack
+        align="center"
+        justify="between"
+        style={{ padding: "16px 20px", position: "sticky", top: 0, zIndex: 10 }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/hyeonhaengbeom_logo.png"
+          alt="현행범"
+          height={28}
+          style={{ height: 28, width: "auto", display: "block" }}
         />
-        <Heading level={1} type="display-3">
-          {user.nickname}
-        </Heading>
+
+        <DropdownMenu
+          hasChevron={false}
+          placement="below"
+          button={{
+            label: "채팅방 추가",
+            isIconOnly: true,
+            variant: "secondary",
+            size: "lg",
+            icon: (
+              <span style={{ fontSize: 20, lineHeight: 1, fontWeight: 600 }}>
+                +
+              </span>
+            ),
+          }}
+          items={[
+            { label: "채팅방 생성하기", onClick: () => setCreateOpen(true) },
+            { label: "채팅방 참여하기", onClick: () => setJoinOpen(true) },
+          ]}
+        />
       </HStack>
-      <Text color="secondary">로그인 완료 · 홈 화면은 준비 중이에요</Text>
+
+      {/* 참여중인 채팅방 리스트 */}
+      <VStack style={{ gap: 10, padding: "8px 20px 40px", flex: 1 }}>
+        <Text color="secondary" type="label" style={{ paddingInline: 4 }}>
+          참여중인 채팅방
+        </Text>
+
+        {rooms === null ? (
+          <HStack justify="center" style={{ padding: 40 }}>
+            <Spinner />
+          </HStack>
+        ) : rooms.length === 0 ? (
+          <VStack
+            align="center"
+            justify="center"
+            style={{ gap: 6, padding: "56px 24px", textAlign: "center" }}
+          >
+            <Text color="secondary">아직 참여중인 채팅방이 없어요</Text>
+            <Text color="disabled" type="supporting">
+              오른쪽 위 + 로 방을 만들거나 참여해 보세요
+            </Text>
+          </VStack>
+        ) : (
+          rooms.map((room) => (
+            <ClickableCard
+              key={room.roomId}
+              label={room.title}
+              href={`/chat?roomId=${room.roomId}`}
+            >
+              <HStack align="center" justify="between" style={{ gap: 12 }}>
+                <VStack style={{ gap: 2, minWidth: 0 }}>
+                  <Heading level={5}>{room.title}</Heading>
+                  <Text color="secondary" type="supporting">
+                    {room.participantCount}명 참여 중
+                  </Text>
+                </VStack>
+                <Badge variant="neutral" label={`${room.participantCount}명`} />
+              </HStack>
+            </ClickableCard>
+          ))
+        )}
+      </VStack>
+
+      <CreateRoomDialog
+        isOpen={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(room) => setRooms((prev) => [room, ...(prev ?? [])])}
+      />
+      <JoinRoomDialog
+        isOpen={joinOpen}
+        onOpenChange={setJoinOpen}
+        onJoined={(room) => setRooms((prev) => [room, ...(prev ?? [])])}
+      />
     </VStack>
+  )
+}
+
+function CreateRoomDialog({
+  isOpen,
+  onOpenChange,
+  onCreated,
+}: {
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
+  onCreated: (room: Room) => void
+}) {
+  const [title, setTitle] = useState("")
+  const [busy, setBusy] = useState(false)
+
+  async function submit() {
+    if (!title.trim() || busy) return
+    setBusy(true)
+    const { room } = await createRoom(title)
+    onCreated(room)
+    setBusy(false)
+    setTitle("")
+    onOpenChange(false)
+  }
+
+  return (
+    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} width={380}>
+      <VStack style={{ gap: 16, padding: 20 }}>
+        <Heading level={4}>채팅방 생성하기</Heading>
+        <TextInput
+          label="방 제목"
+          value={title}
+          onChange={setTitle}
+          placeholder="예: 우리 다이어트 모임"
+        />
+        <HStack justify="end" style={{ gap: 8 }}>
+          <Button
+            variant="ghost"
+            size="lg"
+            label="취소"
+            onClick={() => onOpenChange(false)}
+          />
+          <Button
+            variant="primary"
+            size="lg"
+            label="생성"
+            isLoading={busy}
+            isDisabled={!title.trim()}
+            onClick={submit}
+          />
+        </HStack>
+      </VStack>
+    </Dialog>
+  )
+}
+
+function JoinRoomDialog({
+  isOpen,
+  onOpenChange,
+  onJoined,
+}: {
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
+  onJoined: (room: Room) => void
+}) {
+  const [code, setCode] = useState("")
+  const [busy, setBusy] = useState(false)
+
+  async function submit() {
+    if (!code.trim() || busy) return
+    setBusy(true)
+    const room = await joinRoom(code)
+    onJoined(room)
+    setBusy(false)
+    setCode("")
+    onOpenChange(false)
+  }
+
+  return (
+    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} width={380}>
+      <VStack style={{ gap: 16, padding: 20 }}>
+        <Heading level={4}>채팅방 참여하기</Heading>
+        <TextInput
+          label="참여코드"
+          value={code}
+          onChange={(v) => setCode(v.toUpperCase())}
+          placeholder="예: QWERTZ"
+        />
+        <HStack justify="end" style={{ gap: 8 }}>
+          <Button
+            variant="ghost"
+            size="lg"
+            label="취소"
+            onClick={() => onOpenChange(false)}
+          />
+          <Button
+            variant="primary"
+            size="lg"
+            label="참여"
+            isLoading={busy}
+            isDisabled={!code.trim()}
+            onClick={submit}
+          />
+        </HStack>
+      </VStack>
+    </Dialog>
   )
 }
