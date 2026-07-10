@@ -11,7 +11,7 @@ import { isLoggedIn, login } from "@/lib/auth"
 import { generateIdentity, type Identity } from "@/lib/identity"
 
 // 색 원 지름(px). 이 값만 바꾸면 크기 조정.
-const AVATAR_SIZE = 200
+const AVATAR_SIZE = 160
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -25,6 +25,9 @@ export default function OnboardingPage() {
     }
     setIdentity(generateIdentity())
   }, [router])
+
+  // 원을 누르면 닉네임·색을 새로 뽑는다.
+  const reroll = () => setIdentity(generateIdentity())
 
   const start = async () => {
     if (!identity) return
@@ -43,19 +46,24 @@ export default function OnboardingPage() {
       style={{ maxWidth: 420, margin: "0 auto", padding: "56px 24px 40px" }}
     >
       <VStack align="center" justify="center" style={{ gap: 24, flex: 1 }}>
-        <div
-          aria-hidden
+        <button
+          type="button"
+          onClick={reroll}
+          aria-label="닉네임 다시 뽑기"
           style={{
             width: AVATAR_SIZE,
             height: AVATAR_SIZE,
             borderRadius: "50%",
             background: identity.color,
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
           }}
         />
 
         <Text
           style={{
-            fontSize: 32,
+            fontSize: 20,
             fontWeight: 700,
             lineHeight: 1.2,
             textAlign: "center",
