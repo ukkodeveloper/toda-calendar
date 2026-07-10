@@ -3,14 +3,16 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
+import { Avatar, type AvatarSize } from "@astryxdesign/core/Avatar"
 import { Button } from "@astryxdesign/core/Button"
 import { Text } from "@astryxdesign/core/Text"
 import { VStack } from "@astryxdesign/core/Layout"
 
 import { isLoggedIn, login } from "@/lib/auth"
+import { colorAvatarSrc } from "@/lib/avatar"
 import { generateIdentity, type Identity } from "@/lib/identity"
 
-// 색 원 지름(px). 이 값만 바꾸면 크기 조정.
+// 아바타 지름(px). 이 값만 바꾸면 크기 조정.
 const AVATAR_SIZE = 160
 
 export default function OnboardingPage() {
@@ -45,21 +47,34 @@ export default function OnboardingPage() {
       minHeight="100dvh"
       style={{ maxWidth: 420, margin: "0 auto", padding: "56px 24px 40px" }}
     >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/hyeonhaengbeom_logo.png"
+        alt="현행범"
+        height={32}
+        style={{ height: 32, width: "auto", display: "block" }}
+      />
+
       <VStack align="center" justify="center" style={{ gap: 24, flex: 1 }}>
         <button
           type="button"
           onClick={reroll}
           aria-label="닉네임 다시 뽑기"
           style={{
-            width: AVATAR_SIZE,
-            height: AVATAR_SIZE,
-            borderRadius: "50%",
-            background: identity.color,
             border: "none",
             padding: 0,
+            background: "none",
+            lineHeight: 0,
             cursor: "pointer",
           }}
-        />
+        >
+          <Avatar
+            size={AVATAR_SIZE as AvatarSize}
+            src={colorAvatarSrc(identity.color)}
+            name={identity.nickname}
+            alt={identity.nickname}
+          />
+        </button>
 
         <Text
           style={{
