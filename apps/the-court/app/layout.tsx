@@ -1,12 +1,35 @@
 import type { Metadata, Viewport } from "next"
+import { Figtree, Montserrat } from "next/font/google"
+import localFont from "next/font/local"
 
-// Astryx design system — reset → compiled component styles.
-// Theme tokens (the_court_theme) are injected at runtime by <Providers>/<Theme>.
+// Astryx design system — reset → compiled component styles → Stone 테마 토큰.
+// Stone 은 프리컴파일 CSS. <Providers>/<Theme> 가 data-astryx-theme="stone" 만 붙인다.
 import "@astryxdesign/core/reset.css"
 import "@astryxdesign/core/astryx.css"
+import "@astryxdesign/theme-stone/theme.css"
 import "./globals.css"
 
 import { Providers } from "./providers"
+
+// 라틴 = Figtree(본문)/Montserrat(제목), 한글 = Pretendard. 셋 다 next/font 로
+// 셀프호스팅(런타임 CDN 없음). CSS 변수로 노출해 globals 의 폰트 토큰에 연결한다.
+const figtree = Figtree({
+  subsets: ["latin"],
+  variable: "--font-figtree",
+  display: "swap",
+})
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+})
+// Pretendard — 한글 본문·제목. Variable woff2 를 로컬(app/fonts)에서 로드. wght 45–920.
+const pretendard = localFont({
+  src: "./fonts/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  display: "swap",
+  weight: "45 920",
+})
 
 export const metadata: Metadata = {
   title: "현행범 (現行犯)",
@@ -34,7 +57,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#14213D",
+  // 흰 앱 프레임 상단과 맞춘 상태바 크롬 (앱 프레임 배경 = #fff).
+  themeColor: "#ffffff",
 }
 
 export default function RootLayout({
@@ -44,7 +68,11 @@ export default function RootLayout({
 }>) {
   // data-theme on <html> avoids a flash of the wrong color-scheme before hydration.
   return (
-    <html lang="ko" data-theme="dark">
+    <html
+      lang="ko"
+      data-theme="light"
+      className={`${pretendard.variable} ${figtree.variable} ${montserrat.variable}`}
+    >
       <body>
         <Providers>
           <div className="app-shell">{children}</div>

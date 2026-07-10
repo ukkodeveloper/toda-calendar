@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 import { Badge } from "@astryxdesign/core/Badge"
 import { Dialog } from "@astryxdesign/core/Dialog"
 import { Divider } from "@astryxdesign/core/Divider"
@@ -8,50 +10,51 @@ import { Icon } from "@astryxdesign/core/Icon"
 import { IconButton } from "@astryxdesign/core/IconButton"
 import { HStack, VStack } from "@astryxdesign/core/Layout"
 import { List, ListItem } from "@astryxdesign/core/List"
+import { Spinner } from "@astryxdesign/core/Spinner"
 import { Text } from "@astryxdesign/core/Text"
 
-type CaseStatus = "진행중" | "종결"
+import { caseApi } from "@/lib/api"
+import type { CaseDetailResponse, CaseResponse } from "@/lib/api/types"
 
-export type CaseItem = {
-  id: string
-  title: string
-  description: string
-  status: CaseStatus
-}
+export type TrialStatus = "STATEMENT" | "VOTING" | "ENDED"
 
-// 임시 목 데이터 — 나중에 실데이터로 교체.
-const MOCK_CASES: CaseItem[] = [
-  {
-    id: "c1",
-    title: "아침 6시 기상 인증",
-    description: "오늘 13분 지각 · 벌금 심의 중",
-    status: "진행중",
-  },
-  {
-    id: "c2",
-    title: "주 3회 운동 인증",
-    description: "이번 주 2/3 · 목요일까지",
-    status: "진행중",
-  },
-  {
-    id: "c3",
-    title: "카페인 끊기",
-    description: "3일 연속 성공 후 자백",
-    status: "종결",
-  },
-]
+export type CaseItem = CaseDetailResponse
 
 export function CaseListDrawer({
   isOpen,
   onClose,
-  cases = MOCK_CASES,
+  roomId,
   onSelect,
+  highlightCaseId,
 }: {
   isOpen: boolean
   onClose: () => void
-  cases?: CaseItem[]
-  onSelect?: (c: CaseItem) => void
+  roomId: number
+  onSelect?: (c: CaseDetailResponse) => void
+  highlightCaseId?: number
 }) {
+  const [cases, setCases] = useState<CaseResponse[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) return
+    setLoading(true)
+    caseApi
+      .listAll(roomId)
+      .then(setCases)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [isOpen, roomId])
+
+  const handleSelect = async (c: CaseResponse) => {
+    try {
+      const detail = await caseApi.detail(c.caseId)
+      onSelect?.(detail)
+    } catch {
+      onSelect?.(c as unknown as CaseDetailResponse)
+    }
+  }
+
   return (
     <Dialog
       isOpen={isOpen}
@@ -84,7 +87,11 @@ export function CaseListDrawer({
         <VStack
           style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 8 }}
         >
-          {cases.length === 0 ? (
+          {loading ? (
+            <HStack justify="center" style={{ padding: 40 }}>
+              <Spinner />
+            </HStack>
+          ) : cases.length === 0 ? (
             <VStack
               align="center"
               justify="center"
@@ -94,20 +101,41 @@ export function CaseListDrawer({
             </VStack>
           ) : (
             <List>
-              {cases.map((c) => (
-                <ListItem
-                  key={c.id}
-                  label={c.title}
-                  description={c.description}
-                  onClick={() => onSelect?.(c)}
-                  endContent={
-                    <Badge
-                      variant={c.status === "진행중" ? "warning" : "neutral"}
-                      label={c.status}
-                    />
-                  }
-                />
-              ))}
+              {cases.map((c) => {
+                const badgeProps =
+                  c.status === "DECLARED"
+                    ? { variant: "info" as const, label: "공표됨" }
+                    : c.status === "ON_TRIAL"
+                      ? { variant: "warning" as const, label: "재판중" }
+                      : { variant: "neutral" as const, label: "종결" }
+
+                const description =
+                  c.status === "DECLARED"
+                    ? "공표됨 · 고발 대기 중"
+                    : c.status === "ON_TRIAL"
+                      ? "재판 진행 중"
+                      : "선고 완료"
+
+                const isHighlighted = c.caseId === highlightCaseId
+                return (
+                  <ListItem
+                    key={c.caseId}
+                    label={c.title}
+                    description={description}
+                    onClick={() => handleSelect(c)}
+                    endContent={<Badge {...badgeProps} />}
+                    style={
+                      isHighlighted
+                        ? {
+                            background:
+                              "var(--color-background-accent-subtle, rgba(220,202,4,0.12))",
+                            borderRadius: "var(--radius-element, 8px)",
+                          }
+                        : undefined
+                    }
+                  />
+                )
+              })}
             </List>
           )}
         </VStack>

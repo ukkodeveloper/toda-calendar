@@ -13,8 +13,8 @@ export function AppHeader({ endContent }: { endContent?: ReactNode }) {
       align="center"
       justify="between"
       style={{
-        minHeight: 56,
-        padding: "12px 20px",
+        minHeight: 44,
+        padding: "8px 20px",
         position: "sticky",
         top: 0,
         zIndex: 10,

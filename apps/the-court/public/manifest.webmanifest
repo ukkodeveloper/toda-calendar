@@ -1,0 +1,14 @@
+{
+  "name": "현행범 (現行犯)",
+  "short_name": "현행범",
+  "description": "친구들의 고발과 재판으로, 내 결심을 진짜 지키게 만드는 소셜 커밋먼트 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14213D",
+  "theme_color": "#14213D",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

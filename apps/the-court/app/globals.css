@@ -31,27 +31,34 @@ body > [data-astryx-theme]:has(> .app-shell) {
 }
 
 /*
- * Stone 테마의 지정 폰트(Figtree/Montserrat)를 next/font 로드본으로 연결.
+ * Stone 테마의 폰트 토큰을 next/font 로드본으로 연결.
  * stone theme.css 는 폰트 "이름"만 박아두므로, 실제 렌더되게 토큰만 로드본으로 덮는다.
  * 색·크기 등 나머지 토큰은 stone 기본값 그대로 (/themes?theme=stone).
  */
 [data-astryx-theme="stone"] {
-  /* 라틴 = Figtree/Montserrat(로드본), 한글 = Pretendard. 글자별로 폰트가 갈린다. */
+  /* 라틴 = Figtree/Montserrat, 한글 = Pretendard(셀프호스팅). 글자별로 폰트가 갈린다. */
   --font-family-body:
-    var(--font-figtree), "Pretendard Variable", Pretendard, -apple-system,
+    var(--font-figtree), var(--font-pretendard), -apple-system,
     BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
   --font-family-heading:
-    var(--font-montserrat), var(--font-figtree), "Pretendard Variable",
-    Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-    "Segoe UI", Roboto, sans-serif;
+    var(--font-montserrat), var(--font-figtree), var(--font-pretendard),
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI",
+    Roboto, sans-serif;
 }
 
 /*
  * 온보딩 CTA — 버튼을 화면 폭 꽉 채우고, 라벨은 가운데 + 살짝 키움.
  * (버튼 폭은 style={{ width: "100%" }} 로 채운다. 여기선 라벨만 키운다.)
  */
+.onboarding-cta {
+  min-height: 72px; /* lg 기본(48px)의 1.5배 */
+}
+
 .onboarding-cta > span:first-child > span {
   font-size: 1.375rem; /* 22px — lg 기본(20px)보다 크게 */
+  display: block;
+  width: 100%;
+  text-align: center;
 }
 
 /*

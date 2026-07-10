@@ -9,8 +9,9 @@ import { Text } from "@astryxdesign/core/Text"
 import { VStack } from "@astryxdesign/core/Layout"
 
 import { isLoggedIn, login } from "@/lib/auth"
+import { userApi } from "@/lib/api/user"
 import { colorAvatarSrc } from "@/lib/avatar"
-import { generateIdentity, type Identity } from "@/lib/identity"
+import type { Identity } from "@/lib/identity"
 
 // 아바타 지름(px). 이 값만 바꾸면 크기 조정.
 const AVATAR_SIZE = 160
@@ -19,17 +20,17 @@ export default function OnboardingPage() {
   const router = useRouter()
   const [identity, setIdentity] = useState<Identity | null>(null)
 
-  // 이미 로그인돼 있으면 온보딩을 건너뛰고 홈으로.
   useEffect(() => {
     if (isLoggedIn()) {
       router.replace("/home")
       return
     }
-    setIdentity(generateIdentity())
+    userApi.randomNickname().then(setIdentity)
   }, [router])
 
-  // 원을 누르면 닉네임·색을 새로 뽑는다.
-  const reroll = () => setIdentity(generateIdentity())
+  const reroll = () => {
+    userApi.randomNickname().then(setIdentity)
+  }
 
   const start = async () => {
     if (!identity) return
@@ -45,7 +46,7 @@ export default function OnboardingPage() {
       align="center"
       justify="between"
       minHeight="100dvh"
-      style={{ maxWidth: 420, margin: "0 auto", padding: "56px 24px 40px" }}
+      style={{ maxWidth: 420, margin: "0 auto", padding: "28px 24px 40px" }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -93,6 +94,7 @@ export default function OnboardingPage() {
         size="lg"
         label="현행범 시작하기"
         clickAction={start}
+        className="onboarding-cta"
         style={{ width: "100%" }}
       />
     </VStack>

@@ -2,17 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm build:packages && pnpm --filter api build && pnpm --filter toda-calendar build",
-  "outputDirectory": "apps/toda-calendar/.next",
-  "functions": {
-    "api/index.ts": {
-      "maxDuration": 30
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/:route*",
-      "destination": "/api"
-    }
-  ]
+  "buildCommand": "pnpm --filter the-court build",
+  "outputDirectory": "apps/the-court/.next"
 }

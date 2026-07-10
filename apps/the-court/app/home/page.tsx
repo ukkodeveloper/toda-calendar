@@ -9,14 +9,50 @@ import { ClickableCard } from "@astryxdesign/core/ClickableCard"
 import { Dialog } from "@astryxdesign/core/Dialog"
 import { DropdownMenu, DropdownMenuItem } from "@astryxdesign/core/DropdownMenu"
 import { Heading } from "@astryxdesign/core/Heading"
+import { Icon } from "@astryxdesign/core/Icon"
+import { IconButton } from "@astryxdesign/core/IconButton"
 import { HStack, VStack } from "@astryxdesign/core/Layout"
 import { Spinner } from "@astryxdesign/core/Spinner"
 import { Text } from "@astryxdesign/core/Text"
 import { TextInput } from "@astryxdesign/core/TextInput"
+import { useToast } from "@astryxdesign/core/Toast"
 
 import { AppHeader } from "@/components/app-header"
 import { loadAuth, type AuthUser } from "@/lib/auth"
-import { createRoom, getRooms, joinRoom, type Room } from "@/lib/rooms"
+import { roomApi } from "@/lib/api"
+import type {
+  RoomListResponse,
+  RoomResponse,
+  JoinRoomResponse,
+} from "@/lib/api/types"
+
+function ShareIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="1"
+        y="6"
+        width="9"
+        height="9"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M5.5 5.5V3.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H11.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
 
 function PlusIcon() {
   return (
@@ -40,10 +76,19 @@ function PlusIcon() {
 // 온보딩 이후 도착지. 왼쪽 로고 · 오른쪽 + (생성/참여) · 아래 참여중 채팅방 리스트.
 export default function HomePage() {
   const router = useRouter()
+  const toast = useToast()
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [rooms, setRooms] = useState<Room[] | null>(null)
+  const [rooms, setRooms] = useState<RoomListResponse[] | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [joinOpen, setJoinOpen] = useState(false)
+
+  async function copyCode(code: string, roomTitle: string) {
+    await navigator.clipboard.writeText(code)
+    toast({
+      body: `"${roomTitle}" 초대코드 ${code} 복사됨`,
+      autoHideDuration: 3000,
+    })
+  }
 
   useEffect(() => {
     const auth = loadAuth()
@@ -52,7 +97,7 @@ export default function HomePage() {
       return
     }
     setUser(auth)
-    getRooms().then(setRooms)
+    roomApi.list().then(setRooms)
   }, [router])
 
   if (!user) return null
@@ -90,7 +135,7 @@ export default function HomePage() {
 
       {/* 참여중인 채팅방 리스트 */}
       <VStack style={{ gap: 12, padding: "20px 20px 40px", flex: 1 }}>
-        <Heading level={6} style={{ paddingInline: 4 }}>
+        <Heading level={5} style={{ paddingInline: 4 }}>
           참여중인 채팅방
         </Heading>
 
@@ -121,13 +166,26 @@ export default function HomePage() {
                 justify="between"
                 style={{ gap: 12, padding: "6px 0" }}
               >
-                <VStack style={{ gap: 4, minWidth: 0 }}>
+                <VStack style={{ gap: 4, minWidth: 0, flex: 1 }}>
                   <Heading level={5}>{room.title}</Heading>
                   <Text color="secondary" type="supporting">
                     {room.participantCount}명 참여 중
                   </Text>
                 </VStack>
-                <Badge variant="info" label={`${room.participantCount}명`} />
+                <HStack align="center" style={{ gap: 6 }}>
+                  <IconButton
+                    icon={<ShareIcon />}
+                    label="초대코드 공유"
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      copyCode(room.participationCode, room.title)
+                    }}
+                  />
+                  <Badge variant="info" label={`${room.participantCount}명`} />
+                </HStack>
               </HStack>
             </ClickableCard>
           ))
@@ -137,12 +195,17 @@ export default function HomePage() {
       <CreateRoomDialog
         isOpen={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={(room) => setRooms((prev) => [room, ...(prev ?? [])])}
+        onCreated={(room) => {
+          copyCode(room.participationCode, room.title)
+          roomApi.list().then(setRooms)
+        }}
       />
       <JoinRoomDialog
         isOpen={joinOpen}
         onOpenChange={setJoinOpen}
-        onJoined={(room) => setRooms((prev) => [room, ...(prev ?? [])])}
+        onJoined={() => {
+          roomApi.list().then(setRooms)
+        }}
       />
     </VStack>
   )
@@ -155,7 +218,7 @@ function CreateRoomDialog({
 }: {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onCreated: (room: Room) => void
+  onCreated: (room: RoomResponse) => void
 }) {
   const [title, setTitle] = useState("")
   const [busy, setBusy] = useState(false)
@@ -163,7 +226,7 @@ function CreateRoomDialog({
   async function submit() {
     if (!title.trim() || busy) return
     setBusy(true)
-    const { room } = await createRoom(title)
+    const room = await roomApi.create({ title })
     onCreated(room)
     setBusy(false)
     setTitle("")
@@ -208,7 +271,7 @@ function JoinRoomDialog({
 }: {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onJoined: (room: Room) => void
+  onJoined: () => void
 }) {
   const [code, setCode] = useState("")
   const [busy, setBusy] = useState(false)
@@ -216,8 +279,8 @@ function JoinRoomDialog({
   async function submit() {
     if (!code.trim() || busy) return
     setBusy(true)
-    const room = await joinRoom(code)
-    onJoined(room)
+    await roomApi.join({ participationCode: code })
+    onJoined()
     setBusy(false)
     setCode("")
     onOpenChange(false)
