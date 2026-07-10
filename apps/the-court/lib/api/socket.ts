@@ -21,24 +21,12 @@ import type {
   SocketVotePayload,
 } from "./types"
 
-// WS URL은 빌드타임이 아닌 런타임에 /api/config 에서 취득.
-// 이렇게 해야 NEXT_PUBLIC 없이도 서버 env(API_ORIGIN)를 반영할 수 있다.
-let _cachedWsUrl: string | null = null
-
-async function resolveWsUrl(): Promise<string> {
+// WS는 /ws 경로로 same-origin 연결 — Next.js rewrite가 API_ORIGIN/ws 로 프록시.
+// 이렇게 해야 dev tunnel 브라우저 인증 문제를 우회할 수 있다.
+function resolveWsUrl(): string {
   if (typeof window === "undefined") return "ws://localhost:8080/ws"
-  if (_cachedWsUrl) return _cachedWsUrl
-  try {
-    const res = await fetch("/api/config")
-    if (res.ok) {
-      const data = (await res.json()) as { wsUrl: string }
-      _cachedWsUrl = data.wsUrl
-      return _cachedWsUrl
-    }
-  } catch {
-    // ignore
-  }
-  return "ws://localhost:8080/ws"
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
+  return `${protocol}//${window.location.host}/ws`
 }
 
 // ─── STOMP 프레임 파서 ────────────────────────────────────────────────────────
@@ -106,8 +94,8 @@ export class RoomSocket {
 
   constructor(private readonly roomId: number) {}
 
-  async connect(): Promise<void> {
-    const wsUrl = await resolveWsUrl()
+  connect(): Promise<void> {
+    const wsUrl = resolveWsUrl()
     return new Promise((resolve, reject) => {
       const auth = loadAuth()
       const url = auth?.uuid ? `${wsUrl}?uuid=${auth.uuid}` : wsUrl
@@ -212,8 +200,8 @@ export class TrialSocket {
 
   constructor(private readonly trialId: number) {}
 
-  async connect(): Promise<void> {
-    const wsUrl = await resolveWsUrl()
+  connect(): Promise<void> {
+    const wsUrl = resolveWsUrl()
     return new Promise((resolve, reject) => {
       const auth = loadAuth()
       const url = auth?.uuid ? `${wsUrl}?uuid=${auth.uuid}` : wsUrl

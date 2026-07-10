@@ -18,6 +18,11 @@ const nextConfig = {
         source: "/api/:path*",
         destination: `${API_ORIGIN}/api/:path*`,
       },
+      // WebSocket also proxied through Vercel so browsers don't hit the dev tunnel directly
+      {
+        source: "/ws",
+        destination: `${API_ORIGIN}/ws`,
+      },
     ]
   },
 }
