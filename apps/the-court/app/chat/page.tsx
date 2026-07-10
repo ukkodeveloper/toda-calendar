@@ -17,6 +17,7 @@ import {
 } from "@astryxdesign/core/Chat"
 
 import { AppHeader } from "@/components/app-header"
+import { DeclareIcon, WitnessIcon } from "@/components/chat-action-icons"
 import { colorAvatarSrc } from "@/lib/avatar"
 
 type Sender = "user" | "assistant" | "system"
@@ -102,30 +103,55 @@ export default function ChatPage() {
             onChange={setValue}
             onSubmit={handleSubmit}
             placeholder="메시지를 입력하세요"
+            headerActions={
+              <>
+                <IconButton
+                  label="공표하기 (사건 등록)"
+                  variant="ghost"
+                  size="sm"
+                  icon={<Icon icon={DeclareIcon} size="md" />}
+                />
+                <IconButton
+                  label="고발하기 (목격 등록)"
+                  variant="ghost"
+                  size="sm"
+                  icon={<Icon icon={WitnessIcon} size="md" />}
+                />
+              </>
+            }
           />
         }
       >
         <ChatMessageList>
           <ChatSystemMessage variant="divider">오늘</ChatSystemMessage>
-          {messages.map((m) => (
-            <ChatMessage
-              key={m.id}
-              sender={m.sender}
-              name={m.name}
-              avatar={
-                m.sender === "assistant" ? (
-                  <Avatar
-                    name={m.name ?? ""}
-                    src={m.color ? colorAvatarSrc(m.color) : undefined}
-                    size="small"
-                  />
-                ) : undefined
-              }
-            >
-              <ChatMessageBubble>{m.text}</ChatMessageBubble>
-              <ChatMessageMetadata timestamp={m.time} />
-            </ChatMessage>
-          ))}
+          {messages.map((m, i) => {
+            // 같은 발신자·같은 시간이 연속되면 그룹의 마지막 버블에만 시간 표시.
+            const next = messages[i + 1]
+            const isLastInGroup =
+              !next ||
+              next.sender !== m.sender ||
+              next.name !== m.name ||
+              next.time !== m.time
+            return (
+              <ChatMessage
+                key={m.id}
+                sender={m.sender}
+                name={m.name}
+                avatar={
+                  m.sender === "assistant" ? (
+                    <Avatar
+                      name={m.name ?? ""}
+                      src={m.color ? colorAvatarSrc(m.color) : undefined}
+                      size="small"
+                    />
+                  ) : undefined
+                }
+              >
+                <ChatMessageBubble>{m.text}</ChatMessageBubble>
+                {isLastInGroup && <ChatMessageMetadata timestamp={m.time} />}
+              </ChatMessage>
+            )
+          })}
         </ChatMessageList>
       </ChatLayout>
     </VStack>
