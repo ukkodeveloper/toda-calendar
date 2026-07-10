@@ -1,0 +1,81 @@
+/*
+ * the-court — global layout shell
+ * 모바일 우선: 앱은 최대 800px 로 중앙 정렬, 그보다 넓으면 양옆에 살짝 회색 거터.
+ * 높이는 100dvh (iOS·Android 주소창 대응). 스크롤바는 전역 숨김.
+ */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  /* 앱(흰색) 프레임 바깥에 드러나는 거터 — 살짝 회색 */
+  background: #ececf1;
+}
+
+/*
+ * 앱 루트 프레임 = app-shell 을 감싼 Theme 래퍼(body 직속).
+ * :has(> .app-shell) 로 앱 루트만 잡아 다이얼로그/토스트 포털은 제외한다.
+ * 폭 800px 중앙 정렬 + 흰 배경 → 바깥엔 body 거터가 드러난다.
+ */
+body > [data-astryx-theme]:has(> .app-shell) {
+  max-width: 800px;
+  min-height: 100dvh;
+  margin-inline: auto;
+  background: #ffffff;
+  /* 거터와 앱 경계를 얇게 구분 */
+  box-shadow: 0 0 0 1px rgba(28, 27, 33, 0.06);
+}
+
+/*
+ * Stone 테마 위에 얹는 앱 조정 (this app only).
+ * stone theme.css 뒤에 로드돼 같은 토큰을 덮어쓴다.
+ * 1) 글씨 한 단계 키움 — 모바일 본문·라벨을 편하게.
+ * 2) CTA·인터랙션 높이 키움 — 터치 타깃 확보.
+ * 3) 폰트를 next/font 로 로드한 Figtree/Montserrat 로 연결.
+ */
+[data-astryx-theme="stone"] {
+  /* 폰트: stone 기본(Figtree/Montserrat)을 실제 로드본으로 */
+  --font-family-body:
+    var(--font-figtree), -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
+  --font-family-heading:
+    var(--font-montserrat), var(--font-figtree), -apple-system,
+    BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
+
+  /* 타입 스케일 한 단계 업 (stone 기본 대비) */
+  --font-size-sm: 0.8125rem; /* 11 → 13px */
+  --font-size-base: 1rem; /* 14 → 16px 본문·라벨 */
+  --font-size-lg: 1.25rem; /* 18 → 20px */
+  --font-size-xl: 1.5rem; /* 22 → 24px */
+
+  /* 버튼·입력 높이 업 — 모바일 CTA (lg=주요 CTA) */
+  --size-element-sm: 40px; /* 28 → 40 */
+  --size-element-md: 46px; /* 32 → 46 */
+  --size-element-lg: 52px; /* 36 → 52 */
+}
+
+/*
+ * 온보딩 CTA — 버튼을 화면 폭 꽉 채우고, 라벨은 가운데 + 살짝 키움.
+ * (버튼 폭은 style={{ width: "100%" }} 로 채운다. 여기선 라벨만 키운다.)
+ */
+.onboarding-cta > span:first-child > span {
+  font-size: 1.375rem; /* 22px — lg 기본(20px)보다 크게 */
+}
+
+/* 스크롤바 전역 숨김 (스크롤 기능은 유지) */
+*,
+*::before,
+*::after {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* 구형 Edge/IE */
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none; /* Chrome·Safari */
+}

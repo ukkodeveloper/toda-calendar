@@ -4,8 +4,7 @@ import { useState } from "react"
 
 import { Icon } from "@astryxdesign/core/Icon"
 import { IconButton } from "@astryxdesign/core/IconButton"
-import { HStack, VStack } from "@astryxdesign/core/Layout"
-import { TopNav } from "@astryxdesign/core/TopNav"
+import { VStack } from "@astryxdesign/core/Layout"
 import { Avatar } from "@astryxdesign/core/Avatar"
 import {
   ChatComposer,
@@ -17,12 +16,16 @@ import {
   ChatSystemMessage,
 } from "@astryxdesign/core/Chat"
 
+import { AppHeader } from "@/components/app-header"
+import { colorAvatarSrc } from "@/lib/avatar"
+
 type Sender = "user" | "assistant" | "system"
 
 type Message = {
   id: string
   sender: Sender
   name?: string
+  color?: string
   text: string
   time: string
 }
@@ -33,6 +36,7 @@ const INITIAL_MESSAGES: Message[] = [
     id: "1",
     sender: "assistant",
     name: "김배심",
+    color: "#4F9DFF",
     text: "오늘 아침 6시 기상 인증 아직 안 올라왔는데요?",
     time: "오전 6:12",
   },
@@ -46,6 +50,7 @@ const INITIAL_MESSAGES: Message[] = [
     id: "3",
     sender: "assistant",
     name: "박검사",
+    color: "#FF6B4F",
     text: "13분 지각. 벌금 대상입니다. 이의 있으면 소명하세요.",
     time: "오전 6:13",
   },
@@ -72,22 +77,15 @@ export default function ChatPage() {
 
   return (
     <VStack
-      minHeight="100dvh"
-      style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}
+      height="100dvh"
+      style={{
+        maxWidth: 480,
+        margin: "0 auto",
+        width: "100%",
+        overflow: "hidden",
+      }}
     >
-      <TopNav
-        label="현행범 채팅방"
-        heading={
-          <HStack align="center" style={{ paddingInline: 4 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/hyeonhaengbeom_logo.png"
-              alt="현행범"
-              height={28}
-              style={{ height: 28, width: "auto", display: "block" }}
-            />
-          </HStack>
-        }
+      <AppHeader
         endContent={
           <IconButton
             label="메뉴 열기"
@@ -113,13 +111,18 @@ export default function ChatPage() {
             <ChatMessage
               key={m.id}
               sender={m.sender}
+              name={m.name}
               avatar={
                 m.sender === "assistant" ? (
-                  <Avatar name={m.name ?? ""} size="small" />
+                  <Avatar
+                    name={m.name ?? ""}
+                    src={m.color ? colorAvatarSrc(m.color) : undefined}
+                    size="small"
+                  />
                 ) : undefined
               }
             >
-              <ChatMessageBubble name={m.name}>{m.text}</ChatMessageBubble>
+              <ChatMessageBubble>{m.text}</ChatMessageBubble>
               <ChatMessageMetadata timestamp={m.time} />
             </ChatMessage>
           ))}

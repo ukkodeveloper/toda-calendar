@@ -14,6 +14,7 @@ import { Spinner } from "@astryxdesign/core/Spinner"
 import { Text } from "@astryxdesign/core/Text"
 import { TextInput } from "@astryxdesign/core/TextInput"
 
+import { AppHeader } from "@/components/app-header"
 import { loadAuth, type AuthUser } from "@/lib/auth"
 import { createRoom, getRooms, joinRoom, type Room } from "@/lib/rooms"
 
@@ -39,23 +40,9 @@ export default function HomePage() {
 
   return (
     <VStack style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh" }}>
-      {/* 헤더 — 가운데 현행범 로고 · 오른쪽 + 드롭다운 */}
-      <HStack
-        align="center"
-        justify="between"
-        style={{ padding: "16px 20px", position: "sticky", top: 0, zIndex: 10 }}
-      >
-        <div style={{ flex: 1 }} />
-
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/hyeonhaengbeom_logo.png"
-          alt="현행범"
-          height={32}
-          style={{ height: 32, width: "auto", display: "block" }}
-        />
-
-        <HStack justify="end" style={{ flex: 1 }}>
+      {/* 헤더 — 왼쪽 로고(공통) · 오른쪽 + 드롭다운 */}
+      <AppHeader
+        endContent={
           <DropdownMenu
             hasChevron={false}
             placement="below"
@@ -75,8 +62,8 @@ export default function HomePage() {
               { label: "채팅방 참여하기", onClick: () => setJoinOpen(true) },
             ]}
           />
-        </HStack>
-      </HStack>
+        }
+      />
 
       {/* 참여중인 채팅방 리스트 */}
       <VStack style={{ gap: 10, padding: "8px 20px 40px", flex: 1 }}>
