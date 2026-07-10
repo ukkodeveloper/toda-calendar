@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useRef, useState } from "react"
+import { Suspense, useState } from "react"
 import { useSearchParams } from "next/navigation"
 
 import { Icon } from "@astryxdesign/core/Icon"
@@ -25,9 +25,11 @@ import { DeclareCaseDialog } from "@/components/declare-case-dialog"
 import { TrialSheet } from "@/components/trial-sheet"
 import { WitnessDialog } from "@/components/witness-dialog"
 import { colorAvatarSrc } from "@/lib/avatar"
-import { caseApi, chatApi } from "@/lib/api"
-import { useRoomSocket } from "@/lib/api/socket"
-import { loadAuth } from "@/lib/auth"
+import {
+  MOCK_CHAT_ITEMS,
+  MOCK_ME_UUID,
+  type MockListItem,
+} from "@/lib/mock-chat"
 import type { TrialStatus } from "@/lib/api/types"
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
@@ -166,153 +168,13 @@ function ChatPageInner() {
   const searchParams = useSearchParams()
   const roomId = Number(searchParams.get("roomId") ?? 0)
 
-  const [currentUserUuid, setCurrentUserUuid] = useState("")
-  const [items, setItems] = useState<ListItem[]>([])
+  const [items, setItems] = useState<MockListItem[]>(() => MOCK_CHAT_ITEMS)
   const [value, setValue] = useState("")
   const [isDeclareOpen, setIsDeclareOpen] = useState(false)
   const [isWitnessOpen, setIsWitnessOpen] = useState(false)
   const [isCaseListOpen, setIsCaseListOpen] = useState(false)
   const [trialCase, setTrialCase] = useState<CaseItem | null>(null)
   const [highlightCaseId, setHighlightCaseId] = useState<number | undefined>()
-  const [canDeclare, setCanDeclare] = useState(true)
-
-  // trialId → caseId 맵 (TRIAL_ENDED 페이로드에 caseId가 없어 역추적용)
-  const trialCaseMap = useRef<Map<number, number>>(new Map())
-
-  // 초기 로드
-  useEffect(() => {
-    const auth = loadAuth()
-    if (auth) setCurrentUserUuid(auth.uuid)
-    if (!roomId) return
-
-    // 공표 가능 여부: 본인 사건이 DECLARED/ON_TRIAL 이면 비활성화
-    caseApi
-      .listAll(roomId)
-      .then((cases) => {
-        const a = loadAuth()
-        if (!a) return
-        const hasActive = cases.some(
-          (c) =>
-            c.nickname === a.nickname &&
-            (c.status === "DECLARED" || c.status === "ON_TRIAL")
-        )
-        setCanDeclare(!hasActive)
-      })
-      .catch(() => {})
-
-    chatApi
-      .messages(roomId)
-      .then((msgs) => {
-        const auth2 = loadAuth()
-        const chatItems: ChatItem[] = msgs
-          .filter((m) => m.caseId === null)
-          .map((m) => ({
-            id: String(m.messageId),
-            kind: "chat" as const,
-            sender: (auth2 && m.user.uuid === auth2.uuid
-              ? "user"
-              : "assistant") as Sender,
-            name: m.user.nickname,
-            color: m.user.color,
-            text: m.content,
-            time: formatTime(m.createdAt),
-          }))
-        setItems(chatItems)
-      })
-      .catch(() => {})
-  }, [roomId])
-
-  // 소켓 — 방 채팅 + 이벤트 카드
-  const socketRef = useRoomSocket(roomId || null, {
-    CHAT: (payload) => {
-      if (payload.caseId !== null) return
-      const auth = loadAuth()
-      setItems((prev) => [
-        ...prev,
-        {
-          id: String(payload.messageId),
-          kind: "chat" as const,
-          sender: (auth && payload.user.uuid === auth.uuid
-            ? "user"
-            : "assistant") as Sender,
-          name: payload.user.nickname,
-          color: payload.user.color,
-          text: payload.content,
-          time: formatTime(payload.createdAt),
-        },
-      ])
-    },
-    TRIAL_STARTED: (payload) => {
-      const cardId = "trial-started-" + payload.trialId
-      trialCaseMap.current.set(payload.trialId, payload.caseId)
-      // 카드 즉시 추가 (제목은 비동기 패치 후 업데이트)
-      setItems((prev) => [
-        ...prev,
-        {
-          id: cardId,
-          kind: "event" as const,
-          eventType: "TRIAL_STARTED" as const,
-          caseTitle: "사건 #" + payload.caseId,
-          caseId: payload.caseId,
-          trialId: payload.trialId,
-          eventTrialStatus: payload.status,
-          time: "방금",
-        },
-      ])
-      caseApi
-        .detail(payload.caseId)
-        .then((detail) => {
-          setItems((prev) =>
-            prev.map((item) =>
-              item.id === cardId ? { ...item, caseTitle: detail.title } : item
-            )
-          )
-        })
-        .catch(() => {})
-    },
-    TRIAL_ENDED: (payload) => {
-      const caseId = trialCaseMap.current.get(payload.trialId)
-      if (!caseId) return
-      const cardId = "trial-ended-" + payload.trialId
-      setItems((prev) => [
-        ...prev,
-        {
-          id: cardId,
-          kind: "event" as const,
-          eventType: "TRIAL_ENDED" as const,
-          caseTitle: "사건 #" + caseId,
-          caseId,
-          trialId: payload.trialId,
-          time: "방금",
-        },
-      ])
-      caseApi
-        .detail(caseId)
-        .then((detail) => {
-          setItems((prev) =>
-            prev.map((item) =>
-              item.id === cardId ? { ...item, caseTitle: detail.title } : item
-            )
-          )
-        })
-        .catch(() => {})
-      // 내 사건이 종료됐을 수 있으므로 공표 가능 여부 재확인
-      const auth = loadAuth()
-      if (auth) {
-        caseApi
-          .listAll(roomId)
-          .then((cases) => {
-            const hasActive = cases.some(
-              (c) =>
-                c.nickname === auth.nickname &&
-                (c.status === "DECLARED" || c.status === "ON_TRIAL")
-            )
-            setCanDeclare(!hasActive)
-          })
-          .catch(() => {})
-      }
-    },
-  })
 
   // 이벤트 카드 클릭 핸들러
   const handleEventDeclared = (caseId: number) => {
@@ -320,18 +182,8 @@ function ChatPageInner() {
     setIsCaseListOpen(true)
   }
 
-  const handleEventTrial = (caseId: number) => {
-    caseApi
-      .detail(caseId)
-      .then((detail) => {
-        if (detail.trialId) setTrialCase(detail)
-      })
-      .catch(() => {})
-  }
-
   // 사건 공표 완료 콜백
   const handleDeclared = (caseId: number, title: string) => {
-    setCanDeclare(false) // 공표 직후 즉시 비활성화
     const cardId = "declared-" + caseId
     setItems((prev) => [
       ...prev,
@@ -354,10 +206,34 @@ function ChatPageInner() {
     }
   }
 
+  const now = () => {
+    const d = new Date()
+    const h = d.getHours()
+    const m = d.getMinutes()
+    return (
+      (h < 12 ? "오전" : "오후") +
+      " " +
+      (h % 12 || 12) +
+      ":" +
+      String(m).padStart(2, "0")
+    )
+  }
+
   const handleSubmit = (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
-    socketRef.current?.sendChat(trimmed)
+    setItems((prev) => [
+      ...prev,
+      {
+        id: "sent-" + String(prev.length),
+        kind: "chat" as const,
+        sender: "user" as const,
+        name: "나",
+        color: "teal",
+        text: trimmed,
+        time: now(),
+      },
+    ])
     setValue("")
   }
 
@@ -397,7 +273,6 @@ function ChatPageInner() {
                   size="sm"
                   icon={<Icon icon={DeclareIcon} size="md" />}
                   onClick={() => setIsDeclareOpen(true)}
-                  isDisabled={!canDeclare}
                 />
                 <IconButton
                   label="고발하기 (목격 등록)"
@@ -421,7 +296,7 @@ function ChatPageInner() {
                   <ChatEventCard
                     card={item}
                     onClickDeclared={handleEventDeclared}
-                    onClickTrial={handleEventTrial}
+                    onClickTrial={() => {}}
                   />
                 </div>
               )
@@ -492,8 +367,8 @@ function ChatPageInner() {
           roomId={roomId}
           caseTitle={trialCase.title}
           initialStatus={trialCase.trialStatus}
-          currentUserUuid={currentUserUuid}
-          defendantUuid={trialCase.defendantUuid}
+          currentUserUuid={MOCK_ME_UUID}
+          defendantUuid={trialCase.defendantUuid ?? ""}
         />
       ) : null}
     </VStack>

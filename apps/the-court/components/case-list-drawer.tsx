@@ -1,7 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
-
 import { Badge } from "@astryxdesign/core/Badge"
 import { Dialog } from "@astryxdesign/core/Dialog"
 import { Divider } from "@astryxdesign/core/Divider"
@@ -10,10 +8,9 @@ import { Icon } from "@astryxdesign/core/Icon"
 import { IconButton } from "@astryxdesign/core/IconButton"
 import { HStack, VStack } from "@astryxdesign/core/Layout"
 import { List, ListItem } from "@astryxdesign/core/List"
-import { Spinner } from "@astryxdesign/core/Spinner"
 import { Text } from "@astryxdesign/core/Text"
 
-import { caseApi } from "@/lib/api"
+import { MOCK_CASES } from "@/lib/mock-chat"
 import type { CaseDetailResponse, CaseResponse } from "@/lib/api/types"
 
 export type TrialStatus = "STATEMENT" | "VOTING" | "ENDED"
@@ -33,26 +30,11 @@ export function CaseListDrawer({
   onSelect?: (c: CaseDetailResponse) => void
   highlightCaseId?: number
 }) {
-  const [cases, setCases] = useState<CaseResponse[]>([])
-  const [loading, setLoading] = useState(false)
+  const cases: CaseResponse[] = MOCK_CASES
+  const loading = false
 
-  useEffect(() => {
-    if (!isOpen) return
-    setLoading(true)
-    caseApi
-      .listAll(roomId)
-      .then(setCases)
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [isOpen, roomId])
-
-  const handleSelect = async (c: CaseResponse) => {
-    try {
-      const detail = await caseApi.detail(c.caseId)
-      onSelect?.(detail)
-    } catch {
-      onSelect?.(c as unknown as CaseDetailResponse)
-    }
+  const handleSelect = (c: CaseResponse) => {
+    onSelect?.(c as unknown as CaseDetailResponse)
   }
 
   return (
@@ -87,11 +69,7 @@ export function CaseListDrawer({
         <VStack
           style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 8 }}
         >
-          {loading ? (
-            <HStack justify="center" style={{ padding: 40 }}>
-              <Spinner />
-            </HStack>
-          ) : cases.length === 0 ? (
+          {loading ? null : cases.length === 0 ? (
             <VStack
               align="center"
               justify="center"

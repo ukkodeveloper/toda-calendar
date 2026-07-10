@@ -207,12 +207,12 @@ export function TrialSheet({
       .messages(roomId)
       .then((msgs) => {
         const trialMsgs = msgs
-          .filter((m) => m.caseId === caseId)
+          .filter((m) => m.caseId === caseId && m.user !== null)
           .map((m) => ({
             id: String(m.messageId),
-            senderUuid: m.user.uuid,
-            nickname: m.user.nickname,
-            color: m.user.color,
+            senderUuid: m.user!.uuid,
+            nickname: m.user!.nickname,
+            color: m.user!.color,
             text: m.content,
             time: formatTime(m.createdAt),
           }))

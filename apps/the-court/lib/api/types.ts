@@ -215,7 +215,7 @@ export interface MessageResponse {
   type: string
   caseId: number | null
   content: string
-  user: UserSummary
+  user: UserSummary | null // SYSTEM 메시지는 null
   createdAt: string
 }
 
