@@ -39,39 +39,43 @@ export default function HomePage() {
 
   return (
     <VStack style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh" }}>
-      {/* 헤더 — 왼쪽 로고 · 오른쪽 + 드롭다운 */}
+      {/* 헤더 — 가운데 현행범 로고 · 오른쪽 + 드롭다운 */}
       <HStack
         align="center"
         justify="between"
         style={{ padding: "16px 20px", position: "sticky", top: 0, zIndex: 10 }}
       >
+        <div style={{ flex: 1 }} />
+
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/hyeonhaengbeom_logo.png"
           alt="현행범"
-          height={28}
-          style={{ height: 28, width: "auto", display: "block" }}
+          height={32}
+          style={{ height: 32, width: "auto", display: "block" }}
         />
 
-        <DropdownMenu
-          hasChevron={false}
-          placement="below"
-          button={{
-            label: "채팅방 추가",
-            isIconOnly: true,
-            variant: "secondary",
-            size: "lg",
-            icon: (
-              <span style={{ fontSize: 20, lineHeight: 1, fontWeight: 600 }}>
-                +
-              </span>
-            ),
-          }}
-          items={[
-            { label: "채팅방 생성하기", onClick: () => setCreateOpen(true) },
-            { label: "채팅방 참여하기", onClick: () => setJoinOpen(true) },
-          ]}
-        />
+        <HStack justify="end" style={{ flex: 1 }}>
+          <DropdownMenu
+            hasChevron={false}
+            placement="below"
+            button={{
+              label: "채팅방 추가",
+              isIconOnly: true,
+              variant: "secondary",
+              size: "lg",
+              icon: (
+                <span style={{ fontSize: 20, lineHeight: 1, fontWeight: 600 }}>
+                  +
+                </span>
+              ),
+            }}
+            items={[
+              { label: "채팅방 생성하기", onClick: () => setCreateOpen(true) },
+              { label: "채팅방 참여하기", onClick: () => setJoinOpen(true) },
+            ]}
+          />
+        </HStack>
       </HStack>
 
       {/* 참여중인 채팅방 리스트 */}
