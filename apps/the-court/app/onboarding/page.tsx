@@ -10,9 +10,8 @@ import { VStack } from "@astryxdesign/core/Layout"
 import { isLoggedIn, login } from "@/lib/auth"
 import { generateIdentity, type Identity } from "@/lib/identity"
 
-// 색 원 지름(px). 스펙은 40 이지만 32px 닉네임 옆에서 너무 작아 160 으로 키움.
-// 40 으로 되돌리려면 이 값만 바꾸면 된다.
-const AVATAR_SIZE = 160
+// 색 원 지름(px). 이 값만 바꾸면 크기 조정.
+const AVATAR_SIZE = 200
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -26,8 +25,6 @@ export default function OnboardingPage() {
     }
     setIdentity(generateIdentity())
   }, [router])
-
-  const reroll = () => setIdentity(generateIdentity())
 
   const start = async () => {
     if (!identity) return
@@ -46,18 +43,13 @@ export default function OnboardingPage() {
       style={{ maxWidth: 420, margin: "0 auto", padding: "56px 24px 40px" }}
     >
       <VStack align="center" justify="center" style={{ gap: 24, flex: 1 }}>
-        <button
-          type="button"
-          onClick={reroll}
-          aria-label="닉네임 다시 뽑기"
+        <div
+          aria-hidden
           style={{
             width: AVATAR_SIZE,
             height: AVATAR_SIZE,
             borderRadius: "50%",
             background: identity.color,
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
           }}
         />
 
@@ -71,13 +63,6 @@ export default function OnboardingPage() {
         >
           {identity.nickname}
         </Text>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          label="🎲 다시 뽑기"
-          onClick={reroll}
-        />
       </VStack>
 
       <Button
