@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 
-import { Avatar } from "@astryxdesign/core/Avatar"
 import { Badge } from "@astryxdesign/core/Badge"
 import { Banner } from "@astryxdesign/core/Banner"
 import { Button } from "@astryxdesign/core/Button"
@@ -22,7 +21,8 @@ import { IconButton } from "@astryxdesign/core/IconButton"
 import { HStack, VStack } from "@astryxdesign/core/Layout"
 import { Text } from "@astryxdesign/core/Text"
 
-import { colorAvatarSrc } from "@/lib/avatar"
+import { ColorAvatar } from "@workspace/ui/components/color-avatar"
+
 import { MOCK_TRIAL_MESSAGES, MOCK_TRIAL_PARTICIPANTS } from "@/lib/mock-chat"
 import type { TrialEndResponse } from "@/lib/api/types"
 
@@ -89,12 +89,11 @@ function ParticipantCircle({
   return (
     <VStack align="center" gap={1} style={{ minWidth: 56 }}>
       <div style={{ position: "relative", display: "inline-flex" }}>
-        <Avatar
-          name={participant.nickname}
-          src={
-            participant.color ? colorAvatarSrc(participant.color) : undefined
-          }
+        <ColorAvatar
+          seed={participant.nickname}
+          color={participant.color}
           size={48}
+          animated={false}
           style={isGray ? { filter: "grayscale(1)", opacity: 0.4 } : undefined}
         />
 
@@ -505,10 +504,11 @@ export function TrialSheet({
                     name={isMine ? undefined : m.nickname}
                     avatar={
                       !isMine ? (
-                        <Avatar
-                          name={m.nickname}
-                          src={m.color ? colorAvatarSrc(m.color) : undefined}
-                          size="small"
+                        <ColorAvatar
+                          seed={m.nickname}
+                          color={m.color}
+                          size="sm"
+                          animated={false}
                         />
                       ) : undefined
                     }

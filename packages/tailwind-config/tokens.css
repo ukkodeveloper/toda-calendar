@@ -15,47 +15,65 @@
  * 1. PRIMITIVE — 원시 팔레트 (Linear hex → OKLCH). 참조 전용, 직접 쓰지 않는다.
  * ═══════════════════════════════════════════════════════════════ */
 :root {
-  /* dark surface 계단  #010102 → #08090a → #0f1011 → #191a1b → #28282c */
-  --p-ink-black: oklch(0.0692 0.008 284.11); /* #010102 marketing black */
-  --p-ink-900: oklch(0.139 0.0029 246.26); /* #08090a canvas */
-  --p-ink-800: oklch(0.1723 0.0026 247.98); /* #0f1011 panel */
-  --p-ink-700: oklch(0.2171 0.0025 247.94); /* #191a1b surface 3 */
-  --p-ink-600: oklch(0.2785 0.0073 285.92); /* #28282c surface 2 (hover) */
+  /* dark surface 계단 — clean neutral + green whisper(hue 152, chroma≈0.003).
+     Spotify식: 중립은 거의 무채로 두고 green 은 브랜드 액센트로만 튀게 한다. */
+  --p-ink-black: oklch(0.0692 0.003 152); /* near-black canvas edge */
+  --p-ink-900: oklch(0.139 0.003 152); /* canvas */
+  --p-ink-800: oklch(0.1723 0.003 152); /* panel */
+  --p-ink-700: oklch(0.2171 0.003 152); /* surface 3 (card/dropdown) */
+  --p-ink-600: oklch(0.2785 0.004 152); /* surface 2 (hover) */
 
-  /* 텍스트 4단  #f7f8f8 → #d0d6e0 → #8a8f98 → #62666d */
-  --p-white-100: oklch(0.9784 0.0011 197.14); /* #f7f8f8 primary text */
-  --p-white-200: oklch(0.8744 0.0152 260.73); /* #d0d6e0 secondary */
-  --p-white-400: oklch(0.6488 0.0146 262.36); /* #8a8f98 tertiary */
-  --p-white-500: oklch(0.5092 0.0121 261.77); /* #62666d quaternary */
+  /* 텍스트 4단 — clean gray(green whisper). L 은 유지(대비 불변) */
+  --p-white-100: oklch(0.9784 0.002 152); /* primary text */
+  --p-white-200: oklch(0.8744 0.004 152); /* secondary */
+  --p-white-400: oklch(0.6488 0.004 152); /* tertiary */
+  --p-white-500: oklch(0.5092 0.004 152); /* quaternary */
   --p-white: oklch(1 0 0 / 1); /* pure white */
 
-  /* border — solid 다크 계단 + 반투명 흰 알파 */
-  --p-border-solid-1: oklch(0.2645 0.0098 268.31); /* #23252a */
-  --p-border-solid-2: oklch(0.3274 0.0105 285.81); /* #34343a */
-  --p-border-solid-3: oklch(0.3661 0.0102 285.88); /* #3e3e44 */
-  --p-line-tint: oklch(0.195 0.0026 247.96); /* #141516 */
+  /* border — solid 다크 계단(clean) + 반투명 흰 알파 */
+  --p-border-solid-1: oklch(0.2645 0.004 152);
+  --p-border-solid-2: oklch(0.3274 0.004 152);
+  --p-border-solid-3: oklch(0.3661 0.004 152);
+  --p-line-tint: oklch(0.195 0.003 152); /* 최소 구분선 */
   --p-alpha-white-02: oklch(1 0 0 / 0.02);
   --p-alpha-white-04: oklch(1 0 0 / 0.04);
   --p-alpha-white-05: oklch(1 0 0 / 0.05); /* border subtle */
   --p-alpha-white-08: oklch(1 0 0 / 0.08); /* border standard */
   --p-alpha-white-10: oklch(1 0 0 / 0.1);
 
-  /* 인디고-바이올렛 스케일  #5e6ad2 brand / #7170ff accent / #828fff hover */
-  --p-indigo-brand: oklch(0.5674 0.1585 275.21); /* #5e6ad2 CTA bg */
-  --p-indigo-accent: oklch(0.6225 0.2069 278.85); /* #7170ff interactive */
-  --p-indigo-hover: oklch(0.6906 0.1637 276.24); /* #828fff hover */
-  --p-indigo-muted: oklch(0.61 0.0699 279.3); /* #7a7fad security lavender */
+  /* Spotify green 스케일 — 브랜드.  #1ED760 signature / #1FDF64 hover / #1DB954 classic */
+  --p-green-brand: oklch(
+    0.7697 0.2124 148.67
+  ); /* #1ED760 CTA bg / 링크(다크) */
+  --p-green-hover: oklch(0.7911 0.2182 148.71); /* #1FDF64 밝게 — hover(다크) */
+  --p-green-deep: oklch(
+    0.6888 0.187 148.92
+  ); /* #1DB954 pressed / 라이트 hover / border */
+  --p-green-text: oklch(
+    0.5179 0.1344 150.95
+  ); /* #0F7D3D 라이트 텍스트/링크 (AA 5.2:1) */
+  --p-on-brand: oklch(
+    0.1974 0.0082 17.87
+  ); /* #191414 Spotify black — green fill 위 텍스트 (9.5:1) */
 
-  /* status green  #27a644 / #10b981 */
+  /* red — danger(의미색). green 브랜드와 구분되는 유일한 유채색. */
+  --p-red: oklch(
+    0.6256 0.1933 23.03
+  ); /* #E5484D 다크 danger fill/text (AA 5.1:1) */
+  --p-red-strong: oklch(
+    0.5356 0.1912 24.96
+  ); /* #C4282E 라이트 danger text (AA 5.4:1) */
+
+  /* status green  #27a644 / #10b981 (success — 브랜드보다 tealer hue 162 로 구분) */
   --p-green: oklch(0.6371 0.1749 146.7); /* #27a644 */
-  --p-emerald: oklch(0.6959 0.1491 162.48); /* #10b981 */
+  --p-emerald: oklch(0.6959 0.1491 162.48); /* #10b981 success */
   --p-amber: oklch(0.78 0.13 78); /* warning (Linear 무채 팔레트 밖 보조) */
 
-  /* light-mode 중립  #f7f8f8 / #f3f4f5 / #d0d6e0 / #e6e6e6 */
-  --p-light-100: oklch(0.9784 0.0011 197.14); /* #f7f8f8 */
-  --p-light-150: oklch(0.9667 0.0017 247.84); /* #f3f4f5 */
-  --p-light-200: oklch(0.9249 0 89.88); /* #e6e6e6 */
-  --p-light-border: oklch(0.8744 0.0152 260.73); /* #d0d6e0 */
+  /* light-mode 중립 — clean neutral + green whisper */
+  --p-light-100: oklch(0.9784 0.002 152);
+  --p-light-150: oklch(0.9667 0.0025 152);
+  --p-light-200: oklch(0.9249 0.003 152);
+  --p-light-border: oklch(0.8744 0.004 152);
 
   /* radius scale — DESIGN.md: 2·4·6·8·12·22px + full/circle */
   --p-radius-2: 0.125rem; /* 2px  micro badge */
@@ -93,15 +111,13 @@
   --surface-inset: var(--p-ink-black); /* 눌린/깊은 표면 */
 
   /* fill — 채움 대상(브랜드·중립·상태) */
-  --fill-brand: var(--p-indigo-brand); /* CTA 배경 */
-  --fill-brand-hover: var(--p-indigo-hover);
+  --fill-brand: var(--p-green-brand); /* CTA 배경 (Spotify green) */
+  --fill-brand-hover: var(--p-green-hover);
   --fill-neutral: var(--p-alpha-white-05); /* 중립 버튼/배지 배경 */
   --fill-neutral-weak: var(--p-alpha-white-02); /* ghost 배경 */
   --fill-neutral-strong: var(--p-alpha-white-08);
   --fill-success: var(--p-emerald);
-  --fill-danger: var(
-    --p-indigo-accent
-  ); /* Linear 무채 — danger도 액센트 계열 */
+  --fill-danger: var(--p-red); /* 진짜 빨강 — danger 의미색 */
   --fill-warning: var(--p-amber);
 
   /* text — 4단 계층 + 대상별 전경색 */
@@ -109,19 +125,19 @@
   --text-secondary: var(--p-white-200); /* 본문 #d0d6e0 */
   --text-tertiary: var(--p-white-400); /* placeholder/meta #8a8f98 */
   --text-quaternary: var(--p-white-500); /* 타임스탬프/disabled #62666d */
-  --text-brand: var(--p-indigo-accent); /* 링크·활성 #7170ff */
-  --text-on-brand: var(--p-white); /* 브랜드 fill 위 텍스트 */
+  --text-brand: var(--p-green-brand); /* 링크·활성 (다크: 밝은 green 10.4:1) */
+  --text-on-brand: var(--p-on-brand); /* 브랜드 fill 위 텍스트 (검정 #191414) */
   --text-on-fill: var(--p-white-100); /* 상태 fill 위 텍스트 */
 
   /* border — subtle(기본) → standard → strong, 반투명 흰 */
   --border-subtle: var(--p-alpha-white-05); /* 기본 rgba white .05 */
   --border-standard: var(--p-alpha-white-08); /* 카드·입력 .08 */
   --border-strong: var(--p-alpha-white-10);
-  --border-brand: var(--p-indigo-accent);
-  --border-line: var(--p-line-tint); /* 최소 구분선 #141516 */
+  --border-brand: var(--p-green-brand);
+  --border-line: var(--p-line-tint); /* 최소 구분선 */
 
   /* ring — 포커스 */
-  --ring-focus: var(--p-indigo-accent);
+  --ring-focus: var(--p-green-brand);
 
   /* elevation — 다크는 luminance step 기반, 그림자는 보조 */
   --elevation-1: 0 1px 0 0 oklch(0 0 0 / 0.03);
@@ -183,33 +199,42 @@
   --surface-glass: oklch(1 0 0 / 0.72);
   --surface-inset: var(--p-light-200);
 
-  --fill-brand: var(--p-indigo-brand);
-  --fill-brand-hover: var(--p-indigo-hover);
+  --fill-brand: var(--p-green-brand); /* 라이트도 같은 Spotify green */
+  --fill-brand-hover: var(
+    --p-green-deep
+  ); /* 라이트 hover 는 더 진하게(#1DB954) */
   --fill-neutral: oklch(0 0 0 / 0.05);
   --fill-neutral-weak: oklch(0 0 0 / 0.02);
   --fill-neutral-strong: oklch(0 0 0 / 0.08);
   --fill-success: var(--p-emerald);
-  --fill-danger: var(--p-indigo-brand);
+  --fill-danger: var(
+    --p-red-strong
+  ); /* 라이트 danger 는 진한 빨강(텍스트 AA 5.4:1) */
   --fill-warning: var(--p-amber);
 
   --text-primary: var(--p-ink-800); /* 라이트에선 어두운 텍스트 */
-  /* 라이트 표면은 밝다 → tertiary/quaternary 를 다크보다 어둡게 잡아 4.5:1 확보(규칙10·대비). */
-  --text-secondary: oklch(0.4494 0.0137 262.36); /* ≈#565a61 본문 */
+  /* 라이트 표면은 밝다 → tertiary/quaternary 를 다크보다 어둡게 잡아 4.5:1 확보(규칙10·대비).
+     초록 언더톤 통일 위해 hue 152 로 정렬(L·C 유지 → 대비 불변). */
+  --text-secondary: oklch(0.4494 0.005 152); /* 본문 — clean gray */
   --text-tertiary: oklch(
-    0.4809 0.0129 262
+    0.4809 0.005 152
   ); /* meta — 틴트 패널 위에서도 4.5:1 */
-  --text-quaternary: oklch(0.5601 0.0134 262 / 0.92); /* 타임스탬프/disabled */
-  --text-brand: var(--p-indigo-brand);
-  --text-on-brand: var(--p-white);
+  --text-quaternary: oklch(0.5601 0.005 152 / 0.92); /* 타임스탬프/disabled */
+  --text-brand: var(
+    --p-green-text
+  ); /* 라이트 링크·활성 (진한 green #0F7D3D 5.2:1) */
+  --text-on-brand: var(--p-on-brand); /* green fill 위 검정 텍스트 */
   --text-on-fill: var(--p-white);
 
   --border-subtle: oklch(0 0 0 / 0.06);
   --border-standard: var(--p-light-border);
   --border-strong: oklch(0 0 0 / 0.12);
-  --border-brand: var(--p-indigo-brand);
+  --border-brand: var(--p-green-deep);
   --border-line: var(--p-light-200);
 
-  --ring-focus: var(--p-indigo-brand);
+  --ring-focus: var(
+    --p-green-deep
+  ); /* 라이트 포커스 링은 진한 green 이 대비 확보 */
 
   --elevation-1: 0 1px 2px oklch(0 0 0 / 0.06);
   --elevation-2: 0 4px 12px oklch(0 0 0 / 0.1);
@@ -243,8 +268,8 @@
   --border: var(--border-standard);
   --input: var(--border-standard);
   --ring: var(--ring-focus);
-  --chart-1: var(--p-indigo-accent);
-  --chart-2: var(--p-indigo-brand);
+  --chart-1: var(--p-green-brand);
+  --chart-2: var(--p-green-deep);
   --chart-3: var(--p-emerald);
   --chart-4: var(--p-white-400);
   --chart-5: var(--p-white-500);

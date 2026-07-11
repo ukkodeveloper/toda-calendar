@@ -6,8 +6,9 @@ import { useSearchParams } from "next/navigation"
 import { Icon } from "@astryxdesign/core/Icon"
 import { IconButton } from "@astryxdesign/core/IconButton"
 import { HStack, VStack } from "@astryxdesign/core/Layout"
-import { Avatar } from "@astryxdesign/core/Avatar"
 import { Text } from "@astryxdesign/core/Text"
+
+import { ColorAvatar } from "@workspace/ui/components/color-avatar"
 import {
   ChatComposer,
   ChatLayout,
@@ -24,7 +25,6 @@ import { DeclareIcon, WitnessIcon } from "@/components/chat-action-icons"
 import { DeclareCaseDialog } from "@/components/declare-case-dialog"
 import { TrialSheet } from "@/components/trial-sheet"
 import { WitnessDialog } from "@/components/witness-dialog"
-import { colorAvatarSrc } from "@/lib/avatar"
 import {
   MOCK_CASES,
   MOCK_CHAT_ITEMS,
@@ -322,10 +322,11 @@ function ChatPageInner() {
                 name={item.name}
                 avatar={
                   item.sender === "assistant" ? (
-                    <Avatar
-                      name={item.name ?? ""}
-                      src={item.color ? colorAvatarSrc(item.color) : undefined}
-                      size="small"
+                    <ColorAvatar
+                      seed={item.name ?? ""}
+                      color={item.color}
+                      size="sm"
+                      animated={false}
                     />
                   ) : undefined
                 }

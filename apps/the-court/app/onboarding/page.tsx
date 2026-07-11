@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { Avatar, type AvatarSize } from "@astryxdesign/core/Avatar"
-import { Button } from "@astryxdesign/core/Button"
 import { Text } from "@astryxdesign/core/Text"
 import { VStack } from "@astryxdesign/core/Layout"
 
+import { Button } from "@workspace/ui/components/button"
+import { ColorAvatar } from "@workspace/ui/components/color-avatar"
+
 import { isLoggedIn, login } from "@/lib/auth"
 import { userApi } from "@/lib/api/user"
-import { colorAvatarSrc } from "@/lib/avatar"
 import type { Identity } from "@/lib/identity"
 
 // 아바타 지름(px). 이 값만 바꾸면 크기 조정.
@@ -69,11 +69,11 @@ export default function OnboardingPage() {
             cursor: "pointer",
           }}
         >
-          <Avatar
-            size={AVATAR_SIZE as AvatarSize}
-            src={colorAvatarSrc(identity.color)}
-            name={identity.nickname}
-            alt={identity.nickname}
+          <ColorAvatar
+            seed={identity.nickname}
+            color={identity.color}
+            size={AVATAR_SIZE}
+            label={identity.nickname}
           />
         </button>
 
@@ -92,11 +92,11 @@ export default function OnboardingPage() {
       <Button
         variant="primary"
         size="lg"
-        label="현행범 시작하기"
-        clickAction={start}
-        className="onboarding-cta"
-        style={{ width: "100%" }}
-      />
+        onClick={start}
+        className="h-16 w-full text-lg"
+      >
+        현행범 시작하기
+      </Button>
     </VStack>
   )
 }

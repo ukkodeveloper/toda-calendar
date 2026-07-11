@@ -1,41 +1,53 @@
-import { http } from "./client"
+// 인메모리 목 — 백엔드/S3 없이 증거사진 업로드가 돌게. shape 은 domain/api.md 유지.
+// 실제 네트워크(서버·S3) 호출은 하지 않고 로컬 objectURL 을 s3Url 로 흉내낸다.
 import type {
   PhotoResponse,
   PresignedUrlRequest,
   PresignedUrlResponse,
 } from "./types"
 
-export const photoApi = {
-  /**
-   * 파일을 multipart/form-data로 직접 업로드.
-   * 용량이 크면 presignedUrl → S3 직접 업로드 → complete 흐름을 써라.
-   */
-  upload: (file: File) => http.upload<PhotoResponse>("/api/photos", file),
+const delay = (ms = 200) => new Promise<void>((r) => setTimeout(r, ms))
 
-  /** S3 presigned URL 발급. uploadUrl로 PUT 후 complete를 호출한다. */
-  presignedUrl: (body: PresignedUrlRequest) =>
-    http.post<PresignedUrlResponse>("/api/photos/presigned-url", { body }),
+let nextPhotoId = 100
 
-  /** presigned URL로 S3에 파일을 올린다. 이 함수는 API 서버가 아닌 S3에 직접 요청한다. */
-  uploadToS3: (uploadUrl: string, file: File) =>
-    fetch(uploadUrl, {
-      method: "PUT",
-      headers: { "Content-Type": file.type || "image/jpeg" },
-      body: file,
-    }).then((res) => {
-      if (!res.ok) throw new Error(`S3 업로드 실패: ${res.status}`)
-    }),
-
-  /** S3 업로드 완료 신호. 이후 photoId를 report에 사용한다. */
-  complete: (photoId: number) =>
-    http.post<PhotoResponse>(`/api/photos/${photoId}/complete`),
+function fakeUrl(file?: File): string {
+  if (file && typeof URL !== "undefined" && URL.createObjectURL) {
+    try {
+      return URL.createObjectURL(file)
+    } catch {
+      // ignore
+    }
+  }
+  return "data:image/png;base64,"
 }
 
-/** presigned URL 방식으로 사진을 업로드하는 편의 함수. */
+export const photoApi = {
+  upload: async (file: File): Promise<PhotoResponse> => {
+    await delay()
+    return { photoId: nextPhotoId++, s3Url: fakeUrl(file) }
+  },
+
+  presignedUrl: async (
+    _body: PresignedUrlRequest
+  ): Promise<PresignedUrlResponse> => {
+    await delay()
+    const photoId = nextPhotoId++
+    return { photoId, uploadUrl: "mock://upload", s3Url: fakeUrl() }
+  },
+
+  // S3 직접 업로드는 목에서는 no-op.
+  uploadToS3: async (_uploadUrl: string, _file: File): Promise<void> => {
+    await delay(80)
+  },
+
+  complete: async (photoId: number): Promise<PhotoResponse> => {
+    await delay(80)
+    return { photoId, s3Url: fakeUrl() }
+  },
+}
+
+/** 목: 파일을 받아 로컬 objectURL 로 즉시 PhotoResponse 를 돌려준다. */
 export async function uploadPhoto(file: File): Promise<PhotoResponse> {
-  const { photoId, uploadUrl } = await photoApi.presignedUrl({
-    filename: file.name,
-  })
-  await photoApi.uploadToS3(uploadUrl, file)
-  return photoApi.complete(photoId)
+  await delay()
+  return { photoId: nextPhotoId++, s3Url: fakeUrl(file) }
 }

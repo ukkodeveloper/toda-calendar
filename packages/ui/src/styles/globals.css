@@ -21,6 +21,55 @@
   color-scheme: dark;
 }
 
+/* ColorAvatar — ambient "꿈틀" 모션.
+ * 페더된 blob 을 transform 으로만 미세 드리프트(GPU 친화). 한 blob 한 모션(규칙11).
+ * reduce-motion 이면 정지 — 접근성 대안 필수. */
+.ds-orb-blob {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+.ds-orb-b1 {
+  animation: ds-orb-drift1 11s ease-in-out infinite alternate;
+}
+.ds-orb-b2 {
+  animation: ds-orb-drift2 14s ease-in-out infinite alternate;
+}
+.ds-orb-b3 {
+  animation: ds-orb-drift3 9s ease-in-out infinite alternate;
+}
+@keyframes ds-orb-drift1 {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(7px, -5px) scale(1.12);
+  }
+}
+@keyframes ds-orb-drift2 {
+  from {
+    transform: translate(0, 0) scale(1.06);
+  }
+  to {
+    transform: translate(-6px, 4px) scale(0.94);
+  }
+}
+@keyframes ds-orb-drift3 {
+  from {
+    transform: translate(0, 0) scale(0.96);
+  }
+  to {
+    transform: translate(4px, 6px) scale(1.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-orb-b1,
+  .ds-orb-b2,
+  .ds-orb-b3 {
+    animation: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

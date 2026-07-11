@@ -7,6 +7,10 @@ import localFont from "next/font/local"
 import "@astryxdesign/core/reset.css"
 import "@astryxdesign/core/astryx.css"
 import "@astryxdesign/theme-stone/theme.css"
+// 자체 DS(@workspace/ui) Tailwind 진입 — Astryx 를 페이지별로 걷어내는 중.
+// Astryx CSS 는 unlayered 라 Tailwind 레이어(preflight)를 이겨 기존 Astryx 화면은 보존되고,
+// DS 컴포넌트(astryx 클래스 없음)만 Tailwind 유틸을 받는다.
+import "@workspace/ui/globals.css"
 import "./globals.css"
 
 import { Providers } from "./providers"
@@ -71,7 +75,8 @@ export default function RootLayout({
     <html
       lang="ko"
       data-theme="light"
-      className={`${pretendard.variable} ${figtree.variable} ${montserrat.variable}`}
+      // `light` = @workspace/ui 토큰을 라이트로 고정(DS 기본은 :root=다크). Astryx 는 data-theme 로 별개.
+      className={`light ${pretendard.variable} ${figtree.variable} ${montserrat.variable}`}
     >
       <body>
         <Providers>
