@@ -56,8 +56,8 @@
     0.1974 0.0082 17.87
   ); /* #191414 Spotify black — green fill 위 텍스트 (9.5:1) */
   --p-green-tint: oklch(
-    0.925 0.05 150
-  ); /* #d0f0d5 옅은 민트 — outgoing 버블 라이트 배경 (ink 텍스트 15.5:1) */
+    0.97 0.025 150
+  ); /* #e8f7ea 거의-흰색 pale green — outgoing 버블 라이트 배경, ink 텍스트 최대 대비 */
   --p-green-tint-dark: oklch(
     0.32 0.075 150
   ); /* #0f3d1d 어두운 초록 표면 — outgoing 버블 다크 배경 (흰 텍스트 11.6:1) */
