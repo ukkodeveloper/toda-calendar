@@ -647,9 +647,10 @@ const surfacePaddings = ["sm", "md", "lg"] as const
 const calendarDensities = ["compact", "comfortable", "spacious"] as const
 const previewStyles = ["채움", "선", "줄"] as const
 const sheetStages: Array<{ value: SheetStage; label: string }> = [
-  { value: "compact", label: "컴팩트" },
-  { value: "medium", label: "중간" },
-  { value: "expanded", label: "확장" },
+  { value: "closed", label: "닫힘" },
+  { value: "peek", label: "핸들만" },
+  { value: "half", label: "절반" },
+  { value: "tall", label: "크게" },
 ]
 const segmentOptions: Array<
   SegmentedControlOption<"first" | "second" | "third">
@@ -1295,7 +1296,8 @@ export function DesignSystemDemo({
     React.useState<CalendarDensity>("comfortable")
   const [activePreviewStyle, setActivePreviewStyle] =
     React.useState<(typeof previewStyles)[number]>("채움")
-  const [activeStage, setActiveStage] = React.useState<SheetStage>("compact")
+  const [activeStage, setActiveStage] = React.useState<SheetStage>("half")
+  const [sheetDismissible, setSheetDismissible] = React.useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = React.useState(false)
   const [selectedOptions, setSelectedOptions] = React.useState({
     alpha: true,
@@ -1411,6 +1413,8 @@ export function DesignSystemDemo({
                       activeComponentId={activeComponentId}
                       activePreviewStyle={activePreviewStyle}
                       activeStage={activeStage}
+                      setActiveStage={setActiveStage}
+                      sheetDismissible={sheetDismissible}
                       actionGridColumn={actionGridColumn}
                       animatedNumberSample={animatedNumberSample}
                       appBarAlign={appBarAlign}
@@ -1511,6 +1515,8 @@ export function DesignSystemDemo({
             setActionGridColumn={setActionGridColumn}
             setActivePreviewStyle={setActivePreviewStyle}
             setActiveStage={setActiveStage}
+            sheetDismissible={sheetDismissible}
+            setSheetDismissible={setSheetDismissible}
             setAnimatedNumberSample={setAnimatedNumberSample}
             setAppBarAlign={setAppBarAlign}
             setAppBarSize={setAppBarSize}
@@ -2002,6 +2008,8 @@ function PreviewStage(props: {
   activeComponentId: ComponentId
   activePreviewStyle: string
   activeStage: SheetStage
+  setActiveStage: (value: SheetStage) => void
+  sheetDismissible: boolean
   actionGridColumn: ActionGridColumns
   animatedNumberSample: AnimatedNumberSample
   appBarAlign: AppBarAlign
@@ -2760,7 +2768,8 @@ function PreviewStage(props: {
         {activeComponentId === "three-stage-sheet" ? (
           <ThreeStageSheetPreview
             activeStage={props.activeStage}
-            className="rounded-[28px]"
+            dismissible={props.sheetDismissible}
+            onStageChange={props.setActiveStage}
           />
         ) : null}
 
@@ -2817,6 +2826,8 @@ function ControlsPanel(props: {
   setActionGridColumn: (value: ActionGridColumns) => void
   setActivePreviewStyle: (value: (typeof previewStyles)[number]) => void
   setActiveStage: (value: SheetStage) => void
+  sheetDismissible: boolean
+  setSheetDismissible: (value: boolean) => void
   setAnimatedNumberSample: (value: AnimatedNumberSample) => void
   setAppBarAlign: (value: AppBarAlign) => void
   setAppBarSize: (value: AppBarSize) => void
@@ -3267,12 +3278,19 @@ function ControlsPanel(props: {
         ) : null}
 
         {props.activeComponentId === "three-stage-sheet" ? (
-          <ControlOptions
-            label="Stage"
-            options={sheetStages}
-            value={props.activeStage}
-            onChange={props.setActiveStage}
-          />
+          <>
+            <ControlOptions
+              label="Stage"
+              options={sheetStages}
+              value={props.activeStage}
+              onChange={props.setActiveStage}
+            />
+            <ToggleControl
+              checked={props.sheetDismissible}
+              label="Dismissible"
+              onChange={props.setSheetDismissible}
+            />
+          </>
         ) : null}
 
         {props.activeComponentId === "example-pages" ? (

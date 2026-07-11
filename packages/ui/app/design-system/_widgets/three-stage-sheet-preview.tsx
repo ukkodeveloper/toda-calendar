@@ -1,95 +1,115 @@
+"use client"
+
+import { AnimatePresence } from "framer-motion"
+
+import {
+  ThreeStageSheet,
+  type ThreeStageSheetDetent,
+} from "@workspace/ui/components/three-stage-sheet"
 import { cn } from "@workspace/ui/lib/utils"
 
-export type SheetStage = "compact" | "medium" | "expanded"
+export type SheetStage = "closed" | "peek" | "half" | "tall"
 
 type ThreeStageSheetPreviewProps = {
   activeStage: SheetStage
   className?: string
+  dismissible?: boolean
+  onStageChange: (stage: SheetStage) => void
 }
 
+const detents: ThreeStageSheetDetent[] = [
+  { id: "peek", peekPx: 30 },
+  { id: "half", ratio: 0.5 },
+  { id: "tall", ratio: 0.8 },
+]
+
 const stageCopy: Record<
-  SheetStage,
-  { title: string; body: string; height: string }
+  Exclude<SheetStage, "closed">,
+  { title: string; body: string }
 > = {
-  compact: {
-    title: "컴팩트",
-    body: "핵심 행동 하나만 보이는 최소 높이입니다.",
-    height: "h-[172px]",
+  peek: {
+    title: "핸들만",
+    body: "핸들 바만 프레임 하단에 걸쳐 언제든 다시 끌어올릴 수 있습니다.",
   },
-  medium: {
-    title: "중간",
-    body: "선택 상태와 보조 행동을 함께 보여주는 기본 높이입니다.",
-    height: "h-[238px]",
+  half: {
+    title: "절반",
+    body: "컨테이너 높이의 절반. 선택과 보조 행동을 함께 봅니다.",
   },
-  expanded: {
-    title: "확장",
-    body: "긴 콘텐츠와 복수 컨트롤을 다룰 때 쓰는 최대 높이입니다.",
-    height: "h-[328px]",
+  tall: {
+    title: "크게",
+    body: "컨테이너 높이의 80%. 긴 콘텐츠와 복수 컨트롤을 다룹니다.",
   },
 }
 
 function ThreeStageSheetPreview({
   activeStage,
   className,
+  dismissible = true,
+  onStageChange,
 }: ThreeStageSheetPreviewProps) {
-  const copy = stageCopy[activeStage]
+  const open = activeStage !== "closed"
+  const copy = open ? stageCopy[activeStage] : null
 
   return (
     <div
       className={cn(
-        "relative min-h-[386px] overflow-hidden bg-[var(--calendar-app-bg)] px-3 pt-4 shadow-[inset_0_0_0_1px_var(--calendar-divider)]",
+        "relative h-[420px] overflow-hidden rounded-hero border border-border-subtle bg-surface-canvas",
         className
       )}
     >
-      <div className="mx-auto grid max-w-[15.5rem] grid-cols-7 gap-px overflow-hidden rounded-[16px] opacity-60">
-        {Array.from({ length: 21 }, (_, index) => (
-          <div key={index} className="aspect-[4/5] bg-white/58" />
-        ))}
-      </div>
-      <div
-        className={cn(
-          "absolute inset-x-3 bottom-3 overflow-hidden rounded-[30px] border border-[var(--calendar-sheet-border)] bg-[var(--calendar-sheet-surface-strong)] text-foreground shadow-[var(--calendar-sheet-shadow)] backdrop-blur-[28px] transition-[height] duration-300",
-          copy.height
-        )}
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[image:var(--calendar-sheet-glass-overlay)]" />
-        <div className="relative z-10 flex h-full flex-col px-4 pt-2.5 pb-4">
-          <div className="flex justify-center">
-            <span className="h-1.5 w-10 rounded-full bg-[var(--calendar-sheet-handle)]" />
-          </div>
-          <div className="mt-3 text-center">
-            <p className="text-[0.72rem] font-semibold tracking-[0.14em] text-foreground/42 uppercase">
-              {copy.title}
-            </p>
-            <h3 className="mt-1 text-[1.08rem] font-semibold text-balance">
-              하단 표면의 단계 전환
-            </h3>
-            <p className="mx-auto mt-1 max-w-[15rem] text-[0.82rem] leading-5 text-foreground/58">
-              {copy.body}
-            </p>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2 rounded-[18px] bg-black/[0.045] p-1">
-            {["주요", "보조", "추가"].map((label, index) => (
-              <span
-                key={label}
-                className={cn(
-                  "grid h-9 place-items-center rounded-[14px] text-[0.78rem] font-medium",
-                  index === 0
-                    ? "bg-white text-foreground shadow-[0_8px_22px_rgba(15,23,42,0.08)]"
-                    : "text-foreground/48"
-                )}
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-          <div className="mt-3 grid min-h-0 flex-1 place-items-center rounded-[20px] bg-white/56 px-4 text-center text-[0.84rem] font-medium text-foreground/58">
-            {activeStage === "expanded"
-              ? "확장 상태에서도 닫기와 스크롤 경계를 명확히 유지합니다."
-              : "같은 화면 맥락 위에서 표면의 높이만 조용히 바뀝니다."}
-          </div>
+      <div className="px-3 pt-4">
+        <div className="mx-auto grid max-w-64 grid-cols-7 gap-px overflow-hidden rounded-panel opacity-60">
+          {Array.from({ length: 21 }, (_, index) => (
+            <div key={index} className="aspect-[4/5] bg-surface-raised" />
+          ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {open ? (
+          <ThreeStageSheet
+            activeDetentId={activeStage}
+            detents={detents}
+            dismissible={dismissible}
+            onActiveDetentChange={(id) => onStageChange(id as SheetStage)}
+            onRequestClose={() => onStageChange("closed")}
+          >
+            <div className="flex h-full flex-col">
+              <div className="mt-1 text-center">
+                <p className="text-caption font-strong tracking-wide text-text-tertiary uppercase">
+                  {copy?.title}
+                </p>
+                <h3 className="mt-1 text-title font-strong text-balance">
+                  핸들을 잡고 드래그해 단계를 바꿔보세요
+                </h3>
+                <p className="mx-auto mt-1 max-w-60 text-body text-text-secondary">
+                  {copy?.body}
+                </p>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2 rounded-panel bg-fill-neutral p-1">
+                {(["peek", "half", "tall"] as const).map((stage) => (
+                  <span
+                    key={stage}
+                    className={cn(
+                      "grid h-9 place-items-center rounded-control text-caption font-emphasis",
+                      stage === activeStage
+                        ? "bg-surface-raised text-text-primary shadow-elevation-2"
+                        : "text-text-tertiary"
+                    )}
+                  >
+                    {stageCopy[stage].title}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-3 grid min-h-0 flex-1 place-items-center rounded-panel bg-surface-inset px-4 text-center text-body font-emphasis text-text-secondary">
+                {activeStage === "tall"
+                  ? "크게 펼친 상태에서도 닫기와 스크롤 경계를 명확히 유지합니다."
+                  : "아래로 던지면 닫히고, 다시 열면 같은 단계로 돌아옵니다."}
+              </div>
+            </div>
+          </ThreeStageSheet>
+        ) : null}
+      </AnimatePresence>
     </div>
   )
 }
