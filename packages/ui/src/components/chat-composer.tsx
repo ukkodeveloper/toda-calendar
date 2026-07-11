@@ -85,7 +85,7 @@ function ChatComposer({
     <div
       data-slot="chat-composer"
       className={cn(
-        "flex items-end gap-2 border-t border-border-subtle bg-surface-canvas px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]",
+        "flex items-end gap-2 border-t border-border-subtle bg-surface-canvas px-3 pt-2 pb-safe",
         className
       )}
     >

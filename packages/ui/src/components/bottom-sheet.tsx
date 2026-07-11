@@ -111,7 +111,7 @@ function BottomSheet({
       <Dialog.Portal keepMounted container={container}>
         <AnimatePresence onExitComplete={() => actionsRef.current?.unmount()}>
           {open ? (
-            <div className="fixed inset-0 z-50 flex items-end justify-center overscroll-contain">
+            <div className="fixed inset-0 z-50 flex items-end justify-center overscroll-contain pb-[var(--inset-keyboard,0px)]">
               <Dialog.Backdrop
                 render={
                   <motion.div
@@ -149,7 +149,7 @@ function BottomSheet({
                   />
                 }
                 className={cn(
-                  "relative z-10 flex max-h-[82dvh] w-full max-w-[34rem] flex-col overflow-hidden overscroll-contain rounded-t-hero border border-border-subtle bg-surface-overlay text-text-primary shadow-elevation-3 outline-none",
+                  "relative z-10 flex max-h-[calc(82dvh-var(--inset-keyboard,0px))] w-full max-w-[34rem] flex-col overflow-hidden overscroll-contain rounded-t-hero border border-border-subtle bg-surface-overlay text-text-primary shadow-elevation-3 outline-none",
                   className
                 )}
               >

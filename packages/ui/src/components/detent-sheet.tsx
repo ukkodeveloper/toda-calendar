@@ -138,8 +138,12 @@ function DetentSheet({
                   />
                 }
               />
-              {/* Popup = focus-trap + 뷰포트 높이 기준 부모(ThreeStageSheet 가 측정). */}
-              <Dialog.Popup className="absolute inset-0 outline-none">
+              {/* Popup = focus-trap + 뷰포트 높이 기준 부모(ThreeStageSheet 가 clientHeight 로 측정).
+               * 소프트 키보드가 열리면 하단을 `--inset-keyboard` 만큼 들어올려 이 박스를 줄인다 →
+               * ThreeStageSheet 의 ResizeObserver 가 재측정 → detent 높이가 키보드 위 가시영역
+               * 기준으로 재계산되고 시트(bottom-0)가 키보드 위로 물러난다. 키보드 닫힘=0px.
+               * backdrop 은 바깥 fixed inset-0(전체)이라 리프트 seam 에 투명 틈이 없다. */}
+              <Dialog.Popup className="absolute inset-x-0 top-0 bottom-[var(--inset-keyboard,0px)] outline-none">
                 {/* 바깥 탭 닫기 scrim — 시트 뒤 전체를 덮는 투명 버튼. */}
                 <button
                   type="button"

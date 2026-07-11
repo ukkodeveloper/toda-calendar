@@ -158,6 +158,12 @@
    * 반복 대신 pb-safe 유틸로만 참조한다(규칙2·3). 테마 무관 → 단일 정의. */
   --inset-safe-bottom: env(safe-area-inset-bottom);
 
+  /* keyboard inset — 소프트 키보드가 하단을 가리는 높이. safe-bottom 의 형제.
+   * CSS 만으로는 iOS Safari 의 키보드 높이를 알 수 없어(VirtualKeyboard API 미지원)
+   * useKeyboardInset 훅이 visualViewport 로 측정해 이 변수를 런타임에 덮어쓴다.
+   * 기본 0px = 키보드 닫힘/훅 미장착/미지원. 소비: h-viewport·pb-keyboard·BottomSheet. */
+  --inset-keyboard: 0px;
+
   /* radius — 의도 기반 alias */
   --radius-micro: var(--p-radius-2);
   --radius-small: var(--p-radius-4);

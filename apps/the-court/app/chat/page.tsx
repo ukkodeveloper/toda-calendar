@@ -4,16 +4,12 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 
 import {
-  ArrowRight01Icon,
-  JusticeScale01Icon,
-  LegalHammerIcon,
   Megaphone01Icon,
   Menu01Icon,
   ViewIcon,
 } from "@hugeicons/core-free-icons"
-import type { IconSvgElement } from "@hugeicons/react"
 
-import { ActionCard } from "@workspace/ui/components/action-card"
+import { CaseCard } from "@workspace/ui/components/case-card"
 import { ChatComposer } from "@workspace/ui/components/chat-composer"
 import { ChatMessage } from "@workspace/ui/components/chat-message"
 import { ChatSystemMessage } from "@workspace/ui/components/chat-system-message"
@@ -26,8 +22,13 @@ import { type CaseItem, CaseListDrawer } from "@/components/case-list-drawer"
 import { DeclareCaseDialog } from "@/components/declare-case-dialog"
 import { TrialSheet } from "@/components/trial-sheet"
 import { WitnessDialog } from "@/components/witness-dialog"
-import { caseApi, chatApi } from "@/lib/api"
+import { caseApi, chatApi, roomApi } from "@/lib/api"
 import { useRoomStream } from "@/lib/api/socket"
+import {
+  CASE_STATUS_META,
+  CaseSubtitle,
+  type CaseVisualStatus,
+} from "@/lib/case-status"
 import { loadAuth } from "@/lib/auth"
 import type { MessageResponse, TrialStatus } from "@/lib/api/types"
 
@@ -55,7 +56,11 @@ type EventCard = {
   id: string
   kind: "event"
   eventType: "DECLARED" | "TRIAL_STARTED" | "TRIAL_ENDED"
+  // 파생 시각 상태 — 카드 색·아이콘·라벨의 단일 근거(case-status).
+  status: CaseVisualStatus
   caseTitle: string
+  // 피고 = "누구"의 사건인지. 공표 카드는 공표자 본인(자기를 피고로 건다).
+  defendantName: string
   caseId: number
   trialId?: number
   time: string
@@ -112,31 +117,6 @@ function messageToItem(
 
 // ─── 이벤트 카드 ─────────────────────────────────────────────────────────────
 
-const EVENT_META: Record<
-  EventCard["eventType"],
-  {
-    icon: IconSvgElement
-    subtitle: string
-    tone: "brand" | "danger" | "neutral"
-  }
-> = {
-  DECLARED: {
-    icon: Megaphone01Icon,
-    subtitle: "사건이 공표됐어요 · 눌러서 확인해요",
-    tone: "brand",
-  },
-  TRIAL_STARTED: {
-    icon: JusticeScale01Icon,
-    subtitle: "재판이 시작됐어요 · 눌러서 입장해요",
-    tone: "danger",
-  },
-  TRIAL_ENDED: {
-    icon: LegalHammerIcon,
-    subtitle: "재판이 끝났어요 · 눌러서 결과를 봐요",
-    tone: "neutral",
-  },
-}
-
 function ChatEventCard({
   card,
   onClickDeclared,
@@ -146,15 +126,21 @@ function ChatEventCard({
   onClickDeclared: (caseId: number) => void
   onClickTrial: (caseId: number) => void
 }) {
-  const { icon, subtitle, tone } = EVENT_META[card.eventType]
+  const meta = CASE_STATUS_META[card.status]
 
   return (
-    <ActionCard
-      leading={<Icon icon={icon} />}
-      leadingTone={tone}
+    <CaseCard
+      tone={meta.tone}
+      statusIcon={meta.icon}
+      statusLabel={meta.label}
+      avatarSeed={card.defendantName}
       title={card.caseTitle}
-      subtitle={subtitle}
-      trailing={<Icon icon={ArrowRight01Icon} size="sm" />}
+      subtitle={
+        <CaseSubtitle
+          name={card.defendantName}
+          description={meta.description}
+        />
+      }
       onClick={() =>
         card.eventType === "DECLARED"
           ? onClickDeclared(card.caseId)
@@ -180,6 +166,28 @@ function ChatPageInner() {
   const [highlightCaseId, setHighlightCaseId] = useState<number | undefined>()
 
   const streamRef = useRef<HTMLDivElement>(null)
+
+  // 채팅은 h-viewport 셸(키보드만큼 줄어듦)이라 문서 스크롤이 필요 없다.
+  // 이 라우트 동안만 document 스크롤을 잠가, 키보드가 열렸을 때 body(min-h-dvh)의
+  // 키보드 뒤 여백으로 러버밴드 스크롤되며 UI 가 가려지는 걸 막는다. iOS26 fixed 버그를
+  // 피하려 position:fixed 대신 overflow 잠금만 쓴다. home·onboarding 은 스크롤이 필요해
+  // 전역이 아닌 라우트 스코프로 둔다(언마운트 시 원복).
+  useEffect(() => {
+    const { documentElement: html, body } = document
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyOverscroll: body.style.overscrollBehavior,
+    }
+    html.style.overflow = "hidden"
+    body.style.overflow = "hidden"
+    body.style.overscrollBehavior = "none"
+    return () => {
+      html.style.overflow = prev.htmlOverflow
+      body.style.overflow = prev.bodyOverflow
+      body.style.overscrollBehavior = prev.bodyOverscroll
+    }
+  }, [])
 
   // 중복 방지(WS echo·재연결 백필) + 백필 커서(마지막 messageId).
   const seenIds = useRef<Set<string>>(new Set())
@@ -217,6 +225,8 @@ function ChatPageInner() {
       .messages(roomId)
       .then(appendMessages)
       .catch(() => {})
+    // 방 진입 = 읽음. fire-and-forget(실패해도 UX 무영향) — 다음 홈 조회에서 hasUnread 해제.
+    roomApi.read(roomId).catch(() => {})
     return () => {
       active = false
     }
@@ -247,7 +257,9 @@ function ChatPageInner() {
                 id,
                 kind: "event",
                 eventType: "TRIAL_STARTED",
+                status: "on-trial",
                 caseTitle: d.title,
+                defendantName: d.defendant.nickname,
                 caseId: e.caseId,
                 trialId: e.trialId,
                 time: formatTime(new Date().toISOString()),
@@ -266,7 +278,9 @@ function ChatPageInner() {
             id,
             kind: "event",
             eventType: "TRIAL_ENDED",
+            status: e.verdict === "GUILTY" ? "guilty" : "not-guilty",
             caseTitle: e.defendant.nickname + " 사건",
+            defendantName: e.defendant.nickname,
             caseId: 0,
             trialId: e.trialId,
             time: formatTime(new Date().toISOString()),
@@ -307,6 +321,7 @@ function ChatPageInner() {
   }
 
   // 사건 공표 완료 콜백 — 로컬 DECLARED 카드(공표자 즉시 피드백).
+  // 공표 = 자기 결심을 거는 것 → 공표자 본인이 곧 피고다.
   const handleDeclared = (caseId: number, title: string) => {
     setItems((prev) => [
       ...prev,
@@ -314,7 +329,9 @@ function ChatPageInner() {
         id: "declared-" + caseId,
         kind: "event",
         eventType: "DECLARED",
+        status: "registered",
         caseTitle: title,
+        defendantName: loadAuth()?.nickname ?? "나",
         caseId,
         time: "방금",
       },
@@ -344,7 +361,7 @@ function ChatPageInner() {
   }
 
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-[480px] flex-col overflow-hidden bg-surface-canvas">
+    <div className="mx-auto flex h-viewport w-full max-w-[480px] flex-col overflow-hidden bg-surface-canvas">
       <AppHeader
         endContent={
           <IconButton
@@ -360,7 +377,7 @@ function ChatPageInner() {
       {/* 메시지 스트림 */}
       <div
         ref={streamRef}
-        className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-3"
+        className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain px-4 py-3"
       >
         <ChatSystemMessage variant="divider">오늘</ChatSystemMessage>
 

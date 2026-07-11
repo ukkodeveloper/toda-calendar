@@ -139,3 +139,24 @@
 @utility pb-safe {
   padding-bottom: max(var(--p-space-4), var(--inset-safe-bottom));
 }
+
+/* keyboard-aware 유틸 — pb-safe 결. 소프트 키보드가 열리면 --inset-keyboard(훅이 write)가
+ * 커져, 하단에 핀 고정된 표면이 키보드 위로 물러난다. 키보드 닫힘=0px → pb-safe/h-dvh 와 동일.
+ *
+ * h-viewport   : 경직된 풀하이트 셸(overflow-hidden flex-col)용. 100dvh 에서 키보드를 뺀다.
+ * pb-keyboard  : 핀 고정 하단 바(컴포저 등)용. space-4 플로어·safe-area·키보드 3-way max. */
+@utility h-viewport {
+  height: calc(100dvh - var(--inset-keyboard, 0px));
+}
+
+@utility max-h-viewport {
+  max-height: calc(100dvh - var(--inset-keyboard, 0px));
+}
+
+@utility pb-keyboard {
+  padding-bottom: max(
+    var(--p-space-4),
+    var(--inset-safe-bottom),
+    var(--inset-keyboard, 0px)
+  );
+}

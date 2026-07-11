@@ -48,7 +48,7 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-[max(1.5rem,env(safe-area-inset-bottom))] z-[100] flex flex-col items-center gap-2 px-4"
+        className="pointer-events-none fixed inset-x-0 bottom-[max(var(--p-space-6),var(--inset-safe-bottom),var(--inset-keyboard,0px))] z-[100] flex flex-col items-center gap-2 px-4"
       >
         <AnimatePresence>
           {items.map((t) => (
