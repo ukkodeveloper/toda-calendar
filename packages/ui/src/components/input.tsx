@@ -21,7 +21,7 @@ function Input({ className, ref, ...props }: InputProps) {
       ref={ref}
       data-slot="input"
       className={cn(
-        "flex min-h-11 w-full rounded-control border border-border-standard bg-surface-inset px-3.5 py-2.5 text-body text-text-primary transition-colors outline-none",
+        "flex min-h-11 w-full rounded-control border border-border-standard bg-surface-inset px-3.5 py-2.5 text-input text-text-primary transition-colors outline-none",
         "placeholder:text-text-tertiary",
         "hover:border-border-strong",
         "focus-visible:border-border-brand focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-0",

@@ -54,6 +54,9 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
+  // 입력 필드(14px)가 16px 미만이어도 iOS Safari 가 포커스 시 화면을 자동 줌인하지 않도록
+  // 확대 상한을 1로 고정. (iOS 는 접근성 핀치줌은 대체로 계속 허용.)
+  maximumScale: 1,
   // 흰 앱 프레임 상단과 맞춘 상태바 크롬. <meta name="theme-color"> 는 리터럴 색만 허용(토큰 불가).
   // eslint-disable-next-line no-restricted-syntax -- meta theme-color 는 CSS 토큰을 쓸 수 없다
   themeColor: "#ffffff",

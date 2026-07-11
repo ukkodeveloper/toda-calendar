@@ -22,7 +22,7 @@ function Textarea({ className, rows = 3, ...props }: TextareaProps) {
       render={<textarea rows={rows} />}
       data-slot="textarea"
       className={cn(
-        "flex min-h-20 w-full resize-y rounded-control border border-border-standard bg-surface-inset px-3.5 py-2.5 text-body text-text-primary transition-colors outline-none",
+        "flex min-h-20 w-full resize-y rounded-control border border-border-standard bg-surface-inset px-3.5 py-2.5 text-input text-text-primary transition-colors outline-none",
         "placeholder:text-text-tertiary",
         "hover:border-border-strong",
         "focus-visible:border-border-brand focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-0",

@@ -47,7 +47,7 @@ function Select({
         ref={ref}
         data-slot="select-trigger"
         className={cn(
-          "flex min-h-11 w-full items-center justify-between gap-2 rounded-control border border-border-standard bg-surface-inset px-3.5 py-2.5 text-body text-text-primary transition-colors outline-none",
+          "flex min-h-11 w-full items-center justify-between gap-2 rounded-control border border-border-standard bg-surface-inset px-3.5 py-2.5 text-input text-text-primary transition-colors outline-none",
           "hover:border-border-strong",
           "focus-visible:border-border-brand focus-visible:ring-2 focus-visible:ring-ring-focus",
           "data-[popup-open]:border-border-brand",

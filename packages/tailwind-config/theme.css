@@ -116,6 +116,9 @@
   --text-body: var(--type-body-size);
   --text-body--line-height: var(--type-body-lh);
   --text-body--letter-spacing: var(--type-body-tracking);
+  /* text-input = body 와 별개인 입력 필드 전용(16px 플로어, iOS 줌 방지) */
+  --text-input: var(--type-input-size);
+  --text-input--line-height: var(--type-input-lh);
   --text-caption: var(--type-caption-size);
   --text-caption--line-height: var(--type-caption-lh);
   --text-caption--letter-spacing: var(--type-caption-tracking);

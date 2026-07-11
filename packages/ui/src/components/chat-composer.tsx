@@ -85,7 +85,7 @@ function ChatComposer({
     <div
       data-slot="chat-composer"
       className={cn(
-        "flex items-end gap-2 border-t border-border-subtle bg-surface-canvas px-3 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))]",
+        "flex items-end gap-2 border-t border-border-subtle bg-surface-canvas px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]",
         className
       )}
     >
@@ -95,7 +95,7 @@ function ChatComposer({
         </div>
       ) : null}
 
-      <div className="flex min-h-11 min-w-0 flex-1 items-center rounded-panel bg-fill-neutral px-3.5 py-2">
+      <div className="flex min-h-10 min-w-0 flex-1 items-center rounded-panel bg-fill-neutral px-3.5 py-1.5">
         <textarea
           ref={(node) => {
             innerRef.current = node
@@ -109,7 +109,7 @@ function ChatComposer({
           placeholder={placeholder}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={handleKeyDown}
-          className="max-h-40 min-w-0 flex-1 resize-none bg-transparent text-body text-text-primary outline-none placeholder:text-text-tertiary disabled:cursor-not-allowed disabled:opacity-60"
+          className="max-h-40 min-w-0 flex-1 resize-none bg-transparent text-input text-text-primary outline-none placeholder:text-text-tertiary disabled:cursor-not-allowed disabled:opacity-60"
         />
       </div>
 

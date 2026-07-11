@@ -170,19 +170,23 @@
   --font-weight-light: 300;
 
   /* 계층 타이포 — size / line-height / tracking */
-  --type-display-size: 3rem; /* 48px */
+  --type-display-size: 2.75rem; /* 44px (한 틱 ↓ from 48) */
   --type-display-lh: 1;
-  --type-display-tracking: -0.066rem; /* -1.056px */
-  --type-title-size: 1.25rem; /* 20px H3 */
+  --type-display-tracking: -0.06rem; /* -0.96px (-0.022em 유지) */
+  --type-title-size: 1.125rem; /* 18px H3 (한 틱 ↓ from 20) */
   --type-title-lh: 1.33;
-  --type-title-tracking: -0.015rem; /* -0.24px */
-  --type-body-size: 1rem; /* 16px */
+  --type-title-tracking: -0.014rem; /* -0.216px (-0.012em 유지) */
+  --type-body-size: 0.9375rem; /* 15px (한 틱 ↓ from 16) */
   --type-body-lh: 1.5;
   --type-body-tracking: 0;
-  --type-caption-size: 0.8125rem; /* 13px */
+  /* 입력 필드 전용 사이즈. iOS 포커스 자동 줌은 viewport(maximum-scale=1, layout.tsx)로
+     억제하므로 16px 플로어에 묶이지 않고 슬림하게 둔다. */
+  --type-input-size: 0.875rem; /* 14px */
+  --type-input-lh: 1.5;
+  --type-caption-size: 0.75rem; /* 12px (한 틱 ↓ from 13) */
   --type-caption-lh: 1.5;
-  --type-caption-tracking: -0.008rem; /* -0.13px */
-  --type-label-size: 0.75rem; /* 12px */
+  --type-caption-tracking: -0.007rem; /* -0.12px */
+  --type-label-size: 0.6875rem; /* 11px (한 틱 ↓ from 12) */
   --type-label-lh: 1.4;
   --type-label-tracking: 0;
 }
