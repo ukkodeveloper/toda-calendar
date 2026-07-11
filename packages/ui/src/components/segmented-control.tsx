@@ -24,21 +24,27 @@ export type SegmentedControlOption<T extends string> = {
   label: string
 }
 
-const segmentedControlVariants = cva("grid rounded-pill bg-fill-neutral p-1", {
+const segmentedControlVariants = cva("grid bg-fill-neutral p-1", {
   variants: {
     size: {
       sm: "gap-0.5",
       md: "gap-1",
       lg: "gap-1.5",
     },
+    orientation: {
+      // 가로 = 캡슐(pill), 세로 = 그룹 패널(pill 은 세로 박스에서 원형 블롭이 됨)
+      horizontal: "rounded-pill",
+      vertical: "rounded-panel",
+    },
   },
   defaultVariants: {
     size: "md",
+    orientation: "horizontal",
   },
 })
 
 const segmentedItemVariants = cva(
-  "relative flex min-w-0 cursor-pointer items-center justify-center rounded-pill font-strong text-text-tertiary transition-colors outline-none select-none hover:text-text-secondary focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-canvas data-[checked]:text-text-primary",
+  "relative flex min-w-0 cursor-pointer items-center justify-center font-strong text-text-tertiary transition-colors outline-none select-none hover:text-text-secondary focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-canvas data-[checked]:text-text-primary",
   {
     variants: {
       size: {
@@ -46,9 +52,14 @@ const segmentedItemVariants = cva(
         md: "min-h-11 px-3 text-caption",
         lg: "min-h-12 px-4 text-body",
       },
+      orientation: {
+        horizontal: "rounded-pill",
+        vertical: "rounded-control",
+      },
     },
     defaultVariants: {
       size: "md",
+      orientation: "horizontal",
     },
   }
 )
@@ -59,6 +70,12 @@ type SegmentedControlProps<T extends string> = {
   value: T
   onValueChange: (value: T) => void
   className?: string
+  /**
+   * 배치 방향. horizontal(기본) = 균등폭 가로 세그먼트,
+   * vertical = 한 칸씩 세로 스택(좁은 컨트롤 패널·옵션 목록용).
+   * Base UI RadioGroup 이 두 방향 모두 화살표 키를 보장한다.
+   */
+  orientation?: "horizontal" | "vertical"
 } & VariantProps<typeof segmentedControlVariants>
 
 function SegmentedControl<T extends string>({
@@ -66,6 +83,7 @@ function SegmentedControl<T extends string>({
   className,
   onValueChange,
   options,
+  orientation = "horizontal",
   size,
   value,
 }: SegmentedControlProps<T>) {
@@ -82,10 +100,16 @@ function SegmentedControl<T extends string>({
             onValueChange(next as T)
           }
         }}
-        className={cn(segmentedControlVariants({ size, className }))}
-        style={{
-          gridTemplateColumns: `repeat(${Math.max(options.length, 1)}, minmax(0, 1fr))`,
-        }}
+        className={cn(
+          segmentedControlVariants({ size, orientation, className })
+        )}
+        style={
+          orientation === "vertical"
+            ? undefined
+            : {
+                gridTemplateColumns: `repeat(${Math.max(options.length, 1)}, minmax(0, 1fr))`,
+              }
+        }
       >
         {options.map((option) => {
           const selected = value === option.value
@@ -94,13 +118,18 @@ function SegmentedControl<T extends string>({
             <Radio.Root
               key={option.value}
               value={option.value}
-              className={cn(segmentedItemVariants({ size }))}
+              className={cn(segmentedItemVariants({ size, orientation }))}
             >
               {selected ? (
                 <motion.span
                   layoutId="segmented-control-selection"
                   aria-hidden="true"
-                  className="absolute inset-0 rounded-pill bg-surface-raised shadow-elevation-2"
+                  className={cn(
+                    "absolute inset-0 bg-surface-raised shadow-elevation-2",
+                    orientation === "vertical"
+                      ? "rounded-control"
+                      : "rounded-pill"
+                  )}
                   transition={
                     reducedMotion
                       ? { duration: motionTokens.duration.instant }

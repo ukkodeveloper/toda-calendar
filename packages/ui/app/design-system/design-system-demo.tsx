@@ -1924,27 +1924,16 @@ function MobileComponentNav({
   return (
     <nav className="border-b border-foreground/[0.08] bg-[var(--surface-panel)] px-3 py-3 backdrop-blur-2xl lg:hidden">
       <div className="mx-auto max-w-[28rem] space-y-3">
-        <div className="grid grid-cols-4 gap-1 rounded-[18px] bg-foreground/[0.045] p-1">
-          {designNavSections.map((section) => {
-            const selected = activeSection === section.id
-
-            return (
-              <button
-                key={section.id}
-                type="button"
-                className={cn(
-                  "min-h-10 min-w-0 rounded-[14px] px-1.5 text-center text-[0.86rem] font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
-                  selected
-                    ? "bg-background text-foreground shadow-[var(--ds-elevation-1)]"
-                    : "text-foreground/48"
-                )}
-                onClick={() => onSelectSection(section.id)}
-              >
-                <span className="block truncate">{section.mobileLabel}</span>
-              </button>
-            )
-          })}
-        </div>
+        <SegmentedControl
+          ariaLabel="디자인 섹션"
+          size="sm"
+          options={designNavSections.map((section) => ({
+            value: section.id,
+            label: section.mobileLabel,
+          }))}
+          value={activeSection}
+          onValueChange={onSelectSection}
+        />
 
         <div className="rounded-[22px] bg-background/64 p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
           <div className="mb-2 flex items-center justify-between gap-3">
@@ -4855,49 +4844,21 @@ function ControlOptions<T extends string>({
   options: Array<{ label: string; value: T }>
   value: T
 }) {
-  const groupId = React.useId()
-  const reducedMotion = useReducedMotion()
-
+  // 세로 단일선택 컨트롤 = DS SegmentedControl(vertical) 로 dogfood.
+  // 슬라이딩 인디케이터·roving tabindex·a11y 를 손으로 재구현하지 않는다.
   return (
     <div>
       <p className="mb-2 text-caption font-strong text-text-secondary">
         {label}
       </p>
-      <LayoutGroup id={groupId}>
-        <div className="grid gap-1 rounded-panel bg-fill-neutral p-1">
-          {options.map((option) => {
-            const selected = value === option.value
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                className={cn(
-                  "relative min-h-11 rounded-control px-3 text-caption font-emphasis transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-surface-canvas",
-                  selected
-                    ? "text-text-primary"
-                    : "text-text-tertiary hover:text-text-secondary"
-                )}
-                onClick={() => onChange(option.value)}
-              >
-                {selected ? (
-                  <motion.span
-                    layoutId="control-option-selection"
-                    aria-hidden="true"
-                    className="absolute inset-0 rounded-control bg-surface-raised shadow-elevation-2"
-                    transition={
-                      reducedMotion
-                        ? { duration: motionTokens.duration.instant }
-                        : motionTokens.intent.selectionFlow
-                    }
-                  />
-                ) : null}
-                <span className="relative z-10">{option.label}</span>
-              </button>
-            )
-          })}
-        </div>
-      </LayoutGroup>
+      <SegmentedControl
+        ariaLabel={label}
+        size="sm"
+        orientation="vertical"
+        options={options}
+        value={value}
+        onValueChange={onChange}
+      />
     </div>
   )
 }
