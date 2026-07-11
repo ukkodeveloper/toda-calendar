@@ -414,7 +414,7 @@ function ChatPageInner() {
                   <ColorAvatar
                     seed={item.name ?? ""}
                     color={item.color}
-                    size="sm"
+                    size="xs"
                     animated={false}
                   />
                 ) : undefined

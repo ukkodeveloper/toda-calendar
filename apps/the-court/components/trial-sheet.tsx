@@ -441,7 +441,7 @@ export function TrialSheet({
                   <ColorAvatar
                     seed={m.nickname}
                     color={m.color}
-                    size="sm"
+                    size="xs"
                     animated={false}
                   />
                 ) : undefined
