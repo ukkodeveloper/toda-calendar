@@ -41,23 +41,24 @@ function ChatMessage({
   time,
 }: ChatMessageProps) {
   if (side === "outgoing") {
+    // 나(outgoing): 버블은 오른쪽 정렬, 시간은 버블 "아래"에 우측 정렬로 건다.
     return (
       <div
         ref={ref}
         data-slot="chat-message"
-        className={cn("flex items-end justify-end gap-1.5", className)}
+        className={cn("flex flex-col items-end gap-1", className)}
       >
-        {time ? (
-          <span className="shrink-0 pb-1 text-label font-emphasis text-text-quaternary">
-            {time}
-          </span>
-        ) : null}
         <div
           data-slot="chat-bubble"
           className={cn(chatBubbleVariants({ side: "outgoing", size }))}
         >
           {children}
         </div>
+        {time ? (
+          <span className="px-1 text-label font-emphasis text-text-quaternary">
+            {time}
+          </span>
+        ) : null}
       </div>
     )
   }
