@@ -129,6 +129,10 @@
   --elevation-3: 0 8px 24px oklch(0 0 0 / 0.44);
   --backdrop-overlay: oklch(0 0 0 / 0.85); /* 모달 backdrop */
 
+  /* safe-area — 브라우저 env() 를 semantic 이름으로 승격. 컴포넌트는 인라인 env()
+   * 반복 대신 pb-safe 유틸로만 참조한다(규칙2·3). 테마 무관 → 단일 정의. */
+  --inset-safe-bottom: env(safe-area-inset-bottom);
+
   /* radius — 의도 기반 alias */
   --radius-micro: var(--p-radius-2);
   --radius-small: var(--p-radius-4);

@@ -161,7 +161,7 @@ function BottomSheet({
                 ) : null}
                 <div
                   className={cn(
-                    "min-h-0 flex-1 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5",
+                    "min-h-0 flex-1 px-4 pb-safe sm:px-5",
                     scrollable ? "overflow-y-auto" : "overflow-hidden",
                     contentClassName
                   )}
@@ -169,7 +169,7 @@ function BottomSheet({
                   {children}
                 </div>
                 {footer ? (
-                  <footer className="border-t border-border-subtle px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5">
+                  <footer className="border-t border-border-subtle px-4 pt-3 pb-safe sm:px-5">
                     {footer}
                   </footer>
                 ) : null}
