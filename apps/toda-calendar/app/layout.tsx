@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist_Mono } from "next/font/google"
 
 import "@workspace/ui/globals.css"
+import "./calendar-tokens.css"
 import { appCopy } from "@/lib/copy"
 import { AppProviders } from "@/providers/app-providers"
 import { cn } from "@workspace/ui/lib/utils"
@@ -25,7 +26,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans")}
+      className={cn("light", "antialiased", fontMono.variable, "font-sans")}
     >
       <body>
         <AppProviders>{children}</AppProviders>

@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from "react"
+import { type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -32,7 +32,8 @@ const actionGridVariants = cva("grid", {
 
 type ActionGridProps = {
   items: ActionGridItem[]
-} & Omit<ComponentProps<"div">, "children"> &
+  ref?: Ref<HTMLDivElement>
+} & Omit<ComponentPropsWithoutRef<"div">, "children"> &
   VariantProps<typeof actionGridVariants>
 
 function ActionGrid({
@@ -40,19 +41,25 @@ function ActionGrid({
   columns,
   gap,
   items,
+  ref,
   ...props
 }: ActionGridProps) {
   return (
-    <div className={cn(actionGridVariants({ columns, gap, className }))} {...props}>
+    <div
+      ref={ref}
+      data-slot="action-grid"
+      className={cn(actionGridVariants({ columns, gap, className }))}
+      {...props}
+    >
       {items.map((item) => (
         <div key={item.id} className="flex min-w-0 items-center gap-3">
           {item.icon ? <div className="shrink-0">{item.icon}</div> : null}
           <div className="min-w-0">
-            <p className="truncate text-[0.92rem] font-semibold leading-5 text-foreground">
+            <p className="truncate text-body font-strong text-text-primary">
               {item.label}
             </p>
             {item.description ? (
-              <p className="mt-0.5 truncate text-[0.74rem] font-medium text-foreground/42">
+              <p className="mt-0.5 truncate text-label font-emphasis text-text-tertiary">
                 {item.description}
               </p>
             ) : null}

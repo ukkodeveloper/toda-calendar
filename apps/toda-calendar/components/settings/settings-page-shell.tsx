@@ -44,7 +44,7 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
 
           <div className="pt-8">
             <section>
-              <p className="px-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <p className="px-1 text-[0.72rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                 계정
               </p>
               {isAuthenticated ? (
@@ -95,7 +95,10 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
                             : appCopy.page.settings.runtimePending}
                         </span>
                       </span>
-                      <span aria-hidden="true" className="text-muted-foreground">
+                      <span
+                        aria-hidden="true"
+                        className="text-muted-foreground"
+                      >
                         <ChevronIcon />
                       </span>
                     </Link>
@@ -118,7 +121,10 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
                                 {provider.description}
                               </span>
                             </span>
-                            <span aria-hidden="true" className="text-muted-foreground">
+                            <span
+                              aria-hidden="true"
+                              className="text-muted-foreground"
+                            >
                               <ChevronIcon />
                             </span>
                           </a>
@@ -130,7 +136,7 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
             </section>
 
             <section className="mt-10">
-              <p className="px-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <p className="px-1 text-[0.72rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                 동기화
               </p>
               <div className="mt-4 py-3">
@@ -152,7 +158,7 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
                 className="w-full"
                 size="lg"
                 type="button"
-                variant="destructive"
+                variant="danger"
                 onClick={() => setConfirmOpen(true)}
               >
                 {appCopy.page.settings.logoutCta}
@@ -181,7 +187,7 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
               className="flex-1"
               disabled={isSigningOut}
               type="button"
-              variant="destructive"
+              variant="danger"
               onClick={handleConfirmSignOut}
             >
               {appCopy.page.settings.logoutCta}
@@ -199,12 +205,7 @@ export function SettingsPageShell({ session }: SettingsPageShellProps) {
 
 function BackIcon() {
   return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
+    <svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24">
       <path
         d="m14.5 6.5-5 5 5 5"
         stroke="currentColor"
@@ -218,12 +219,7 @@ function BackIcon() {
 
 function ChevronIcon() {
   return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
+    <svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24">
       <path
         d="m9.5 6.5 5 5-5 5"
         stroke="currentColor"

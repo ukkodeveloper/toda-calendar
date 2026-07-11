@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-
+import { Tabs } from "@base-ui/react/tabs"
 import { cva, type VariantProps } from "class-variance-authority"
 import { LayoutGroup, motion, useReducedMotion } from "framer-motion"
 
@@ -9,6 +9,15 @@ import { Badge } from "@workspace/ui/components/badge"
 import { motionTokens } from "@workspace/ui/lib/motion"
 import { cn } from "@workspace/ui/lib/utils"
 
+/**
+ * PillTabs — Base UI Tabs(headless) 위의 상단 필터/네비 탭. (규칙5)
+ *
+ * 키보드는 Base UI 가 보장한다: roving tabindex·←→ 화살표·Home/End·loop.
+ * `Tabs.List`+`Tabs.Tab` 로 `role="tablist"`/`role="tab"`·`aria-selected` 자동.
+ * activateOnFocus=false = 화살표로 포커스 이동, Enter/Space 로 선택(수동 활성).
+ *
+ * 최소 높이 44px(규칙12) — sm 도 min-h-11. 색·라운드는 semantic 토큰만(규칙1·2·3).
+ */
 export type PillTabOption<T extends string> = {
   value: T
   label: string
@@ -36,70 +45,38 @@ const pillTabsVariants = cva("flex min-w-0 items-center", {
 })
 
 const pillTabVariants = cva(
-  "relative inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap font-semibold tracking-normal transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]/45",
+  "relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 font-strong tracking-normal whitespace-nowrap transition-colors outline-none select-none focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-canvas",
   {
     variants: {
       variant: {
-        chip: "",
-        soft: "",
-        text: "",
+        chip: "rounded-pill bg-fill-neutral",
+        soft: "rounded-pill bg-surface-raised",
+        text: "px-0",
       },
       size: {
-        sm: "min-h-8 px-2.5 text-[0.8rem]",
-        md: "min-h-10 px-3.5 text-[0.9rem]",
-        lg: "min-h-11 px-4 text-[1rem]",
-      },
-      selected: {
-        true: "",
-        false: "",
+        sm: "min-h-11 px-2.5 text-caption",
+        md: "min-h-11 px-3.5 text-body",
+        lg: "min-h-12 px-4 text-body",
       },
     },
     compoundVariants: [
       {
         variant: "chip",
-        className: "rounded-full bg-foreground/[0.055]",
+        className:
+          "text-text-tertiary hover:text-text-primary data-[active]:text-text-on-brand",
       },
       {
         variant: "soft",
-        className: "rounded-full bg-white/62 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]",
+        className:
+          "text-text-tertiary hover:text-text-primary data-[active]:text-text-primary",
       },
       {
         variant: "text",
-        className: "px-0",
-      },
-      {
-        selected: false,
-        variant: "chip",
-        className: "text-foreground/72 hover:text-foreground",
-      },
-      {
-        selected: true,
-        variant: "chip",
-        className: "text-background",
-      },
-      {
-        selected: true,
-        variant: "soft",
-        className: "text-foreground",
-      },
-      {
-        selected: false,
-        variant: "soft",
-        className: "text-foreground/62 hover:text-foreground",
-      },
-      {
-        selected: true,
-        variant: "text",
-        className: "text-foreground",
-      },
-      {
-        selected: false,
-        variant: "text",
-        className: "text-foreground/42 hover:text-foreground/68",
+        className:
+          "text-text-quaternary hover:text-text-secondary data-[active]:text-text-primary",
       },
     ],
     defaultVariants: {
-      selected: false,
       size: "md",
       variant: "chip",
     },
@@ -131,68 +108,70 @@ function PillTabs<T extends string>({
 
   return (
     <LayoutGroup id={layoutGroupId}>
-      <div
-        aria-label={ariaLabel}
-        className={cn(pillTabsVariants({ gap, scrollable, className }))}
-        role="tablist"
+      <Tabs.Root
+        value={value}
+        onValueChange={(next) => onValueChange(next as T)}
       >
-        {options.map((option) => {
-          const selected = option.value === value
+        <Tabs.List
+          activateOnFocus={false}
+          aria-label={ariaLabel}
+          className={cn(pillTabsVariants({ gap, scrollable, className }))}
+        >
+          {options.map((option) => {
+            const selected = option.value === value
 
-          return (
-            <button
-              key={option.value}
-              type="button"
-              aria-selected={selected}
-              className={cn(pillTabVariants({ selected, size, variant }))}
-              role="tab"
-              onClick={() => onValueChange(option.value)}
-            >
-              {selected && variant !== "text" ? (
-                <motion.span
-                  layoutId="pill-tab-selection"
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute inset-0 rounded-full",
-                    variant === "chip"
-                      ? "bg-foreground"
-                      : "bg-white shadow-[0_8px_22px_rgba(15,23,42,0.08)]"
-                  )}
-                  transition={
-                    reducedMotion
-                      ? { duration: motionTokens.duration.instant }
-                      : motionTokens.intent.selectionFlow
-                  }
-                />
-              ) : null}
-              {selected && variant === "text" ? (
-                <motion.span
-                  layoutId="pill-tab-text-selection"
-                  aria-hidden="true"
-                  className="absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-foreground"
-                  transition={
-                    reducedMotion
-                      ? { duration: motionTokens.duration.instant }
-                      : motionTokens.intent.selectionFlow
-                  }
-                />
-              ) : null}
-              <span className="relative z-10 inline-flex items-center gap-1.5">
-                {option.leading}
-                {option.label}
-                {option.dot ? (
-                  <span className="size-1.5 rounded-full bg-[var(--ds-accent)]" />
+            return (
+              <Tabs.Tab
+                key={option.value}
+                value={option.value}
+                className={cn(pillTabVariants({ size, variant }))}
+              >
+                {selected && variant !== "text" ? (
+                  <motion.span
+                    layoutId="pill-tab-selection"
+                    aria-hidden="true"
+                    className={cn(
+                      "absolute inset-0 rounded-pill",
+                      variant === "chip"
+                        ? "bg-fill-brand"
+                        : "bg-surface-raised shadow-elevation-2"
+                    )}
+                    transition={
+                      reducedMotion
+                        ? { duration: motionTokens.duration.instant }
+                        : motionTokens.intent.selectionFlow
+                    }
+                  />
                 ) : null}
-                {option.badge ? (
-                  <Badge tone="accent" size="sm">
-                    {option.badge}
-                  </Badge>
+                {selected && variant === "text" ? (
+                  <motion.span
+                    layoutId="pill-tab-text-selection"
+                    aria-hidden="true"
+                    className="absolute right-0 -bottom-1 left-0 h-1 rounded-pill bg-fill-brand"
+                    transition={
+                      reducedMotion
+                        ? { duration: motionTokens.duration.instant }
+                        : motionTokens.intent.selectionFlow
+                    }
+                  />
                 ) : null}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+                <span className="relative z-10 inline-flex items-center gap-1.5">
+                  {option.leading}
+                  {option.label}
+                  {option.dot ? (
+                    <span className="size-1.5 rounded-pill bg-fill-brand" />
+                  ) : null}
+                  {option.badge ? (
+                    <Badge tone="accent" size="sm">
+                      {option.badge}
+                    </Badge>
+                  ) : null}
+                </span>
+              </Tabs.Tab>
+            )
+          })}
+        </Tabs.List>
+      </Tabs.Root>
     </LayoutGroup>
   )
 }

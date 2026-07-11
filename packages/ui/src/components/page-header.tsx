@@ -1,9 +1,14 @@
-import type { ComponentProps, ReactNode } from "react"
+import { type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@workspace/ui/lib/utils"
 
+/**
+ * PageHeader — 화면 상단 헤더의 단일 구현. leading/title/meta/subtitle/trailing + size.
+ * AppBar 는 이 컴포넌트의 얇은 alias(하위호환). 색·타이포는 semantic 토큰만(규칙1·2·3).
+ * 순수 표현(레이아웃) — 인터랙션·터치 타깃은 슬롯한 요소(Button 등)가 책임진다.
+ */
 const pageHeaderVariants = cva("flex shrink-0 gap-3", {
   variants: {
     align: {
@@ -13,7 +18,7 @@ const pageHeaderVariants = cva("flex shrink-0 gap-3", {
     size: {
       compact: "min-h-14 px-5 py-2",
       regular: "min-h-16 px-5 py-3",
-      large: "min-h-[4.5rem] px-5 pt-5 pb-2.5",
+      large: "min-h-18 px-5 pt-5 pb-2.5",
     },
   },
   defaultVariants: {
@@ -23,13 +28,13 @@ const pageHeaderVariants = cva("flex shrink-0 gap-3", {
 })
 
 const pageHeaderTitleVariants = cva(
-  "min-w-0 shrink-0 font-semibold tracking-normal text-foreground",
+  "min-w-0 shrink-0 font-strong text-text-primary",
   {
     variants: {
       size: {
-        compact: "text-[1.08rem] leading-6",
-        regular: "text-[1.28rem] leading-7",
-        large: "text-[1.86rem] leading-9",
+        compact: "text-body",
+        regular: "text-title",
+        large: "text-display",
       },
     },
     defaultVariants: {
@@ -38,21 +43,18 @@ const pageHeaderTitleVariants = cva(
   }
 )
 
-const pageHeaderMetaVariants = cva(
-  "min-w-0 font-semibold tracking-normal text-foreground/48",
-  {
-    variants: {
-      size: {
-        compact: "text-[0.8rem] leading-5",
-        regular: "text-[0.86rem] leading-5",
-        large: "text-[0.98rem] leading-6",
-      },
+const pageHeaderMetaVariants = cva("min-w-0 font-strong text-text-tertiary", {
+  variants: {
+    size: {
+      compact: "text-caption",
+      regular: "text-caption",
+      large: "text-body",
     },
-    defaultVariants: {
-      size: "regular",
-    },
-  }
-)
+  },
+  defaultVariants: {
+    size: "regular",
+  },
+})
 
 type PageHeaderProps = {
   leading?: ReactNode
@@ -60,7 +62,8 @@ type PageHeaderProps = {
   subtitle?: ReactNode
   title: ReactNode
   trailing?: ReactNode
-} & ComponentProps<"header"> &
+  ref?: Ref<HTMLElement>
+} & Omit<ComponentPropsWithoutRef<"header">, "title"> &
   VariantProps<typeof pageHeaderVariants>
 
 function PageHeader({
@@ -68,6 +71,7 @@ function PageHeader({
   className,
   leading,
   meta,
+  ref,
   size = "regular",
   subtitle,
   title,
@@ -78,6 +82,8 @@ function PageHeader({
 
   return (
     <header
+      ref={ref}
+      data-slot="page-header"
       className={cn(pageHeaderVariants({ align, size, className }))}
       {...props}
     >
@@ -95,7 +101,7 @@ function PageHeader({
           ) : null}
         </div>
         {subtitle ? (
-          <p className="mt-1 truncate text-[0.86rem] font-medium leading-5 text-foreground/46">
+          <p className="mt-1 truncate text-caption font-emphasis text-text-tertiary">
             {subtitle}
           </p>
         ) : null}
@@ -113,3 +119,4 @@ export {
   pageHeaderTitleVariants,
   pageHeaderVariants,
 }
+export type { PageHeaderProps }

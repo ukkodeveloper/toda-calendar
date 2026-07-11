@@ -76,8 +76,6 @@ export const todaDesignSystem = {
     "Grid",
     "Divider",
     "Badge",
-    "TokenSwatch",
-    "SpacingScale",
     "Avatar",
     "AppBar",
     "PageHeader",
@@ -96,8 +94,6 @@ export const todaDesignSystem = {
     "MessageInput",
     "Surface",
     "BottomSheet",
-    "CalendarPreview",
-    "ThreeStageSheet",
     "MenuCheckboxGroup",
   ],
 } as const

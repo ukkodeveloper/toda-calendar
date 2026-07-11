@@ -1,0 +1,130 @@
+/*
+ * @workspace/tailwind-config — 공유 Tailwind v4 진입점.
+ *
+ * S1.5 분리: 토큰·@theme(유틸 등록)·tailwind/shadcn/tw-animate import·
+ * @custom-variant dark 를 packages/ui 에서 여기로 이전했다.
+ * @workspace/ui globals.css 와 소비 앱이 이 파일을 @import 해서 단일 토큰 소스를 공유한다.
+ *
+ * ⚠️ @source 는 여기 두지 않는다. Tailwind v4 에서 @source 는 "선언한 파일 기준
+ *    상대경로"로 해석된다(imported 파일 위치가 아니라). 소스 스캔은 각 소비자
+ *    CSS(=자기 트리 위치를 아는 파일)에서 선언한다. 이 파일엔 스캔할 .tsx 가 없다.
+ *
+ * 토큰 값·이름·구조는 S1(worker-design 확정) 그대로. 이전·배선만.
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./tokens.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-heading);
+  --font-sans: var(--font-sans);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* ── semantic 토큰을 Tailwind 유틸리티로 노출 (S2~) ──
+   * 컴포넌트가 bg-fill-brand·text-on-brand·border-subtle·rounded-control 처럼
+   * semantic 층을 직접, 임의값 없이 참조하게 한다. (규칙2·3 — 우회 인센티브 제거) */
+  --color-fill-brand: var(--fill-brand);
+  --color-fill-brand-hover: var(--fill-brand-hover);
+  --color-fill-neutral: var(--fill-neutral);
+  --color-fill-neutral-weak: var(--fill-neutral-weak);
+  --color-fill-neutral-strong: var(--fill-neutral-strong);
+  --color-fill-success: var(--fill-success);
+  --color-fill-danger: var(--fill-danger);
+  --color-fill-warning: var(--fill-warning);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-quaternary: var(--text-quaternary);
+  --color-text-brand: var(--text-brand);
+  --color-text-on-brand: var(--text-on-brand);
+  --color-text-on-fill: var(--text-on-fill);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-standard: var(--border-standard);
+  --color-border-strong: var(--border-strong);
+  --color-border-brand: var(--border-brand);
+  --color-surface-canvas: var(--surface-canvas);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-surface-glass: var(--surface-glass);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-inset: var(--surface-inset);
+  --color-backdrop-overlay: var(--backdrop-overlay);
+  --color-ring-focus: var(--ring-focus);
+
+  /* elevation 그림자 유틸 (shadow-elevation-*) — 시트·팝오버 깊이.
+   * 인라인 shadow-[...] 매직넘버 대신 semantic 그림자 토큰을 참조한다(규칙2). */
+  --shadow-elevation-1: var(--elevation-1);
+  --shadow-elevation-2: var(--elevation-2);
+  --shadow-elevation-3: var(--elevation-3);
+
+  --radius-micro: var(--p-radius-2);
+  --radius-control: var(--p-radius-6);
+  --radius-card: var(--p-radius-8);
+  --radius-panel: var(--p-radius-12);
+  --radius-hero: var(--p-radius-22);
+  --radius-pill: var(--p-radius-full);
+
+  /* 타이포 스케일을 text-* 유틸리티로 (size/line-height/tracking 묶음).
+   * 이름이 text-primary 같은 색 유틸과 겹치지 않게 계층 이름을 쓴다. */
+  --text-display: var(--type-display-size);
+  --text-display--line-height: var(--type-display-lh);
+  --text-display--letter-spacing: var(--type-display-tracking);
+  --text-title: var(--type-title-size);
+  --text-title--line-height: var(--type-title-lh);
+  --text-title--letter-spacing: var(--type-title-tracking);
+  --text-body: var(--type-body-size);
+  --text-body--line-height: var(--type-body-lh);
+  --text-body--letter-spacing: var(--type-body-tracking);
+  --text-caption: var(--type-caption-size);
+  --text-caption--line-height: var(--type-caption-lh);
+  --text-caption--letter-spacing: var(--type-caption-tracking);
+  --text-label: var(--type-label-size);
+  --text-label--line-height: var(--type-label-lh);
+  --text-label--letter-spacing: var(--type-label-tracking);
+
+  /* 폰트 웨이트를 font-* 유틸리티로 (Linear 시그니처 510) */
+  --font-weight-read: var(--font-weight-read);
+  --font-weight-emphasis: var(--font-weight-emphasis);
+  --font-weight-strong: var(--font-weight-strong);
+}

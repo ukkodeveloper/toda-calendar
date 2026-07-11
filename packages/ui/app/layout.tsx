@@ -1,9 +1,16 @@
 import type { Metadata } from "next"
-import { Geist_Mono } from "next/font/google"
+import { Geist_Mono, Inter } from "next/font/google"
 
 import "@workspace/ui/globals.css"
+import "./design-system/calendar-demo-tokens.css"
 import { cn } from "@workspace/ui/lib/utils"
 import { AppProviders } from "./providers"
+
+// weight 미지정 = 가변 축(100–900) 로드 → Linear 시그니처 웨이트 510 사용 가능
+const fontSans = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+})
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -24,7 +31,12 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans")}
+      className={cn(
+        "antialiased",
+        fontSans.variable,
+        fontMono.variable,
+        "font-sans"
+      )}
     >
       <body>
         <AppProviders>{children}</AppProviders>

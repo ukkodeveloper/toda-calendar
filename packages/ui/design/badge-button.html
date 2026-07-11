@@ -1,0 +1,226 @@
+<!doctype html>
+<!-- S2 파일럿 시각 계약 — Badge · Button, 다크(기본)·라이트 양쪽.
+     토큰 값은 tokens.css semantic 층과 동일. 구현은 이 "보이는 결과"를 통과시킨다. -->
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>S2 — Badge · Button 시각 계약</title>
+    <style>
+      :root {
+        /* semantic (dark native, from tokens.css) */
+        --surface-canvas: #08090a;
+        --surface-raised: #191a1b;
+        --fill-brand: #5e6ad2;
+        --fill-brand-hover: #828fff;
+        --fill-neutral: rgba(255, 255, 255, 0.05);
+        --fill-neutral-strong: rgba(255, 255, 255, 0.08);
+        --fill-success: #10b981;
+        --fill-danger: #7170ff;
+        --text-primary: #f7f8f8;
+        --text-secondary: #d0d6e0;
+        --text-tertiary: #8a8f98;
+        --text-brand: #7170ff;
+        --text-on-brand: #fff;
+        --border-subtle: rgba(255, 255, 255, 0.05);
+        --border-standard: rgba(255, 255, 255, 0.08);
+        --radius-control: 6px;
+        --radius-pill: 9999px;
+        --font-ui: Inter, -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+      }
+      .light {
+        --surface-canvas: #f7f8f8;
+        --surface-raised: #fff;
+        --fill-neutral: rgba(0, 0, 0, 0.05);
+        --fill-neutral-strong: rgba(0, 0, 0, 0.08);
+        --fill-danger: #5e6ad2;
+        --text-primary: #0f1011;
+        --text-secondary: #62666d;
+        --text-tertiary: #8a8f98;
+        --text-brand: #5e6ad2;
+        --border-subtle: rgba(0, 0, 0, 0.06);
+        --border-standard: #d0d6e0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-ui);
+        font-weight: 510;
+        display: flex;
+        gap: 0;
+      }
+      .pane {
+        flex: 1;
+        min-height: 100vh;
+        background: var(--surface-canvas);
+        color: var(--text-primary);
+        padding: 32px;
+      }
+      h2 {
+        font-size: 13px;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin: 28px 0 12px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      /* ── Badge (non-interactive) ── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-pill);
+        border: 1px solid transparent;
+        font-weight: 590;
+        min-height: 24px;
+        padding: 0 10px;
+        font-size: 12px;
+      }
+      .badge.sm {
+        padding: 0 8px;
+        font-size: 11px;
+      }
+      .badge.lg {
+        min-height: 32px;
+        padding: 0 12px;
+        font-size: 13px;
+      }
+      .badge.neutral {
+        background: var(--fill-neutral);
+        color: var(--text-secondary);
+        border-color: var(--border-subtle);
+      }
+      .badge.brand {
+        background: color-mix(in srgb, var(--fill-brand) 14%, transparent);
+        color: var(--text-brand);
+        border-color: color-mix(in srgb, var(--fill-brand) 24%, transparent);
+      }
+      .badge.success {
+        background: color-mix(in srgb, var(--fill-success) 14%, transparent);
+        color: var(--fill-success);
+        border-color: color-mix(in srgb, var(--fill-success) 24%, transparent);
+      }
+      .badge.danger {
+        background: color-mix(in srgb, var(--fill-danger) 14%, transparent);
+        color: var(--fill-danger);
+        border-color: color-mix(in srgb, var(--fill-danger) 24%, transparent);
+      }
+
+      /* ── Button (interactive, 44px 터치) ── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border-radius: var(--radius-control);
+        border: 1px solid transparent;
+        font-family: inherit;
+        font-weight: 510;
+        font-size: 14px;
+        cursor: pointer;
+        min-height: 44px;
+        padding: 0 16px;
+        white-space: nowrap;
+      }
+      .btn.sm {
+        min-height: 44px;
+        padding: 0 12px;
+        font-size: 13px;
+      }
+      .btn.lg {
+        min-height: 48px;
+        padding: 0 20px;
+        font-size: 15px;
+      }
+      .btn.primary {
+        background: var(--fill-brand);
+        color: var(--text-on-brand);
+      }
+      .btn.neutral {
+        background: var(--fill-neutral-strong);
+        color: var(--text-primary);
+      }
+      .btn.outline {
+        border-color: var(--border-standard);
+        color: var(--text-primary);
+        background: transparent;
+      }
+      .btn.ghost {
+        color: var(--text-secondary);
+        background: transparent;
+      }
+      .btn.danger {
+        background: color-mix(in srgb, var(--fill-danger) 14%, transparent);
+        color: var(--fill-danger);
+      }
+      .btn.link {
+        color: var(--text-brand);
+        background: transparent;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        min-height: auto;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pane" id="dark">
+      <strong>다크 (기본)</strong>
+      <h2>Badge — tone</h2>
+      <div class="row">
+        <span class="badge neutral">중립</span>
+        <span class="badge brand">브랜드</span>
+        <span class="badge success">완료</span>
+        <span class="badge danger">주의</span>
+      </div>
+      <h2>Badge — size</h2>
+      <div class="row">
+        <span class="badge brand sm">SM</span>
+        <span class="badge brand">MD</span>
+        <span class="badge brand lg">LG</span>
+      </div>
+      <h2>Button — variant</h2>
+      <div class="row">
+        <button class="btn primary">주요 행동</button>
+        <button class="btn neutral">보조</button>
+        <button class="btn outline">외곽선</button>
+        <button class="btn ghost">고스트</button>
+        <button class="btn danger">삭제</button>
+        <button class="btn link">링크</button>
+      </div>
+      <h2>Button — size</h2>
+      <div class="row">
+        <button class="btn primary sm">작게</button>
+        <button class="btn primary">기본</button>
+        <button class="btn primary lg">크게</button>
+      </div>
+    </div>
+    <div class="pane light" id="light">
+      <strong>라이트 (보조)</strong>
+      <h2>Badge — tone</h2>
+      <div class="row">
+        <span class="badge neutral">중립</span>
+        <span class="badge brand">브랜드</span>
+        <span class="badge success">완료</span>
+        <span class="badge danger">주의</span>
+      </div>
+      <h2>Button — variant</h2>
+      <div class="row">
+        <button class="btn primary">주요 행동</button>
+        <button class="btn neutral">보조</button>
+        <button class="btn outline">외곽선</button>
+        <button class="btn ghost">고스트</button>
+        <button class="btn danger">삭제</button>
+        <button class="btn link">링크</button>
+      </div>
+    </div>
+  </body>
+</html>

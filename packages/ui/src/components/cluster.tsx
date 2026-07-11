@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react"
+import { type ComponentPropsWithoutRef, type Ref } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -39,10 +39,13 @@ function Cluster({
   className,
   gap,
   justify,
+  ref,
   ...props
-}: ComponentProps<"div"> & VariantProps<typeof clusterVariants>) {
+}: ComponentPropsWithoutRef<"div"> &
+  VariantProps<typeof clusterVariants> & { ref?: Ref<HTMLDivElement> }) {
   return (
     <div
+      ref={ref}
       className={cn(clusterVariants({ align, gap, justify, className }))}
       {...props}
     />
