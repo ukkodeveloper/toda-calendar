@@ -516,17 +516,17 @@ const aligns = ["start", "center", "end", "stretch"] as const
 const justifies = ["start", "center", "end", "between"] as const
 const gridColumns = ["one", "two", "three"] as const
 const dividerInsets = ["none", "sm", "md"] as const
-const badgeTones = ["neutral", "accent", "success", "danger"] as const
+const badgeTones = ["neutral", "brand", "success", "danger"] as const
 const badgeSizes = ["sm", "md", "lg"] as const
 const avatarSizes = ["xs", "sm", "md", "lg", "xl"] as const
 const avatarShapes = ["circle", "rounded", "squircle"] as const
 const avatarTones = ["neutral", "accent", "success", "danger"] as const
 const buttonVariants = [
-  "default",
-  "secondary",
+  "primary",
+  "neutral",
   "outline",
   "ghost",
-  "destructive",
+  "danger",
 ] as const
 const buttonSizes = ["sm", "default", "lg"] as const
 const appBarSizes = ["compact", "regular", "large"] as const
@@ -1240,7 +1240,7 @@ export function DesignSystemDemo({
   const [clusterJustify, setClusterJustify] = React.useState<Justify>("start")
   const [columns, setColumns] = React.useState<GridColumns>("two")
   const [dividerInset, setDividerInset] = React.useState<DividerInset>("none")
-  const [badgeTone, setBadgeTone] = React.useState<BadgeTone>("accent")
+  const [badgeTone, setBadgeTone] = React.useState<BadgeTone>("brand")
   const [badgeSize, setBadgeSize] = React.useState<BadgeSize>("md")
   const [avatarSize, setAvatarSize] = React.useState<AvatarSize>("md")
   const [avatarShape, setAvatarShape] = React.useState<AvatarShape>("circle")
@@ -1274,7 +1274,7 @@ export function DesignSystemDemo({
     routedState.examplePage
   )
   const [buttonVariant, setButtonVariant] =
-    React.useState<ButtonVariant>("default")
+    React.useState<ButtonVariant>("primary")
   const [buttonSize, setButtonSize] = React.useState<ButtonSize>("default")
   const [buttonDisabled, setButtonDisabled] = React.useState(false)
   const [iconButtonSize, setIconButtonSize] =
@@ -3885,7 +3885,7 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
         <div className="relative px-5 pt-5">
           <div className="flex items-center justify-between gap-3">
             <Button
-              variant="secondary"
+              variant="neutral"
               className="h-12 rounded-full bg-white/86 px-4 text-[1rem] shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
             >
               <span aria-hidden="true">‹</span>
@@ -4006,7 +4006,7 @@ function ExamplePagePreview({ examplePage }: { examplePage: ExamplePage }) {
           {["단독", "색상", "가격대", "상품정보", "브랜드"].map((label) => (
             <Button
               key={label}
-              variant="secondary"
+              variant="neutral"
               className="h-10 rounded-full bg-foreground/[0.055] px-4 text-foreground/70"
             >
               {label}⌄

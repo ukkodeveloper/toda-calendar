@@ -620,7 +620,7 @@ function EditorSheetMock({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button size="lg" variant="secondary" onClick={onDismiss}>
+          <Button size="lg" variant="neutral" onClick={onDismiss}>
             저장 없이 닫기
           </Button>
           <Button size="lg" onClick={onSave}>
