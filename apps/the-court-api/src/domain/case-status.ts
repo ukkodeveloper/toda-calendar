@@ -1,11 +1,13 @@
 import type { CaseStatus, TrialStatus, Verdict } from "@workspace/contracts"
 
-// 사건 4단 UI status = CaseStatus × TrialStatus 파생(저장 enum 아님).
-//   등록됨   REGISTERED = DECLARED & 재판 없음
-//   재판중   ON_TRIAL   = trialStatus STATEMENT
-//   판결     JUDGING    = trialStatus VOTING
-//   재판완료 CONCLUDED  = trialStatus ENDED (+ verdict 로 유/무죄)
-// 무죄면 caseStatus 가 DECLARED 로 복귀하므로, verdict+trialStatus 로만 "등록됨"과 구분된다.
+// 사건 4단 UI status = CaseStatus × 최신 Trial(status/verdict) 파생(저장 enum 아님).
+//   등록됨   REGISTERED = 재판 없음(trialStatus null)
+//   재판중   ON_TRIAL   = 최신 trialStatus STATEMENT
+//   판결     JUDGING    = 최신 trialStatus VOTING
+//   재판완료 CONCLUDED  = 최신 trialStatus ENDED (+ verdict 로 유/무죄)
+// 핵심: 무죄면 caseStatus 가 DECLARED 로 복귀하지만 최신 Trial 은 ENDED 로 남으므로
+//   trialStatus 로 판정하면 "재판완료(무죄)"가 순수 "등록됨"과 안 섞인다.
+//   (재고발되면 새 Trial 이 STATEMENT 로 생겨 최신이 바뀌고 → ON_TRIAL 로 넘어간다.)
 export type CaseUiStatus = "REGISTERED" | "ON_TRIAL" | "JUDGING" | "CONCLUDED"
 
 export function deriveCaseUiStatus(input: {
@@ -13,7 +15,14 @@ export function deriveCaseUiStatus(input: {
   trialStatus: TrialStatus | null
   verdict: Verdict | null
 }): CaseUiStatus {
-  // TODO(슬라이스 02): 파생 구현 + 테스트(무죄복귀 사건이 REGISTERED 와 안 섞이는지).
-  void input
-  throw new Error("deriveCaseUiStatus: TODO 슬라이스 02")
+  switch (input.trialStatus) {
+    case null:
+      return "REGISTERED"
+    case "STATEMENT":
+      return "ON_TRIAL"
+    case "VOTING":
+      return "JUDGING"
+    case "ENDED":
+      return "CONCLUDED"
+  }
 }
