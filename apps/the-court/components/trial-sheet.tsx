@@ -6,7 +6,7 @@ import { LegalHammerIcon } from "@hugeicons/core-free-icons"
 import { motion, useReducedMotion } from "framer-motion"
 
 import { Badge } from "@workspace/ui/components/badge"
-import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
+import { DetentSheet } from "@workspace/ui/components/detent-sheet"
 import { Button } from "@workspace/ui/components/button"
 import { ChatComposer } from "@workspace/ui/components/chat-composer"
 import { ChatMessage } from "@workspace/ui/components/chat-message"
@@ -313,7 +313,7 @@ export function TrialSheet({
     trialStatus === "STATEMENT" && isDefendant ? (
       <Button
         variant="danger"
-        size="lg"
+        size="default"
         className="w-full"
         onClick={handleEndStatement}
       >
@@ -322,7 +322,7 @@ export function TrialSheet({
     ) : trialStatus === "VOTING" ? (
       <Button
         variant="primary"
-        size="lg"
+        size="default"
         className="w-full"
         onClick={handleEndTrial}
       >
@@ -333,17 +333,16 @@ export function TrialSheet({
   const isGuilty = verdictResult?.verdict === "GUILTY"
 
   return (
-    <BottomSheet
+    <DetentSheet
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) onClose()
       }}
-      draggable={false}
+      fill
+      initialDetentId="full"
       title={caseTitle}
       trailingAccessory={<Badge tone={statusTone}>{statusLabel}</Badge>}
-      className="h-[85dvh]"
-      scrollable={false}
-      contentClassName="relative flex flex-col p-0"
+      contentClassName="relative -mx-4 flex flex-col overflow-hidden"
     >
       {/* ── 선고 배너 */}
       {trialStatus === "ENDED" && verdictResult ? (
@@ -376,7 +375,7 @@ export function TrialSheet({
             <div className="flex gap-2">
               <Button
                 variant="primary"
-                size="lg"
+                size="default"
                 className="flex-1"
                 onClick={() => handleVote(true)}
               >
@@ -384,7 +383,7 @@ export function TrialSheet({
               </Button>
               <Button
                 variant="outline"
-                size="lg"
+                size="default"
                 className="flex-1"
                 onClick={() => handleVote(false)}
               >
@@ -528,11 +527,11 @@ export function TrialSheet({
             ) : null}
           </div>
 
-          <Button variant="neutral" size="lg" onClick={onClose}>
+          <Button variant="neutral" size="default" onClick={onClose}>
             닫기
           </Button>
         </motion.div>
       ) : null}
-    </BottomSheet>
+    </DetentSheet>
   )
 }

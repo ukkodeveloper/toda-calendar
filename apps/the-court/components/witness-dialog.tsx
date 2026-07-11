@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 
-import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
+import { DetentSheet } from "@workspace/ui/components/detent-sheet"
 import { Button } from "@workspace/ui/components/button"
 import { Field, FieldLabel } from "@workspace/ui/components/field"
 import { FileField } from "@workspace/ui/components/file-field"
@@ -105,7 +105,7 @@ export function WitnessDialog({
     : (photo?.name ?? null)
 
   return (
-    <BottomSheet
+    <DetentSheet
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) handleClose()
@@ -114,12 +114,12 @@ export function WitnessDialog({
       description="증거사진과 함께 목격한 사건을 고발해요"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="lg" onClick={handleClose}>
+          <Button variant="ghost" size="default" onClick={handleClose}>
             취소
           </Button>
           <Button
             variant="primary"
-            size="lg"
+            size="default"
             loading={isSubmitting}
             disabled={!canSubmit}
             onClick={handleSubmit}
@@ -162,6 +162,6 @@ export function WitnessDialog({
           ) : null}
         </div>
       </div>
-    </BottomSheet>
+    </DetentSheet>
   )
 }

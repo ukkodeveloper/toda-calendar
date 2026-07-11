@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
+import { DetentSheet } from "@workspace/ui/components/detent-sheet"
 import { Button } from "@workspace/ui/components/button"
 import { Field, FieldLabel } from "@workspace/ui/components/field"
 import { Input } from "@workspace/ui/components/input"
@@ -65,7 +65,7 @@ export function DeclareCaseDialog({
   }
 
   return (
-    <BottomSheet
+    <DetentSheet
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) handleCancel()
@@ -74,12 +74,12 @@ export function DeclareCaseDialog({
       description="어떤 결심을 걸 건가요?"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="lg" onClick={handleCancel}>
+          <Button variant="ghost" size="default" onClick={handleCancel}>
             취소
           </Button>
           <Button
             variant="primary"
-            size="lg"
+            size="default"
             loading={isSubmitting}
             disabled={!canSubmit}
             onClick={handleSubmit}
@@ -119,6 +119,6 @@ export function DeclareCaseDialog({
           />
         </Field>
       </div>
-    </BottomSheet>
+    </DetentSheet>
   )
 }

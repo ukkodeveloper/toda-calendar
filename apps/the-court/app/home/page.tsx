@@ -13,7 +13,7 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import { AvatarStack } from "@workspace/ui/components/avatar-stack"
-import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
+import { DetentSheet } from "@workspace/ui/components/detent-sheet"
 import { Button } from "@workspace/ui/components/button"
 import { Field, FieldLabel } from "@workspace/ui/components/field"
 import { Icon } from "@workspace/ui/components/icon"
@@ -272,18 +272,22 @@ function CreateRoomDialog({
   }
 
   return (
-    <BottomSheet
+    <DetentSheet
       open={isOpen}
       onOpenChange={onOpenChange}
       title="채팅방 생성하기"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="lg" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="ghost"
+            size="default"
+            onClick={() => onOpenChange(false)}
+          >
             취소
           </Button>
           <Button
             variant="primary"
-            size="lg"
+            size="default"
             loading={busy}
             disabled={!title.trim()}
             onClick={submit}
@@ -304,7 +308,7 @@ function CreateRoomDialog({
           />
         </Field>
       </div>
-    </BottomSheet>
+    </DetentSheet>
   )
 }
 
@@ -343,18 +347,22 @@ function JoinRoomDialog({
   }
 
   return (
-    <BottomSheet
+    <DetentSheet
       open={isOpen}
       onOpenChange={onOpenChange}
       title="채팅방 참여하기"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="lg" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="ghost"
+            size="default"
+            onClick={() => onOpenChange(false)}
+          >
             취소
           </Button>
           <Button
             variant="primary"
-            size="lg"
+            size="default"
             loading={busy}
             disabled={!code.trim()}
             onClick={submit}
@@ -375,6 +383,6 @@ function JoinRoomDialog({
           />
         </Field>
       </div>
-    </BottomSheet>
+    </DetentSheet>
   )
 }

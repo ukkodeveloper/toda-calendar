@@ -13,7 +13,7 @@ import type { IconSvgElement } from "@hugeicons/react"
 
 import { ActionCard } from "@workspace/ui/components/action-card"
 import { Badge, type BadgeTone } from "@workspace/ui/components/badge"
-import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
+import { DetentSheet } from "@workspace/ui/components/detent-sheet"
 import { Icon } from "@workspace/ui/components/icon"
 import { IconButton } from "@workspace/ui/components/icon-button"
 import { Text } from "@workspace/ui/components/text"
@@ -95,11 +95,12 @@ export function CaseListDrawer({
   }, [isOpen, roomId])
 
   return (
-    <BottomSheet
+    <DetentSheet
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) onClose()
       }}
+      fill
       title="사건 목록"
       description="공표된 사건과 진행 중인 재판을 한눈에 봐요"
       trailingAccessory={
@@ -154,6 +155,6 @@ export function CaseListDrawer({
           })}
         </div>
       )}
-    </BottomSheet>
+    </DetentSheet>
   )
 }
