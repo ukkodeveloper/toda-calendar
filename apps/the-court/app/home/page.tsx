@@ -181,37 +181,40 @@ export default function HomePage() {
             <Link
               key={room.roomId}
               href={`/chat?roomId=${room.roomId}`}
-              className="block rounded-hero border border-border-subtle bg-surface-raised px-4 shadow-elevation-1 transition-[background-color,box-shadow] hover:bg-surface-hover hover:shadow-elevation-2"
+              className="group block rounded-hero border border-border-subtle bg-surface-raised px-4 shadow-elevation-1 transition-[background-color,box-shadow] hover:bg-surface-hover hover:shadow-elevation-2"
             >
               <ListItem
                 density="regular"
                 divider={false}
                 title={room.title}
-                leading={
-                  <AvatarStack
-                    items={room.members.map((mem) => ({
-                      seed: mem.nickname,
-                      color: mem.color,
-                    }))}
-                    total={room.participantCount}
-                    max={3}
-                    size="sm"
-                  />
-                }
                 subtitle="참여 중"
                 trailing={
-                  <IconButton
-                    variant="ghost"
-                    size="sm"
-                    aria-label="초대코드 공유"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      copyCode(undefined, room.title)
-                    }}
-                  >
-                    <Icon icon={Share08Icon} size="sm" />
-                  </IconButton>
+                  // 세로 컬럼: 위 공유 버튼 · 아래 아바타 스택(우측 정렬).
+                  // 제목은 title 슬롯에 좌측 고정, 아바타 뭉치는 카드 우하단에 앉는다.
+                  <div className="flex flex-col items-end gap-2">
+                    <IconButton
+                      variant="ghost"
+                      size="sm"
+                      aria-label="초대코드 공유"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        copyCode(undefined, room.title)
+                      }}
+                    >
+                      <Icon icon={Share08Icon} size="sm" />
+                    </IconButton>
+                    <AvatarStack
+                      items={room.members.map((mem) => ({
+                        seed: mem.nickname,
+                        color: mem.color,
+                      }))}
+                      total={room.participantCount}
+                      max={3}
+                      size="xxs"
+                      separatorClassName="ring-surface-raised group-hover:ring-surface-hover"
+                    />
+                  </div>
                 }
               />
             </Link>
