@@ -1,4 +1,6 @@
-import { forwardRef } from "react"
+"use client"
+
+import { type Ref } from "react"
 
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -49,30 +51,54 @@ type ButtonProps = ButtonPrimitive.Props &
   VariantProps<typeof buttonVariants> & {
     /** true 면 aria-busy 를 세팅하고 포인터/포커스를 막는다. */
     loading?: boolean
+    /** React 19: ref 는 일반 prop. Base UI 가 렌더하는 요소(기본 button)로 전달. */
+    ref?: Ref<HTMLButtonElement>
   }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  {
-    className,
-    variant = "primary",
-    size = "default",
-    loading,
-    disabled,
-    ...props
-  },
-  ref
-) {
+/**
+ * 링크를 버튼처럼 쓰려면 Radix Slot 이 아니라 Base UI 의 `render` prop 을 쓴다:
+ *   <Button render={<Link href="/next" />}>다음</Button>
+ * `render` 가 대상 요소를 대체하고 우리 className·data-slot·핸들러를 병합한다.
+ * 이때 렌더 요소가 <button> 이 아니면 `nativeButton={false}` 도 함께 넘긴다.
+ */
+function Button({
+  className,
+  variant = "primary",
+  size = "default",
+  loading,
+  disabled,
+  type,
+  ref,
+  ...props
+}: ButtonProps) {
+  const isIconOnly = size === "icon" || size === "icon-lg"
+
+  if (
+    // eslint-disable-next-line turbo/no-undeclared-env-vars -- 번들러가 치환하는 dev 전용 가드
+    process.env.NODE_ENV !== "production" &&
+    isIconOnly &&
+    !props["aria-label"] &&
+    !props["aria-labelledby"]
+  ) {
+    console.warn(
+      'Button: size="icon" 는 접근 가능한 이름이 없습니다. aria-label 을 넘기세요.'
+    )
+  }
+
   return (
     <ButtonPrimitive
       ref={ref}
       data-slot="button"
+      // Base UI 네이티브 button 은 폼 안에서 기본 type=submit → 명시적으로 button.
+      // render 로 <a>/<Link> 를 넘긴 경우엔 type 을 붙이지 않는다.
+      type={props.render ? type : (type ?? "button")}
       disabled={disabled ?? loading}
       aria-busy={loading || undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
   )
-})
+}
 
 export { Button, buttonVariants }
 export type { ButtonProps }

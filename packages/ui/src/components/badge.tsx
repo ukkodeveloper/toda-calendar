@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentPropsWithoutRef } from "react"
+import { type ComponentPropsWithoutRef, type Ref } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -11,7 +11,7 @@ import { cn } from "@workspace/ui/lib/utils"
  * 상태 tone 은 fill 위 14% 틴트 + 24% 보더 = opacity step 만 사용(매직 알파 아님).
  */
 const badgeVariants = cva(
-  "font-strong inline-flex min-h-6 shrink-0 items-center justify-center rounded-pill border",
+  "inline-flex min-h-6 shrink-0 items-center justify-center rounded-pill border font-strong",
   {
     variants: {
       tone: {
@@ -21,9 +21,9 @@ const badgeVariants = cva(
         danger: "border-fill-danger/24 bg-fill-danger/14 text-fill-danger",
       },
       size: {
-        sm: "text-label px-2",
-        md: "text-label px-2.5",
-        lg: "text-caption min-h-8 px-3",
+        sm: "px-2 text-label",
+        md: "px-2.5 text-label",
+        lg: "min-h-8 px-3 text-caption",
       },
     },
     defaultVariants: {
@@ -36,15 +36,23 @@ const badgeVariants = cva(
 /** `tone="accent"` 는 `brand` 의 하위호환 alias (기존 소비처 유지). */
 type BadgeTone = "neutral" | "brand" | "accent" | "success" | "danger"
 
+/** 크기 축. 소비 앱에서 타입 재사용 가능하도록 공개. */
+type BadgeSize = NonNullable<VariantProps<typeof badgeVariants>["size"]>
+
 type BadgeProps = Omit<ComponentPropsWithoutRef<"span">, "color"> &
   Omit<VariantProps<typeof badgeVariants>, "tone"> & {
     tone?: BadgeTone
+    /** React 19: ref 는 일반 prop. */
+    ref?: Ref<HTMLSpanElement>
   }
 
-const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
-  { className, size, tone = "neutral", ...props },
-  ref
-) {
+function Badge({
+  className,
+  size,
+  tone = "neutral",
+  ref,
+  ...props
+}: BadgeProps) {
   const resolvedTone = tone === "accent" ? "brand" : tone
   return (
     <span
@@ -54,7 +62,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
       {...props}
     />
   )
-})
+}
 
 export { Badge, badgeVariants }
-export type { BadgeProps, BadgeTone }
+export type { BadgeProps, BadgeTone, BadgeSize }
