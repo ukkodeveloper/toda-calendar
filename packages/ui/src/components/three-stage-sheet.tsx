@@ -37,6 +37,8 @@ import { cn } from "@workspace/ui/lib/utils"
  * 이동·복귀. 핸들은 포커스 가능한 버튼으로 ↑/↓(크게/작게)·Home/End(최대/최소)로
  * detent 를 옮기고, Esc 는(dismissible 시) 시트를 닫는다. reduced-motion 에서는
  * 스프링 대신 즉시 전환.
+ * 배경 inert·전면 Tab 트랩은 이 컴포넌트가 안 만든다 — 필요하면 소비 측이 Base UI
+ * Dialog 로 감싼다(`modal` prop 주석 참고). 즉 드래그 가능한 presentational dialog.
  */
 /**
  * 하나의 detent = 시트가 멈추는 높이 한 칸. 노출량을 둘 중 하나로 정의한다.
@@ -74,8 +76,13 @@ export type ThreeStageSheetProps = {
   /**
    * 모달 여부. 기본 `false`(비모달) — 인라인 프리뷰·상시 노출 시트를 위한 값이라
    * 포커스를 빼앗지 않는다. `true` 면 열릴 때 핸들로 포커스를 옮기고 닫힐 때
-   * 직전 요소로 복귀하며 `aria-modal="true"` 를 건다(전면 Tab 트랩은 아직 없음 —
-   * 배경 비활성은 소비 측 오버레이가 담당).
+   * 직전 요소로 복귀하며 `aria-modal="true"` 를 건다.
+   *
+   * 경계(의도적): 이 컴포넌트는 **드래그 가능한 presentational dialog** 다 —
+   * role/aria-modal + 포커스 이동·복원까지만 책임진다. 배경 inert·전면 Tab 트랩은
+   * 손수 만들지 않는다(headless 재발명 금지, 규칙5). 진짜 모달(배경 비활성 +
+   * Tab 순환 가둠)이 필요하면 **소비 측이 Base UI Dialog 로 감싼다** — BottomSheet
+   * 가 이미 그 경로다(로드맵과 정합).
    */
   modal?: boolean
   /**
