@@ -30,8 +30,10 @@ import {
 import { PageHeader } from "@workspace/ui/components/page-header"
 import { Text } from "@workspace/ui/components/text"
 import { useToast } from "@workspace/ui/components/toast"
+import { UnreadDot } from "@workspace/ui/components/unread-dot"
 
 import { loadAuth, type AuthUser } from "@/lib/auth"
+import { formatRelativeTime } from "@/lib/time"
 import { roomApi } from "@/lib/api"
 import { ApiError } from "@/lib/api/client"
 import type { RoomListItem, RoomResponse } from "@/lib/api/types"
@@ -186,38 +188,47 @@ export default function HomePage() {
               <ListItem
                 density="regular"
                 divider={false}
-                title={
-                  // 제목 한 단 키움: text-body(15) → text-title(18). 좌측 상단 고정.
-                  <Text as="span" variant="title">
-                    {room.title}
-                  </Text>
-                }
+                // 제목: ListItem 기본 타이포(text-body 15 · font-strong) — 좌측 고정.
+                title={room.title}
                 subtitle={
-                  // 제목 바로 아래 참여자 아바타 줄(왼쪽 정렬). "참여 중" 텍스트를 대체.
-                  <AvatarStack
-                    items={room.members.map((mem) => ({
-                      seed: mem.nickname,
-                      color: mem.color,
-                    }))}
-                    total={room.participantCount}
-                    max={3}
-                    size="xs"
-                    separatorClassName="ring-surface-raised group-hover:ring-surface-hover"
-                  />
+                  // 제목 아래: 마지막 활동 상대시간. 안읽음이면 앞에 점 + brand 색.
+                  room.hasUnread ? (
+                    <span className="flex items-center gap-1.5">
+                      <UnreadDot size="sm" />
+                      <span className="text-text-brand">
+                        {formatRelativeTime(room.lastMessageAt)}
+                      </span>
+                    </span>
+                  ) : (
+                    formatRelativeTime(room.lastMessageAt)
+                  )
                 }
                 trailing={
-                  <IconButton
-                    variant="ghost"
-                    size="sm"
-                    aria-label="초대코드 공유"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      copyCode(undefined, room.title)
-                    }}
-                  >
-                    <Icon icon={Share08Icon} size="sm" />
-                  </IconButton>
+                  // 우측 그룹: 아바타 미리보기 + 공유. 행 items-center 라 상하 가운데 정렬.
+                  <div className="flex items-center gap-3">
+                    <AvatarStack
+                      items={room.members.map((mem) => ({
+                        seed: mem.nickname,
+                        color: mem.color,
+                      }))}
+                      total={room.participantCount}
+                      max={3}
+                      size="xxs"
+                      separatorClassName="ring-surface-raised group-hover:ring-surface-hover"
+                    />
+                    <IconButton
+                      variant="ghost"
+                      size="sm"
+                      aria-label="초대코드 공유"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        copyCode(undefined, room.title)
+                      }}
+                    >
+                      <Icon icon={Share08Icon} size="sm" />
+                    </IconButton>
+                  </div>
                 }
               />
             </Link>

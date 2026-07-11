@@ -26,4 +26,8 @@ export const roomApi = {
 
   members: (roomId: number): Promise<RoomMembersResponse> =>
     http.get<RoomMembersResponse>(`/api/rooms/${roomId}/members`),
+
+  // POST /api/rooms/{id}/read — 요청 유저의 이 방 읽음 처리(안읽음 해제). fire-and-forget.
+  read: (roomId: number): Promise<{ ok: boolean }> =>
+    http.post<{ ok: boolean }>(`/api/rooms/${roomId}/read`),
 }
