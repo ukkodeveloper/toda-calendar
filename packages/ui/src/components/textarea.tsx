@@ -25,7 +25,7 @@ function Textarea({ className, rows = 3, ...props }: TextareaProps) {
         "flex min-h-20 w-full resize-y rounded-control border border-border-standard bg-surface-inset px-3.5 py-2.5 text-input text-text-primary transition-colors outline-none",
         "placeholder:text-text-tertiary",
         "hover:border-border-strong",
-        "focus-visible:border-border-brand focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-offset-0",
+        "focus-visible:border-border-brand focus-visible:ring-2 focus-visible:ring-ring-focus focus-visible:ring-inset",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "aria-[invalid]:border-fill-danger",
         className
