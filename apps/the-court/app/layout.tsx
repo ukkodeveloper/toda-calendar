@@ -2,11 +2,8 @@ import type { Metadata, Viewport } from "next"
 import { Figtree, Montserrat } from "next/font/google"
 import localFont from "next/font/local"
 
-// Astryx design system — reset → compiled component styles → Stone 테마 토큰.
-// Stone 은 프리컴파일 CSS. <Providers>/<Theme> 가 data-astryx-theme="stone" 만 붙인다.
-import "@astryxdesign/core/reset.css"
-import "@astryxdesign/core/astryx.css"
-import "@astryxdesign/theme-stone/theme.css"
+// 자체 DS(@workspace/ui) Tailwind 진입. Astryx 는 완전히 제거됨.
+import "@workspace/ui/globals.css"
 import "./globals.css"
 
 import { Providers } from "./providers"
@@ -57,7 +54,11 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  // 흰 앱 프레임 상단과 맞춘 상태바 크롬 (앱 프레임 배경 = #fff).
+  // 입력 필드(14px)가 16px 미만이어도 iOS Safari 가 포커스 시 화면을 자동 줌인하지 않도록
+  // 확대 상한을 1로 고정. (iOS 는 접근성 핀치줌은 대체로 계속 허용.)
+  maximumScale: 1,
+  // 흰 앱 프레임 상단과 맞춘 상태바 크롬. <meta name="theme-color"> 는 리터럴 색만 허용(토큰 불가).
+  // eslint-disable-next-line no-restricted-syntax -- meta theme-color 는 CSS 토큰을 쓸 수 없다
   themeColor: "#ffffff",
 }
 
@@ -66,12 +67,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // data-theme on <html> avoids a flash of the wrong color-scheme before hydration.
   return (
     <html
       lang="ko"
-      data-theme="light"
-      className={`${pretendard.variable} ${figtree.variable} ${montserrat.variable}`}
+      // `light` 클래스로 @workspace/ui 토큰을 라이트에 고정(DS 기본 :root=다크). 하이드레이션 전 flash 방지.
+      className={`light ${pretendard.variable} ${figtree.variable} ${montserrat.variable}`}
     >
       <body>
         <Providers>

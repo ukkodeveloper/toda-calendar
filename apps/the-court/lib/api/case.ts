@@ -1,28 +1,34 @@
+// 사건 — 실 REST. 공표/목록/상세/최신재판. 4단 UI status 는 CaseSummary 필드에서 파생.
 import { http } from "./client"
 import type {
   CaseCreateResponse,
   CaseDetailResponse,
-  CaseResponse,
   CaseStatus,
+  CaseSummaryList,
   CaseTrialResponse,
   CreateCaseRequest,
 } from "./types"
 
 export const caseApi = {
-  list: (roomId: number, status?: CaseStatus) => {
-    const query = status ? `?status=${status}` : ""
-    return http.get<CaseResponse[]>(`/api/rooms/${roomId}/cases${query}`)
-  },
+  // GET /api/rooms/:id/cases[?status] — status 미지정 시 진행중(CLOSED 제외).
+  list: (roomId: number, status?: CaseStatus): Promise<CaseSummaryList> =>
+    http.get<CaseSummaryList>(
+      `/api/rooms/${roomId}/cases${status ? `?status=${status}` : ""}`
+    ),
 
-  listAll: (roomId: number) =>
-    http.get<CaseResponse[]>(`/api/rooms/${roomId}/cases/all`),
+  // GET /api/rooms/:id/cases/all — 종료 포함 전체.
+  listAll: (roomId: number): Promise<CaseSummaryList> =>
+    http.get<CaseSummaryList>(`/api/rooms/${roomId}/cases/all`),
 
-  declare: (roomId: number, body: CreateCaseRequest) =>
+  declare: (
+    roomId: number,
+    body: CreateCaseRequest
+  ): Promise<CaseCreateResponse> =>
     http.post<CaseCreateResponse>(`/api/rooms/${roomId}/cases`, { body }),
 
-  detail: (caseId: number) =>
+  detail: (caseId: number): Promise<CaseDetailResponse> =>
     http.get<CaseDetailResponse>(`/api/cases/${caseId}`),
 
-  latestTrial: (caseId: number) =>
+  latestTrial: (caseId: number): Promise<CaseTrialResponse> =>
     http.get<CaseTrialResponse>(`/api/cases/${caseId}/trial`),
 }

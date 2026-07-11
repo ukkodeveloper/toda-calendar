@@ -1,0 +1,215 @@
+// 현행범 (the-court) — Prisma schema
+// SoT: vault/projects/the-court/sprints/01-rearrange/plan.md "데이터모델 (Prisma / Postgres — ERD)"
+//
+// 불변식 강제 위치 (안정성 우선):
+//  - @@unique / @@index 로 되는 것은 여기(schema DSL)에.
+//  - partial unique index 2개는 preview 무한-마이그레이션 버그 회피를 위해
+//    마이그레이션 SQL 에 수동 삽입한다 (migrations/20260711120000_init/migration.sql).
+//    → 이 프로젝트는 `migrate deploy` 만 쓴다(드리프트 검사 없음). 상세는 prisma/README.md.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum Title {
+  CITIZEN
+  MODEL_CITIZEN
+  EX_CONVICT
+}
+
+enum CaseStatus {
+  DECLARED
+  ON_TRIAL
+  CLOSED
+}
+
+enum TrialStatus {
+  STATEMENT
+  VOTING
+  ENDED
+}
+
+enum Verdict {
+  GUILTY
+  NOT_GUILTY
+}
+
+enum MessageType {
+  USER
+  SYSTEM
+}
+
+// ─── User ──────────────────────────────────────────────────────────────────
+// 전역 신원. uuid 는 서버가 발급(@default(uuid), 클라 localStorage 저장)하고
+// 모든 소유 FK 의 참조 대상이 된다. nickname/color 는 unique 아님(익명·변경 자유).
+// oauth 확장은 미래에 nullable 컬럼 추가로 — 지금 스키마가 막지 않는다.
+
+model User {
+  uuid      String   @id @default(uuid())
+  nickname  String
+  color     String
+  createdAt DateTime @default(now())
+
+  members  Member[]
+  cases    Case[]    @relation("CaseDefendant")
+  votes    Vote[]
+  reports  Report[]
+  messages Message[]
+  photos   Photo[]
+}
+
+// ─── Room ──────────────────────────────────────────────────────────────────
+
+model Room {
+  id        Int      @id @default(autoincrement())
+  title     String
+  code      String   @unique // 참여코드(대문자6) — join 조회 키
+  createdAt DateTime @default(now())
+
+  members  Member[]
+  cases    Case[]
+  messages Message[]
+}
+
+// ─── Member ────────────────────────────────────────────────────────────────
+// 방별 멤버십. 전과(convictionCount)·칭호(title)가 방별로 여기 산다(결정#8).
+
+model Member {
+  id              Int      @id @default(autoincrement())
+  roomId          Int
+  userUuid        String
+  title           Title    @default(CITIZEN)
+  convictionCount Int      @default(0)
+  joinedAt        DateTime @default(now())
+  lastReadAt      DateTime? // 이 유저가 이 방을 마지막으로 읽은 시각. null = 가입만·미열람
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userUuid], references: [uuid])
+
+  @@unique([roomId, userUuid]) // 방 1회 참여
+  @@index([roomId]) // 방 멤버·참여자수 조회
+  @@index([userUuid]) // 내 방 목록 조회(GET /rooms)
+}
+
+// ─── Case (사건) ─────────────────────────────────────────────────────────────
+// 날짜 2개: startDate(시작) + deadline(마감). "기간" = 둘 사이.
+// 사건:재판 = 1:N (무죄→재고발 대응). "현재 재판" = 최신 Trial.
+// 불변식 "1방·1인·1활성사건" 은 partial unique(수동 SQL):
+//   (roomId, defendantUuid) WHERE status IN ('DECLARED','ON_TRIAL')
+
+model Case {
+  id            Int        @id @default(autoincrement())
+  roomId        Int
+  defendantUuid String
+  title         String
+  content       String
+  startDate     DateTime
+  deadline      DateTime
+  status        CaseStatus @default(DECLARED)
+  createdAt     DateTime   @default(now())
+
+  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  defendant User      @relation("CaseDefendant", fields: [defendantUuid], references: [uuid])
+  trials    Trial[]
+  reports   Report[]
+  messages  Message[]
+
+  @@index([roomId, status]) // 방 사건목록·status 필터
+}
+
+// ─── Trial (재판) ────────────────────────────────────────────────────────────
+// Case 1:N. Trial.caseId @unique 는 제거하고 @@index 로.
+// 불변식 "사건당 활성재판 1개" 는 partial unique(수동 SQL):
+//   Trial(caseId) WHERE status <> 'ENDED'
+
+model Trial {
+  id              Int         @id @default(autoincrement())
+  caseId          Int
+  status          TrialStatus @default(STATEMENT)
+  verdict         Verdict?
+  statementEndsAt DateTime?
+  createdAt       DateTime    @default(now())
+
+  case  Case   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  votes Vote[]
+
+  @@index([caseId]) // 사건의 재판 이력·최신 재판 조회
+}
+
+// ─── Report (고발) ───────────────────────────────────────────────────────────
+// 고발 = 재판 개시 트리거. 첫 증거사진 1장은 여기(photoId). 이후 추가 증거는 Message.photoId.
+
+model Report {
+  id           Int      @id @default(autoincrement())
+  caseId       Int
+  reporterUuid String
+  photoId      Int
+  content      String?
+  createdAt    DateTime @default(now())
+
+  case     Case  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  reporter User  @relation(fields: [reporterUuid], references: [uuid])
+  photo    Photo @relation(fields: [photoId], references: [id])
+
+  @@index([caseId])
+}
+
+// ─── Photo ───────────────────────────────────────────────────────────────────
+// POST /api/photos → {photoId, url}. 고발 증거·재판 채팅 첨부 공용.
+
+model Photo {
+  id           Int      @id @default(autoincrement())
+  url          String
+  uploaderUuid String?
+  createdAt    DateTime @default(now())
+
+  uploader User?     @relation(fields: [uploaderUuid], references: [uuid])
+  reports  Report[]
+  messages Message[]
+}
+
+// ─── Vote ────────────────────────────────────────────────────────────────────
+// 1인 1표(@@unique). 본인투표 금지·과반계산은 유스케이스($transaction) 소관.
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  trialId   Int
+  voterUuid String
+  guilty    Boolean
+  createdAt DateTime @default(now())
+
+  trial Trial @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  voter User  @relation(fields: [voterUuid], references: [uuid])
+
+  @@unique([trialId, voterUuid]) // 1인 1표 + hasVoted/myVote 조회 인덱스
+  @@index([trialId]) // 집계
+}
+
+// ─── Message ─────────────────────────────────────────────────────────────────
+// 단일 테이블: caseId=null → 방 본문 / caseId=값 → 재판 스레드(=caseId).
+// userUuid=null → SYSTEM 메시지. photoId → 재판 채팅 사진 첨부(nullable).
+
+model Message {
+  id        Int         @id @default(autoincrement())
+  roomId    Int
+  caseId    Int?
+  userUuid  String?
+  photoId   Int?
+  type      MessageType @default(USER)
+  content   String
+  createdAt DateTime    @default(now())
+
+  room  Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  case  Case?  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user  User?  @relation(fields: [userUuid], references: [uuid])
+  photo Photo? @relation(fields: [photoId], references: [id])
+
+  @@index([roomId, caseId, createdAt]) // 방/스레드 시간순 페치 + ?after=id 백필
+}

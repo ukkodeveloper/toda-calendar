@@ -2,20 +2,29 @@
 
 import type { ReactNode } from "react"
 
-import { Theme } from "@astryxdesign/core/theme"
-import { stoneTheme } from "@astryxdesign/theme-stone/built"
+import { ToastProvider } from "@workspace/ui/components/toast"
+import { useKeyboardInset } from "@workspace/ui/hooks/use-keyboard-inset"
 
 /**
- * Astryx theme provider — Stone (프리셋, 기본값 그대로).
- * 토큰은 프리컴파일 CSS(`@astryxdesign/theme-stone/theme.css`, layout 에서 import)로 오고,
- * <Theme> 는 래퍼에 data-astryx-theme="stone" + 색 모드만 붙인다.
- * 커스텀 오버라이드 없음 — /themes?theme=stone 그대로. (폰트만 globals 에서 로드본 연결)
- * 라이트/다크 전환: 여기 mode 와 layout.tsx 의 <html data-theme> 를 함께 바꾼다.
+ * KeyboardInsetListener — 소프트 키보드 높이를 측정해 `--inset-keyboard` CSS 변수에
+ * write 한다(앱 전역 1회 장착). 셸(h-viewport)·시트(DetentSheet)·토스트가 이 변수를
+ * 읽어 키보드 위로 물러난다. 리프 컴포넌트로 둬서 훅의 setState 리렌더가 앱 트리로
+ * 번지지 않게 격리한다.
+ */
+function KeyboardInsetListener() {
+  useKeyboardInset()
+  return null
+}
+
+/**
+ * 앱 프로바이더. 테마는 layout 의 `<html class="light">` 가 @workspace/ui 토큰을
+ * 라이트에 고정하므로 별도 테마 프로바이더는 없다. 토스트 + 키보드 인셋 리스너를 마운트한다.
  */
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <Theme theme={stoneTheme} mode="light">
+    <ToastProvider>
+      <KeyboardInsetListener />
       {children}
-    </Theme>
+    </ToastProvider>
   )
 }

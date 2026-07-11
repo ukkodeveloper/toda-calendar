@@ -1,93 +1,83 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { Badge } from "@astryxdesign/core/Badge"
-import { Button } from "@astryxdesign/core/Button"
-import { ClickableCard } from "@astryxdesign/core/ClickableCard"
-import { Dialog } from "@astryxdesign/core/Dialog"
-import { DropdownMenu, DropdownMenuItem } from "@astryxdesign/core/DropdownMenu"
-import { Heading } from "@astryxdesign/core/Heading"
-import { Icon } from "@astryxdesign/core/Icon"
-import { IconButton } from "@astryxdesign/core/IconButton"
-import { HStack, VStack } from "@astryxdesign/core/Layout"
-import { Spinner } from "@astryxdesign/core/Spinner"
-import { Text } from "@astryxdesign/core/Text"
-import { TextInput } from "@astryxdesign/core/TextInput"
-import { useToast } from "@astryxdesign/core/Toast"
+import {
+  Add01Icon,
+  Login03Icon,
+  PlusSignCircleIcon,
+  Share08Icon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons"
 
-import { AppHeader } from "@/components/app-header"
+import { AvatarStack } from "@workspace/ui/components/avatar-stack"
+import { DetentSheet } from "@workspace/ui/components/detent-sheet"
+import { Button } from "@workspace/ui/components/button"
+import { Field, FieldLabel } from "@workspace/ui/components/field"
+import { Icon } from "@workspace/ui/components/icon"
+import { IconButton } from "@workspace/ui/components/icon-button"
+import { Input } from "@workspace/ui/components/input"
+import { ListItem } from "@workspace/ui/components/list-item"
+import {
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger,
+} from "@workspace/ui/components/menu"
+import { PageHeader } from "@workspace/ui/components/page-header"
+import { Text } from "@workspace/ui/components/text"
+import { useToast } from "@workspace/ui/components/toast"
+import { UnreadDot } from "@workspace/ui/components/unread-dot"
+
 import { loadAuth, type AuthUser } from "@/lib/auth"
+import { formatRelativeTime } from "@/lib/time"
 import { roomApi } from "@/lib/api"
-import type {
-  RoomListResponse,
-  RoomResponse,
-  JoinRoomResponse,
-} from "@/lib/api/types"
-
-function ShareIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect
-        x="1"
-        y="6"
-        width="9"
-        height="9"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M5.5 5.5V3.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H11.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function PlusIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M8 2v12M2 8h12"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
+import { ApiError } from "@/lib/api/client"
+import type { RoomListItem, RoomResponse } from "@/lib/api/types"
 
 // 온보딩 이후 도착지. 왼쪽 로고 · 오른쪽 + (생성/참여) · 아래 참여중 채팅방 리스트.
 export default function HomePage() {
   const router = useRouter()
   const toast = useToast()
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [rooms, setRooms] = useState<RoomListResponse[] | null>(null)
+  const [rooms, setRooms] = useState<RoomListItem[] | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [joinOpen, setJoinOpen] = useState(false)
 
-  async function copyCode(code: string, roomTitle: string) {
-    await navigator.clipboard.writeText(code)
-    toast({
-      body: `"${roomTitle}" 초대코드 ${code} 복사됨`,
-      autoHideDuration: 3000,
-    })
+  // 참여코드는 백엔드가 방 목록에 내려주지 않고 방 생성 응답에만 담긴다.
+  // 그래서 목록의 공유 버튼은 코드가 없으면(=대부분) 안내만 한다.
+  async function copyCode(code: string | undefined, roomTitle: string) {
+    if (!code) {
+      toast({
+        body: "초대코드는 방을 만든 사람이 생성 직후 공유해요",
+        duration: 3000,
+      })
+      return
+    }
+    // 자동복사는 사용자 제스처 안에서만 허용된다. 방 생성 직후(await·시트 닫힘 뒤)엔
+    // 제스처가 만료돼 NotAllowedError 가 날 수 있으니, 막히면 코드를 보여줘 수동복사하게 한다.
+    try {
+      await navigator.clipboard.writeText(code)
+      toast({
+        body: `"${roomTitle}" 초대코드 ${code} 복사됨`,
+        duration: 4000,
+      })
+    } catch {
+      toast({
+        body: `초대코드 ${code} · 길게 눌러 복사하세요`,
+        duration: 6000,
+      })
+    }
+  }
+
+  function reloadRooms() {
+    roomApi
+      .list()
+      .then(setRooms)
+      .catch(() => setRooms([]))
   }
 
   useEffect(() => {
@@ -96,118 +86,170 @@ export default function HomePage() {
       router.replace("/onboarding")
       return
     }
-    setUser(auth)
-    roomApi.list().then(setRooms)
+    let active = true
+    // setState 를 await 뒤로 미뤄 effect 동기 setState(cascading render)를 피한다.
+    void (async () => {
+      const list = await roomApi.list().catch(() => null)
+      if (!active) return
+      setUser(auth)
+      setRooms(list ?? [])
+    })()
+    return () => {
+      active = false
+    }
   }, [router])
 
   if (!user) return null
 
   return (
-    <VStack style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh" }}>
-      {/* 헤더 — 왼쪽 로고(공통) · 오른쪽 + 드롭다운 */}
-      <AppHeader
-        endContent={
-          <DropdownMenu
-            hasChevron={false}
-            placement="below"
-            menuWidth={256}
-            button={{
-              label: "채팅방 추가",
-              isIconOnly: true,
-              variant: "primary",
-              size: "lg",
-              icon: <PlusIcon />,
-            }}
-          >
-            <DropdownMenuItem
-              label="채팅방 생성하기"
-              description="새 방을 만들고 초대코드를 공유해요"
-              onClick={() => setCreateOpen(true)}
+    <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col">
+      {/* 헤더 — 왼쪽 로고(→ 홈) · 오른쪽 + 프로스티드 드롭다운 */}
+      <PageHeader
+        align="center"
+        className="sticky top-0 z-10 bg-surface-canvas/80 backdrop-blur-xl"
+        title={
+          <Link href="/home" aria-label="현행범 홈" className="inline-flex">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hyeonhaengbeom_logo.png"
+              alt="현행범"
+              className="block h-6 w-auto"
             />
-            <DropdownMenuItem
-              label="채팅방 참여하기"
-              description="초대코드로 기존 방에 들어가요"
-              onClick={() => setJoinOpen(true)}
+          </Link>
+        }
+        trailing={
+          <Menu>
+            <MenuTrigger
+              render={
+                <IconButton variant="surface" aria-label="채팅방 추가">
+                  <Icon icon={Add01Icon} />
+                </IconButton>
+              }
             />
-          </DropdownMenu>
+            <MenuContent align="end" sideOffset={10}>
+              <MenuItem
+                icon={<Icon icon={PlusSignCircleIcon} />}
+                description="새 방을 만들고 초대코드를 공유해요"
+                onClick={() => setCreateOpen(true)}
+              >
+                채팅방 생성하기
+              </MenuItem>
+              <MenuSeparator />
+              <MenuItem
+                icon={<Icon icon={Login03Icon} />}
+                description="초대코드로 기존 방에 들어가요"
+                onClick={() => setJoinOpen(true)}
+              >
+                채팅방 참여하기
+              </MenuItem>
+            </MenuContent>
+          </Menu>
         }
       />
 
       {/* 참여중인 채팅방 리스트 */}
-      <VStack style={{ gap: 12, padding: "20px 20px 40px", flex: 1 }}>
-        <Heading level={5} style={{ paddingInline: 4 }}>
+      <div className="flex flex-1 flex-col gap-3 px-5 pt-2 pb-10">
+        <Text
+          as="h2"
+          variant="caption"
+          tone="tertiary"
+          className="px-1 font-strong"
+        >
           참여중인 채팅방
-        </Heading>
+        </Text>
 
         {rooms === null ? (
-          <HStack justify="center" style={{ padding: 40 }}>
-            <Spinner />
-          </HStack>
+          <div className="flex justify-center py-14">
+            <div
+              role="status"
+              aria-label="불러오는 중"
+              className="size-6 animate-spin rounded-pill border-2 border-border-subtle border-t-text-tertiary motion-reduce:[animation-duration:1.4s]"
+            />
+          </div>
         ) : rooms.length === 0 ? (
-          <VStack
-            align="center"
-            justify="center"
-            style={{ gap: 6, padding: "56px 24px", textAlign: "center" }}
-          >
-            <Text color="secondary">아직 참여중인 채팅방이 없어요</Text>
-            <Text color="disabled" type="supporting">
-              오른쪽 위 + 로 방을 만들거나 참여해 보세요
-            </Text>
-          </VStack>
+          <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
+            <div className="flex size-14 items-center justify-center rounded-pill bg-fill-neutral text-text-tertiary">
+              <Icon icon={UserGroupIcon} size="lg" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Text tone="secondary">아직 참여중인 채팅방이 없어요</Text>
+              <Text variant="caption" tone="tertiary">
+                오른쪽 위 + 로 방을 만들거나 참여해 보세요
+              </Text>
+            </div>
+          </div>
         ) : (
           rooms.map((room) => (
-            <ClickableCard
+            <Link
               key={room.roomId}
-              label={room.title}
               href={`/chat?roomId=${room.roomId}`}
+              className="group block rounded-hero border border-border-subtle bg-surface-raised px-4 shadow-elevation-1 transition-[background-color,box-shadow] hover:bg-surface-hover hover:shadow-elevation-2"
             >
-              <HStack
-                align="center"
-                justify="between"
-                style={{ gap: 12, padding: "6px 0" }}
-              >
-                <VStack style={{ gap: 4, minWidth: 0, flex: 1 }}>
-                  <Heading level={5}>{room.title}</Heading>
-                  <Text color="secondary" type="supporting">
-                    {room.participantCount}명 참여 중
-                  </Text>
-                </VStack>
-                <HStack align="center" style={{ gap: 6 }}>
-                  <IconButton
-                    icon={<ShareIcon />}
-                    label="초대코드 공유"
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      copyCode(room.participationCode, room.title)
-                    }}
-                  />
-                  <Badge variant="info" label={`${room.participantCount}명`} />
-                </HStack>
-              </HStack>
-            </ClickableCard>
+              <ListItem
+                density="regular"
+                divider={false}
+                // 제목: ListItem 기본 타이포(text-body 15 · font-strong) — 좌측 고정.
+                title={room.title}
+                subtitle={
+                  // 제목 아래: 마지막 활동 상대시간. 안읽음이면 앞에 점 + brand 색.
+                  room.hasUnread ? (
+                    <span className="flex items-center gap-1.5">
+                      <UnreadDot size="sm" />
+                      <span className="text-text-brand">
+                        {formatRelativeTime(room.lastMessageAt)}
+                      </span>
+                    </span>
+                  ) : (
+                    formatRelativeTime(room.lastMessageAt)
+                  )
+                }
+                trailing={
+                  // 우측 그룹: 아바타 미리보기 + 공유. 행 items-center 라 상하 가운데 정렬.
+                  <div className="flex items-center gap-3">
+                    <AvatarStack
+                      items={room.members.map((mem) => ({
+                        seed: mem.nickname,
+                        color: mem.color,
+                      }))}
+                      total={room.participantCount}
+                      max={3}
+                      size="xxs"
+                      separatorClassName="ring-surface-raised group-hover:ring-surface-hover"
+                    />
+                    <IconButton
+                      variant="ghost"
+                      size="sm"
+                      aria-label="초대코드 공유"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        copyCode(undefined, room.title)
+                      }}
+                    >
+                      <Icon icon={Share08Icon} size="sm" />
+                    </IconButton>
+                  </div>
+                }
+              />
+            </Link>
           ))
         )}
-      </VStack>
+      </div>
 
       <CreateRoomDialog
         isOpen={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={(room) => {
           copyCode(room.participationCode, room.title)
-          roomApi.list().then(setRooms)
+          reloadRooms()
         }}
       />
       <JoinRoomDialog
         isOpen={joinOpen}
         onOpenChange={setJoinOpen}
-        onJoined={() => {
-          roomApi.list().then(setRooms)
-        }}
+        onJoined={reloadRooms}
       />
-    </VStack>
+    </div>
   )
 }
 
@@ -220,47 +262,64 @@ function CreateRoomDialog({
   onOpenChange: (open: boolean) => void
   onCreated: (room: RoomResponse) => void
 }) {
+  const toast = useToast()
   const [title, setTitle] = useState("")
   const [busy, setBusy] = useState(false)
 
   async function submit() {
     if (!title.trim() || busy) return
     setBusy(true)
-    const room = await roomApi.create({ title })
-    onCreated(room)
-    setBusy(false)
-    setTitle("")
-    onOpenChange(false)
+    try {
+      const room = await roomApi.create({ title })
+      onCreated(room)
+      setTitle("")
+      onOpenChange(false)
+    } catch (e) {
+      const msg = e instanceof ApiError ? e.message : "방 생성에 실패했어요"
+      toast({ body: msg, duration: 3000 })
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} width={380}>
-      <VStack style={{ gap: 16, padding: 20 }}>
-        <Heading level={4}>채팅방 생성하기</Heading>
-        <TextInput
-          label="방 제목"
-          value={title}
-          onChange={setTitle}
-          placeholder="예: 우리 다이어트 모임"
-        />
-        <HStack justify="end" style={{ gap: 8 }}>
+    <DetentSheet
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title="채팅방 생성하기"
+      footer={
+        <div className="flex justify-end gap-2">
           <Button
             variant="ghost"
-            size="lg"
-            label="취소"
+            size="default"
             onClick={() => onOpenChange(false)}
-          />
+          >
+            취소
+          </Button>
           <Button
             variant="primary"
-            size="lg"
-            label="생성"
-            isLoading={busy}
-            isDisabled={!title.trim()}
+            size="default"
+            loading={busy}
+            disabled={!title.trim()}
             onClick={submit}
+          >
+            생성
+          </Button>
+        </div>
+      }
+    >
+      <div className="py-2">
+        <Field>
+          <FieldLabel>방 제목</FieldLabel>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="예: 우리 다이어트 모임"
+            autoFocus
           />
-        </HStack>
-      </VStack>
-    </Dialog>
+        </Field>
+      </div>
+    </DetentSheet>
   )
 }
 
@@ -273,46 +332,68 @@ function JoinRoomDialog({
   onOpenChange: (open: boolean) => void
   onJoined: () => void
 }) {
+  const toast = useToast()
   const [code, setCode] = useState("")
   const [busy, setBusy] = useState(false)
 
   async function submit() {
     if (!code.trim() || busy) return
     setBusy(true)
-    await roomApi.join({ participationCode: code })
-    onJoined()
-    setBusy(false)
-    setCode("")
-    onOpenChange(false)
+    try {
+      await roomApi.join({ participationCode: code })
+      onJoined()
+      setCode("")
+      onOpenChange(false)
+    } catch (e) {
+      const msg =
+        e instanceof ApiError && e.isNotFound
+          ? "참여코드에 해당하는 방이 없어요"
+          : e instanceof ApiError
+            ? e.message
+            : "참여에 실패했어요"
+      toast({ body: msg, duration: 3000 })
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} width={380}>
-      <VStack style={{ gap: 16, padding: 20 }}>
-        <Heading level={4}>채팅방 참여하기</Heading>
-        <TextInput
-          label="참여코드"
-          value={code}
-          onChange={(v) => setCode(v.toUpperCase())}
-          placeholder="예: QWERTZ"
-        />
-        <HStack justify="end" style={{ gap: 8 }}>
+    <DetentSheet
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title="채팅방 참여하기"
+      footer={
+        <div className="flex justify-end gap-2">
           <Button
             variant="ghost"
-            size="lg"
-            label="취소"
+            size="default"
             onClick={() => onOpenChange(false)}
-          />
+          >
+            취소
+          </Button>
           <Button
             variant="primary"
-            size="lg"
-            label="참여"
-            isLoading={busy}
-            isDisabled={!code.trim()}
+            size="default"
+            loading={busy}
+            disabled={!code.trim()}
             onClick={submit}
+          >
+            참여
+          </Button>
+        </div>
+      }
+    >
+      <div className="py-2">
+        <Field>
+          <FieldLabel>참여코드</FieldLabel>
+          <Input
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="예: QWERTZ"
+            autoFocus
           />
-        </HStack>
-      </VStack>
-    </Dialog>
+        </Field>
+      </div>
+    </DetentSheet>
   )
 }

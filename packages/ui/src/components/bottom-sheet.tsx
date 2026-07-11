@@ -43,6 +43,12 @@ type BottomSheetProps = {
    * 대상 요소는 `fixed` 자손을 가두도록 containing block 이어야 한다(transform/contain 등).
    */
   container?: React.ComponentProps<typeof Dialog.Portal>["container"]
+  /**
+   * drag-to-dismiss 활성 여부. 기본 true.
+   * 내부에 스크롤·입력이 많은 키 큰 시트(예: 재판)는 제스처 충돌을 피해 false 로 끄고
+   * 닫기 버튼·backdrop·Escape 로 닫는다.
+   */
+  draggable?: boolean
 }
 
 function BottomSheet({
@@ -51,6 +57,7 @@ function BottomSheet({
   container,
   contentClassName,
   description,
+  draggable = true,
   footer,
   leadingAccessory,
   onOpenChange,
@@ -62,7 +69,11 @@ function BottomSheet({
   const reducedMotion = useReducedMotion()
   const actionsRef = React.useRef<Dialog.Root.Actions | null>(null)
 
-  function handleDragEnd(_: PointerEvent, info: PanInfo) {
+  function handleDragEnd(_: PointerEvent, info?: PanInfo) {
+    // 방어: framer 의 drag 종료는 항상 PanInfo 를 넘기지만, 핸들러 병합·네이티브
+    // drag 이벤트 등 framer 밖 경로로 info 없이 불릴 수 있다(제스처 아님). 그때는
+    // `info.offset` 접근 크래시를 피하려 무시한다.
+    if (!info?.offset) return
     if (
       info.offset.y > motionTokens.gesture.sheetDismissOffset ||
       info.velocity.y > motionTokens.gesture.sheetDismissVelocity
@@ -70,6 +81,19 @@ function BottomSheet({
       onOpenChange(false)
     }
   }
+
+  const dragProps = draggable
+    ? {
+        drag: "y" as const,
+        dragDirectionLock: true,
+        dragElastic: 0.12,
+        dragMomentum: false,
+        onDragEnd: handleDragEnd as (
+          event: MouseEvent | TouchEvent | PointerEvent,
+          info: PanInfo
+        ) => void,
+      }
+    : {}
 
   return (
     <Dialog.Root
@@ -87,7 +111,7 @@ function BottomSheet({
       <Dialog.Portal keepMounted container={container}>
         <AnimatePresence onExitComplete={() => actionsRef.current?.unmount()}>
           {open ? (
-            <div className="fixed inset-0 z-50 flex items-end justify-center overscroll-contain">
+            <div className="fixed inset-0 z-50 flex items-end justify-center overscroll-contain pb-[var(--inset-keyboard,0px)]">
               <Dialog.Backdrop
                 render={
                   <motion.div
@@ -107,16 +131,7 @@ function BottomSheet({
               <Dialog.Popup
                 render={
                   <motion.section
-                    drag="y"
-                    dragDirectionLock
-                    dragElastic={0.12}
-                    dragMomentum={false}
-                    onDragEnd={
-                      handleDragEnd as (
-                        event: MouseEvent | TouchEvent | PointerEvent,
-                        info: PanInfo
-                      ) => void
-                    }
+                    {...dragProps}
                     initial={
                       reducedMotion ? { opacity: 0 } : { opacity: 0, y: 24 }
                     }
@@ -134,12 +149,17 @@ function BottomSheet({
                   />
                 }
                 className={cn(
-                  "relative z-10 flex max-h-[82dvh] w-full max-w-[34rem] flex-col overflow-hidden overscroll-contain rounded-t-hero border border-border-subtle bg-surface-overlay text-text-primary shadow-elevation-3 outline-none",
+                  "relative z-10 flex max-h-[calc(82dvh-var(--inset-keyboard,0px))] w-full max-w-[34rem] flex-col overflow-hidden overscroll-contain rounded-t-hero border border-border-subtle bg-surface-overlay text-text-primary shadow-elevation-3 outline-none",
                   className
                 )}
               >
                 <div className="flex justify-center pt-2.5">
-                  <div className="h-1.5 w-10 rounded-pill bg-fill-neutral-strong" />
+                  <div
+                    className={cn(
+                      "h-1.5 w-10 rounded-pill bg-fill-neutral-strong",
+                      !draggable && "opacity-0"
+                    )}
+                  />
                 </div>
                 {title ||
                 description ||

@@ -1,0 +1,79 @@
+import { z } from "zod"
+
+import { userTitleSchema } from "./enums.js"
+
+// POST /rooms — 방 생성 → 참여코드 발급.
+export const createRoomRequestSchema = z.object({
+  title: z.string().trim().min(1).max(60),
+})
+
+export const roomResponseSchema = z.object({
+  roomId: z.number().int(),
+  title: z.string(),
+  participationCode: z.string(),
+  createdAt: z.string(), // ISO-8601
+})
+
+// POST /rooms/join — 참여코드로 입장.
+export const joinRoomRequestSchema = z.object({
+  participationCode: z.string().trim().min(1).max(12),
+})
+
+export const joinRoomResponseSchema = z.object({
+  roomId: z.number().int(),
+  title: z.string(),
+  myTitle: userTitleSchema,
+})
+
+// 방 목록의 멤버 미리보기(아바타 스택용) — 최대 3명, color 로 표시.
+export const roomMemberPreviewSchema = z.object({
+  uuid: z.string(),
+  nickname: z.string(),
+  color: z.string(),
+})
+
+// GET /rooms — 참여중인 방 리스트(title + N명 + 참여코드 + 멤버 미리보기).
+// code: 멤버만 자기 방 목록을 보므로 노출 안전(이미 참여자) — 홈에서 초대 공유용.
+// participantCount 는 총원(오버플로 "+N" 계산용), members 는 앞 3명 미리보기.
+export const roomListItemSchema = z.object({
+  roomId: z.number().int(),
+  title: z.string(),
+  code: z.string(),
+  participantCount: z.number().int().nonnegative(),
+  members: z.array(roomMemberPreviewSchema).max(3),
+  lastMessageAt: z.string().nullable(), // 방 최신 메시지 시각 ISO, 메시지 없으면 null
+  hasUnread: z.boolean(), // 내가 마지막으로 읽은 이후 새 메시지 존재
+})
+
+export const roomListResponseSchema = z.array(roomListItemSchema)
+
+// GET /rooms/{id} — 방 상세.
+export const roomDetailResponseSchema = z.object({
+  roomId: z.number().int(),
+  title: z.string(),
+  code: z.string(),
+  participantCount: z.number().int().nonnegative(),
+  myTitle: userTitleSchema,
+})
+
+// GET /rooms/{id}/members — 멤버 목록(전과 N범/모범시민 뱃지용).
+export const roomMemberSchema = z.object({
+  uuid: z.string(),
+  nickname: z.string(),
+  title: userTitleSchema,
+  color: z.string(),
+  convictionCount: z.number().int().nonnegative(),
+})
+
+export const roomMembersResponseSchema = z.array(roomMemberSchema)
+
+export type CreateRoomRequest = z.infer<typeof createRoomRequestSchema>
+export type RoomResponse = z.infer<typeof roomResponseSchema>
+export type JoinRoomRequest = z.infer<typeof joinRoomRequestSchema>
+export type JoinRoomResponse = z.infer<typeof joinRoomResponseSchema>
+export type RoomMemberPreview = z.infer<typeof roomMemberPreviewSchema>
+export type RoomListItem = z.infer<typeof roomListItemSchema>
+export type RoomListResponse = z.infer<typeof roomListResponseSchema>
+export type RoomDetailResponse = z.infer<typeof roomDetailResponseSchema>
+export type RoomMember = z.infer<typeof roomMemberSchema>
+export type RoomMembersResponse = z.infer<typeof roomMembersResponseSchema>

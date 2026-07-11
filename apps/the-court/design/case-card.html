@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CaseCard — 사건 카드 목업</title>
+    <style>
+      /* 다크(네이티브 기본) 토큰 근사 — 시각 계약용. 구현은 DS 시맨틱 토큰으로 재구성한다. */
+      :root {
+        --surface-canvas: #08090a;
+        --surface-raised: #191a1b;
+        --surface-hover: #28282c;
+        --border-subtle: rgba(255, 255, 255, 0.05);
+        --border-standard: rgba(255, 255, 255, 0.08);
+        --text-primary: #f7f8f8;
+        --text-secondary: #d0d6e0;
+        --text-tertiary: #8a8f98;
+        --fill-brand: #1ed760; /* Spotify green */
+        --fill-danger: #e5484d;
+        --fill-success: #10b981;
+        --radius-panel: 14px;
+        --radius-card: 10px;
+        --radius-pill: 999px;
+        --fw-emphasis: 510;
+        --fw-strong: 590;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--surface-canvas);
+        color: var(--text-primary);
+        font-family:
+          Inter,
+          -apple-system,
+          sans-serif;
+        font-weight: var(--fw-emphasis);
+        -webkit-font-smoothing: antialiased;
+        padding: 24px 16px;
+      }
+      .frame {
+        max-width: 480px;
+        margin: 0 auto;
+      }
+      h2 {
+        font-size: 12px;
+        font-weight: var(--fw-strong);
+        color: var(--text-tertiary);
+        letter-spacing: 0.02em;
+        margin: 20px 4px 10px;
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      /* CaseCard */
+      .card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        background: var(--surface-raised);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-panel);
+        padding: 12px 14px;
+        text-align: left;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+        min-height: 64px;
+      }
+      .card.selected {
+        border-color: var(--fill-brand);
+        box-shadow: 0 0 0 2px var(--fill-brand);
+      }
+
+      /* 아바타 + 상태 색 링 */
+      .avatar-wrap {
+        position: relative;
+        flex-shrink: 0;
+      }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-card);
+        display: block;
+      }
+      /* 상태 아이콘 코너 배지 — 아바타 위에 상태색 점 */
+      .status-dot {
+        position: absolute;
+        right: -3px;
+        bottom: -3px;
+        width: 18px;
+        height: 18px;
+        border-radius: var(--radius-pill);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--surface-raised);
+      }
+      .status-dot svg {
+        width: 10px;
+        height: 10px;
+      }
+
+      /* 본문 */
+      .body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .title {
+        font-size: 15px;
+        font-weight: var(--fw-strong);
+        color: var(--text-primary);
+        line-height: 1.33;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .meta {
+        font-size: 12px;
+        font-weight: var(--fw-emphasis);
+        color: var(--text-tertiary);
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .meta b {
+        color: var(--text-secondary);
+        font-weight: var(--fw-strong);
+      }
+
+      /* trailing: 상태 pill + chevron */
+      .trailing {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        height: 24px;
+        padding: 0 9px;
+        border-radius: var(--radius-pill);
+        font-size: 11px;
+        font-weight: var(--fw-strong);
+        border: 1px solid transparent;
+      }
+      .pill svg {
+        width: 13px;
+        height: 13px;
+      }
+      .chevron {
+        color: var(--text-tertiary);
+        display: flex;
+      }
+      .chevron svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      /* tone: neutral */
+      .t-neutral .pill {
+        background: var(--border-subtle);
+        border-color: var(--border-standard);
+        color: var(--text-secondary);
+      }
+      .t-neutral .status-dot {
+        background: #3a3b3d;
+        color: var(--text-secondary);
+      }
+      /* tone: brand */
+      .t-brand .pill {
+        background: color-mix(in srgb, var(--fill-brand) 14%, transparent);
+        border-color: color-mix(in srgb, var(--fill-brand) 24%, transparent);
+        color: var(--fill-brand);
+      }
+      .t-brand .status-dot {
+        background: var(--fill-brand);
+        color: #0a0a0a;
+      }
+      /* tone: danger */
+      .t-danger .pill {
+        background: color-mix(in srgb, var(--fill-danger) 14%, transparent);
+        border-color: color-mix(in srgb, var(--fill-danger) 24%, transparent);
+        color: var(--fill-danger);
+      }
+      .t-danger .status-dot {
+        background: var(--fill-danger);
+        color: #fff;
+      }
+      /* tone: success */
+      .t-success .pill {
+        background: color-mix(in srgb, var(--fill-success) 14%, transparent);
+        border-color: color-mix(in srgb, var(--fill-success) 24%, transparent);
+        color: var(--fill-success);
+      }
+      .t-success .status-dot {
+        background: var(--fill-success);
+        color: #04120b;
+      }
+
+      /* 데모 아바타 오브 근사 (실구현은 ColorAvatar) */
+      .orb1 {
+        background: radial-gradient(
+          circle at 32% 26%,
+          #9b6cff,
+          #5b3fd6 55%,
+          #2f1f7a
+        );
+      }
+      .orb2 {
+        background: radial-gradient(
+          circle at 32% 26%,
+          #4fd1c5,
+          #14b8a6 55%,
+          #0e6b63
+        );
+      }
+      .orb3 {
+        background: radial-gradient(
+          circle at 32% 26%,
+          #ff9e6d,
+          #f97316 55%,
+          #9a3d0a
+        );
+      }
+      .orb4 {
+        background: radial-gradient(
+          circle at 32% 26%,
+          #6ea8ff,
+          #3b82f6 55%,
+          #1e3a8a
+        );
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <h2>사건 카드 — 3상태(+평결) 시각 계약</h2>
+      <div class="stack">
+        <!-- 등록됨 (재판 전) -->
+        <div class="card t-neutral">
+          <div class="avatar-wrap">
+            <span class="avatar orb1"></span>
+            <span class="status-dot">
+              <!-- megaphone -->
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+              >
+                <path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1Z" />
+                <path d="M18 8a5 5 0 0 1 0 8" />
+              </svg>
+            </span>
+          </div>
+          <div class="body">
+            <span class="title">운동 3번 빼먹기</span>
+            <span class="meta">피고 <b>김철수</b> · 접수됨</span>
+          </div>
+          <div class="trailing">
+            <span class="pill">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1Z" />
+                <path d="M18 8a5 5 0 0 1 0 8" />
+              </svg>
+              접수
+            </span>
+            <span class="chevron"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m9 6 6 6-6 6" /></svg
+            ></span>
+          </div>
+        </div>
+
+        <!-- 재판중 -->
+        <div class="card t-brand">
+          <div class="avatar-wrap">
+            <span class="avatar orb2"></span>
+            <span class="status-dot">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+              >
+                <path
+                  d="M12 3v18M7 21h10M6 7l-3 6a3 3 0 0 0 6 0L6 7Zm12 0-3 6a3 3 0 0 0 6 0l-3-6ZM4 7h16"
+                />
+              </svg>
+            </span>
+          </div>
+          <div class="body">
+            <span class="title">약속 시간 늦기</span>
+            <span class="meta">피고 <b>박영희</b> · 재판 진행 중</span>
+          </div>
+          <div class="trailing">
+            <span class="pill">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M12 3v18M7 21h10M6 7l-3 6a3 3 0 0 0 6 0L6 7Zm12 0-3 6a3 3 0 0 0 6 0l-3-6ZM4 7h16"
+                />
+              </svg>
+              재판 중
+            </span>
+            <span class="chevron"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m9 6 6 6-6 6" /></svg
+            ></span>
+          </div>
+        </div>
+
+        <!-- 재판완료 · 유죄 -->
+        <div class="card t-danger">
+          <div class="avatar-wrap">
+            <span class="avatar orb3"></span>
+            <span class="status-dot">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+              >
+                <path d="m14 4 6 6-4 4-6-6 4-4ZM8 10l-5 5 3 3 5-5M13 15l4 4" />
+              </svg>
+            </span>
+          </div>
+          <div class="body">
+            <span class="title">빌린 돈 안 갚기</span>
+            <span class="meta">피고 <b>이민수</b> · 선고 완료</span>
+          </div>
+          <div class="trailing">
+            <span class="pill">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m14 4 6 6-4 4-6-6 4-4ZM8 10l-5 5 3 3 5-5M13 15l4 4" />
+              </svg>
+              유죄
+            </span>
+            <span class="chevron"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m9 6 6 6-6 6" /></svg
+            ></span>
+          </div>
+        </div>
+
+        <!-- 재판완료 · 무죄 -->
+        <div class="card t-success">
+          <div class="avatar-wrap">
+            <span class="avatar orb4"></span>
+            <span class="status-dot">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+              >
+                <path d="m5 13 4 4 10-10" />
+              </svg>
+            </span>
+          </div>
+          <div class="body">
+            <span class="title">단톡방 답장 씹기</span>
+            <span class="meta">피고 <b>최지우</b> · 선고 완료</span>
+          </div>
+          <div class="trailing">
+            <span class="pill">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+              >
+                <path d="m5 13 4 4 10-10" />
+              </svg>
+              무죄
+            </span>
+            <span class="chevron"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m9 6 6 6-6 6" /></svg
+            ></span>
+          </div>
+        </div>
+
+        <h2>경계 — 긴 제목 · 선택됨(하이라이트)</h2>
+
+        <!-- 긴 제목 truncate -->
+        <div class="card t-brand">
+          <div class="avatar-wrap">
+            <span class="avatar orb2"></span>
+            <span class="status-dot">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+              >
+                <path
+                  d="M12 3v18M7 21h10M6 7l-3 6a3 3 0 0 0 6 0L6 7Zm12 0-3 6a3 3 0 0 0 6 0l-3-6ZM4 7h16"
+                />
+              </svg>
+            </span>
+          </div>
+          <div class="body">
+            <span class="title"
+              >매주 일요일 아침 러닝 나가기로 해놓고 계속 안 나간 죄</span
+            >
+            <span class="meta">피고 <b>정하늘하늘하늘</b> · 재판 진행 중</span>
+          </div>
+          <div class="trailing">
+            <span class="pill">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M12 3v18M7 21h10M6 7l-3 6a3 3 0 0 0 6 0L6 7Zm12 0-3 6a3 3 0 0 0 6 0l-3-6ZM4 7h16"
+                />
+              </svg>
+              재판 중
+            </span>
+            <span class="chevron"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m9 6 6 6-6 6" /></svg
+            ></span>
+          </div>
+        </div>
+
+        <!-- 선택됨 -->
+        <div class="card t-neutral selected">
+          <div class="avatar-wrap">
+            <span class="avatar orb1"></span>
+            <span class="status-dot">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+              >
+                <path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1Z" />
+                <path d="M18 8a5 5 0 0 1 0 8" />
+              </svg>
+            </span>
+          </div>
+          <div class="body">
+            <span class="title">운동 3번 빼먹기</span>
+            <span class="meta">피고 <b>김철수</b> · 접수됨</span>
+          </div>
+          <div class="trailing">
+            <span class="pill">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1Z" />
+                <path d="M18 8a5 5 0 0 1 0 8" />
+              </svg>
+              접수
+            </span>
+            <span class="chevron"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m9 6 6 6-6 6" /></svg
+            ></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

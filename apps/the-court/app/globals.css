@@ -14,51 +14,29 @@ body {
   min-height: 100dvh;
   /* 앱(흰색) 프레임 바깥에 드러나는 거터 — 살짝 회색 */
   background: #ececf1;
+  /* 폰트: 라틴=Figtree/Montserrat, 한글=Pretendard(셀프호스팅). DS 토큰(--font-sans/heading)을
+     next/font 로드본으로 덮는다. body 에 둬서 포털(시트·토스트·메뉴)까지 상속되게 한다. */
+  --font-sans:
+    var(--font-figtree), var(--font-pretendard), -apple-system,
+    BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
+  --font-heading:
+    var(--font-montserrat), var(--font-figtree), var(--font-pretendard),
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI",
+    Roboto, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /*
- * 앱 루트 프레임 = app-shell 을 감싼 Theme 래퍼(body 직속).
- * :has(> .app-shell) 로 앱 루트만 잡아 다이얼로그/토스트 포털은 제외한다.
- * 폭 800px 중앙 정렬 + 흰 배경 → 바깥엔 body 거터가 드러난다.
+ * 앱 루트 프레임 = .app-shell(body 직속 div). 폭 800px 중앙 정렬 + 흰 배경 →
+ * 바깥엔 body 거터가 드러난다. (포털 시트·토스트·메뉴는 이 프레임 밖에 렌더된다.)
  */
-body > [data-astryx-theme]:has(> .app-shell) {
+.app-shell {
   max-width: 800px;
   min-height: 100dvh;
   margin-inline: auto;
   background: #ffffff;
   /* 거터와 앱 경계를 얇게 구분 */
   box-shadow: 0 0 0 1px rgba(28, 27, 33, 0.06);
-}
-
-/*
- * Stone 테마의 폰트 토큰을 next/font 로드본으로 연결.
- * stone theme.css 는 폰트 "이름"만 박아두므로, 실제 렌더되게 토큰만 로드본으로 덮는다.
- * 색·크기 등 나머지 토큰은 stone 기본값 그대로 (/themes?theme=stone).
- */
-[data-astryx-theme="stone"] {
-  /* 라틴 = Figtree/Montserrat, 한글 = Pretendard(셀프호스팅). 글자별로 폰트가 갈린다. */
-  --font-family-body:
-    var(--font-figtree), var(--font-pretendard), -apple-system,
-    BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
-  --font-family-heading:
-    var(--font-montserrat), var(--font-figtree), var(--font-pretendard),
-    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI",
-    Roboto, sans-serif;
-}
-
-/*
- * 온보딩 CTA — 버튼을 화면 폭 꽉 채우고, 라벨은 가운데 + 살짝 키움.
- * (버튼 폭은 style={{ width: "100%" }} 로 채운다. 여기선 라벨만 키운다.)
- */
-.onboarding-cta {
-  min-height: 72px; /* lg 기본(48px)의 1.5배 */
-}
-
-.onboarding-cta > span:first-child > span {
-  font-size: 1.375rem; /* 22px — lg 기본(20px)보다 크게 */
-  display: block;
-  width: 100%;
-  text-align: center;
 }
 
 /*
@@ -76,6 +54,58 @@ dialog.case-drawer {
   }
   to {
     transform: translateX(0);
+  }
+}
+
+/*
+ * ColorAvatar(@workspace/ui) ambient "꿈틀" 모션.
+ * DS globals.css 와 동일 정의 — 이 앱은 DS globals 를 통째로 import 하지 않으므로
+ * (Tailwind preflight 회귀 방지) 오브 키프레임만 평문 CSS 로 둔다.
+ * 페더된 blob 을 transform 으로만 미세 드리프트(GPU 친화). reduce-motion 정지.
+ */
+.ds-orb-blob {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+.ds-orb-b1 {
+  animation: ds-orb-drift1 11s ease-in-out infinite alternate;
+}
+.ds-orb-b2 {
+  animation: ds-orb-drift2 14s ease-in-out infinite alternate;
+}
+.ds-orb-b3 {
+  animation: ds-orb-drift3 9s ease-in-out infinite alternate;
+}
+@keyframes ds-orb-drift1 {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(7px, -5px) scale(1.12);
+  }
+}
+@keyframes ds-orb-drift2 {
+  from {
+    transform: translate(0, 0) scale(1.06);
+  }
+  to {
+    transform: translate(-6px, 4px) scale(0.94);
+  }
+}
+@keyframes ds-orb-drift3 {
+  from {
+    transform: translate(0, 0) scale(0.96);
+  }
+  to {
+    transform: translate(4px, 6px) scale(1.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-orb-b1,
+  .ds-orb-b2,
+  .ds-orb-b3 {
+    animation: none;
   }
 }
 

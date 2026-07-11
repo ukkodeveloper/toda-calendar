@@ -66,6 +66,7 @@
    * semantic 층을 직접, 임의값 없이 참조하게 한다. (규칙2·3 — 우회 인센티브 제거) */
   --color-fill-brand: var(--fill-brand);
   --color-fill-brand-hover: var(--fill-brand-hover);
+  --color-fill-brand-weak: var(--fill-brand-weak);
   --color-fill-neutral: var(--fill-neutral);
   --color-fill-neutral-weak: var(--fill-neutral-weak);
   --color-fill-neutral-strong: var(--fill-neutral-strong);
@@ -116,6 +117,9 @@
   --text-body: var(--type-body-size);
   --text-body--line-height: var(--type-body-lh);
   --text-body--letter-spacing: var(--type-body-tracking);
+  /* text-input = body 와 별개인 입력 필드 전용(16px 플로어, iOS 줌 방지) */
+  --text-input: var(--type-input-size);
+  --text-input--line-height: var(--type-input-lh);
   --text-caption: var(--type-caption-size);
   --text-caption--line-height: var(--type-caption-lh);
   --text-caption--letter-spacing: var(--type-caption-tracking);
@@ -134,4 +138,25 @@
  * 시트·FAB·바텀바 등 화면 하단에 닿는 표면이 인라인 env() 없이 이걸 쓴다(P0.5 최초 도입). */
 @utility pb-safe {
   padding-bottom: max(var(--p-space-4), var(--inset-safe-bottom));
+}
+
+/* keyboard-aware 유틸 — pb-safe 결. 소프트 키보드가 열리면 --inset-keyboard(훅이 write)가
+ * 커져, 하단에 핀 고정된 표면이 키보드 위로 물러난다. 키보드 닫힘=0px → pb-safe/h-dvh 와 동일.
+ *
+ * h-viewport   : 경직된 풀하이트 셸(overflow-hidden flex-col)용. 100dvh 에서 키보드를 뺀다.
+ * pb-keyboard  : 핀 고정 하단 바(컴포저 등)용. space-4 플로어·safe-area·키보드 3-way max. */
+@utility h-viewport {
+  height: calc(100dvh - var(--inset-keyboard, 0px));
+}
+
+@utility max-h-viewport {
+  max-height: calc(100dvh - var(--inset-keyboard, 0px));
+}
+
+@utility pb-keyboard {
+  padding-bottom: max(
+    var(--p-space-4),
+    var(--inset-safe-bottom),
+    var(--inset-keyboard, 0px)
+  );
 }

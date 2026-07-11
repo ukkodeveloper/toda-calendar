@@ -9,7 +9,7 @@ import { cn } from "@workspace/ui/lib/utils"
  * AppBar 는 이 컴포넌트의 얇은 alias(하위호환). 색·타이포는 semantic 토큰만(규칙1·2·3).
  * 순수 표현(레이아웃) — 인터랙션·터치 타깃은 슬롯한 요소(Button 등)가 책임진다.
  */
-const pageHeaderVariants = cva("flex shrink-0 gap-3", {
+const pageHeaderVariants = cva("flex shrink-0 gap-3 bg-surface-raised", {
   variants: {
     align: {
       start: "items-start",

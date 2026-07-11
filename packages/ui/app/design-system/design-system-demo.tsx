@@ -41,6 +41,7 @@ import {
   SegmentedControl,
   type SegmentedControlOption,
 } from "@workspace/ui/components/segmented-control"
+import { SheetFooterPreview } from "./_widgets/sheet-footer-preview"
 import { SpacingScale } from "./_widgets/spacing-scale"
 import { Stack } from "@workspace/ui/components/stack"
 import { Surface } from "@workspace/ui/components/surface"
@@ -83,6 +84,7 @@ type ComponentId =
   | "switch-control"
   | "surface"
   | "bottom-sheet"
+  | "sheet-footer"
   | "calendar-preview"
   | "menu-checkbox"
   | "three-stage-sheet"
@@ -322,6 +324,15 @@ const componentItems: ComponentItem[] = [
     status: "사용 가능",
     title: "BottomSheet",
     variantAxes: ["open", "scrollable", "footer"],
+  },
+  {
+    id: "sheet-footer",
+    category: "Actions",
+    description:
+      "시트 하단에 핀 고정되는 floating 액션 바입니다. Primary·Secondary 슬롯으로 조립합니다.",
+    status: "사용 가능",
+    title: "SheetFooter",
+    variantAxes: ["layout", "primary", "secondary"],
   },
   {
     id: "calendar-preview",
@@ -2716,6 +2727,17 @@ function PreviewStage(props: {
                   시트 열기
                 </Button>
               </Stack>
+            </div>
+          </PhoneSection>
+        ) : null}
+
+        {activeComponentId === "sheet-footer" ? (
+          <PhoneSection
+            title="SheetFooter"
+            description="시트 하단 floating 액션 바"
+          >
+            <div className="mt-8">
+              <SheetFooterPreview />
             </div>
           </PhoneSection>
         ) : null}

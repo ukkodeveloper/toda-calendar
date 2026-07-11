@@ -1,21 +1,25 @@
 "use client"
 
-import { Badge } from "@astryxdesign/core/Badge"
-import { Dialog } from "@astryxdesign/core/Dialog"
-import { Divider } from "@astryxdesign/core/Divider"
-import { Heading } from "@astryxdesign/core/Heading"
-import { Icon } from "@astryxdesign/core/Icon"
-import { IconButton } from "@astryxdesign/core/IconButton"
-import { HStack, VStack } from "@astryxdesign/core/Layout"
-import { List, ListItem } from "@astryxdesign/core/List"
-import { Text } from "@astryxdesign/core/Text"
+import { useEffect, useState } from "react"
 
-import { MOCK_CASES } from "@/lib/mock-chat"
-import type { CaseDetailResponse, CaseResponse } from "@/lib/api/types"
+import { Cancel01Icon } from "@hugeicons/core-free-icons"
 
-export type TrialStatus = "STATEMENT" | "VOTING" | "ENDED"
+import { CaseCard } from "@workspace/ui/components/case-card"
+import { DetentSheet } from "@workspace/ui/components/detent-sheet"
+import { Icon } from "@workspace/ui/components/icon"
+import { IconButton } from "@workspace/ui/components/icon-button"
+import { Text } from "@workspace/ui/components/text"
 
-export type CaseItem = CaseDetailResponse
+import { caseApi } from "@/lib/api"
+import type { CaseSummary } from "@/lib/api/types"
+import {
+  CASE_STATUS_META,
+  CaseSubtitle,
+  deriveCaseStatus,
+} from "@/lib/case-status"
+
+// 사건 목록 아이템 = 계약 CaseSummary(4단 UI 파생 필드 포함).
+export type CaseItem = CaseSummary
 
 export function CaseListDrawer({
   isOpen,
@@ -27,97 +31,88 @@ export function CaseListDrawer({
   isOpen: boolean
   onClose: () => void
   roomId: number
-  onSelect?: (c: CaseDetailResponse) => void
+  onSelect?: (c: CaseSummary) => void
   highlightCaseId?: number
 }) {
-  const cases: CaseResponse[] = MOCK_CASES
-  const loading = false
+  const [cases, setCases] = useState<CaseSummary[]>([])
+  const [loading, setLoading] = useState(false)
 
-  const handleSelect = (c: CaseResponse) => {
-    onSelect?.(c as unknown as CaseDetailResponse)
-  }
+  // 열릴 때마다 최신 사건 목록(종료 포함)을 실 백엔드에서 로드.
+  useEffect(() => {
+    if (!isOpen || !roomId) return
+    let active = true
+    const load = async () => {
+      setLoading(true)
+      try {
+        const data = await caseApi.listAll(roomId)
+        if (active) setCases(data)
+      } catch {
+        if (active) setCases([])
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    void load()
+    return () => {
+      active = false
+    }
+  }, [isOpen, roomId])
 
   return (
-    <Dialog
-      isOpen={isOpen}
+    <DetentSheet
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) onClose()
       }}
-      purpose="info"
-      width={320}
-      maxHeight="100dvh"
-      padding={0}
-      position={{ top: 0, right: 0, bottom: 0 }}
-      className="case-drawer"
+      fill
+      title="사건 목록"
+      description="공표된 사건과 진행 중인 재판을 한눈에 봐요"
+      trailingAccessory={
+        <IconButton variant="ghost" aria-label="닫기" onClick={onClose}>
+          <Icon icon={Cancel01Icon} />
+        </IconButton>
+      }
     >
-      <VStack style={{ height: "100dvh", width: "100%" }}>
-        <HStack
-          align="center"
-          justify="between"
-          style={{ padding: "16px 16px 12px", flexShrink: 0 }}
-        >
-          <Heading level={4}>사건 목록</Heading>
-          <IconButton
-            label="닫기"
-            variant="ghost"
-            size="sm"
-            icon={<Icon icon="close" size="md" />}
-            onClick={onClose}
+      {loading ? (
+        <div className="flex justify-center py-14">
+          <div
+            role="status"
+            aria-label="불러오는 중"
+            className="size-6 animate-spin rounded-pill border-2 border-border-subtle border-t-text-tertiary motion-reduce:[animation-duration:1.4s]"
           />
-        </HStack>
-        <Divider />
-        <VStack
-          style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 8 }}
-        >
-          {loading ? null : cases.length === 0 ? (
-            <VStack
-              align="center"
-              justify="center"
-              style={{ flex: 1, gap: 4, padding: 32, textAlign: "center" }}
-            >
-              <Text color="secondary">아직 등록된 사건이 없어요</Text>
-            </VStack>
-          ) : (
-            <List>
-              {cases.map((c) => {
-                const badgeProps =
-                  c.status === "DECLARED"
-                    ? { variant: "info" as const, label: "공표됨" }
-                    : c.status === "ON_TRIAL"
-                      ? { variant: "warning" as const, label: "재판중" }
-                      : { variant: "neutral" as const, label: "종결" }
-
-                const description =
-                  c.status === "DECLARED"
-                    ? "공표됨 · 고발 대기 중"
-                    : c.status === "ON_TRIAL"
-                      ? "재판 진행 중"
-                      : "선고 완료"
-
-                const isHighlighted = c.caseId === highlightCaseId
-                return (
-                  <ListItem
-                    key={c.caseId}
-                    label={c.title}
-                    description={description}
-                    onClick={() => handleSelect(c)}
-                    endContent={<Badge {...badgeProps} />}
-                    style={
-                      isHighlighted
-                        ? {
-                            background:
-                              "var(--color-background-accent-subtle, rgba(220,202,4,0.12))",
-                            borderRadius: "var(--radius-element, 8px)",
-                          }
-                        : undefined
-                    }
+        </div>
+      ) : cases.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 px-6 py-16 text-center">
+          <Text tone="secondary">아직 등록된 사건이 없어요</Text>
+          <Text variant="caption" tone="tertiary">
+            채팅에서 공표하면 여기에 쌓여요
+          </Text>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2.5 py-2">
+          {cases.map((c) => {
+            const meta = CASE_STATUS_META[deriveCaseStatus(c)]
+            return (
+              <CaseCard
+                key={c.caseId}
+                tone={meta.tone}
+                statusIcon={meta.icon}
+                statusLabel={meta.label}
+                avatarSeed={c.defendant.nickname}
+                title={c.title}
+                subtitle={
+                  <CaseSubtitle
+                    name={c.defendant.nickname}
+                    description={meta.description}
                   />
-                )
-              })}
-            </List>
-          )}
-        </VStack>
-      </VStack>
-    </Dialog>
+                }
+                selected={c.caseId === highlightCaseId}
+                onClick={() => onSelect?.(c)}
+              />
+            )
+          })}
+        </div>
+      )}
+    </DetentSheet>
   )
 }
