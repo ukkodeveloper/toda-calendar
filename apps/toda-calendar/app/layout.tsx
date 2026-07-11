@@ -26,7 +26,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans")}
+      className={cn("light", "antialiased", fontMono.variable, "font-sans")}
     >
       <body>
         <AppProviders>{children}</AppProviders>
