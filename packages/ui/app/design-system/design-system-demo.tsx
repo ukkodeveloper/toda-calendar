@@ -25,7 +25,7 @@ import { ChatBubble } from "@workspace/ui/components/chat-bubble"
 import {
   CalendarPreview,
   type CalendarPreviewDay,
-} from "@workspace/ui/components/calendar-preview"
+} from "./_widgets/calendar-preview"
 import { Cluster } from "@workspace/ui/components/cluster"
 import { Divider } from "@workspace/ui/components/divider"
 import { FloatingActionButton } from "@workspace/ui/components/floating-action-button"
@@ -41,16 +41,16 @@ import {
   SegmentedControl,
   type SegmentedControlOption,
 } from "@workspace/ui/components/segmented-control"
-import { SpacingScale } from "@workspace/ui/components/spacing-scale"
+import { SpacingScale } from "./_widgets/spacing-scale"
 import { Stack } from "@workspace/ui/components/stack"
 import { Surface } from "@workspace/ui/components/surface"
 import { SwitchControl } from "@workspace/ui/components/switch-control"
 import {
   ThreeStageSheetPreview,
   type SheetStage,
-} from "@workspace/ui/components/three-stage-sheet-preview"
+} from "./_widgets/three-stage-sheet-preview"
 import { Text } from "@workspace/ui/components/text"
-import { TokenSwatch } from "@workspace/ui/components/token-swatch"
+import { TokenSwatch } from "./_widgets/token-swatch"
 import { ValueCard } from "@workspace/ui/components/value-card"
 import { todaDesignSystem } from "@workspace/ui/lib/design-system"
 import { motionTokens } from "@workspace/ui/lib/motion"

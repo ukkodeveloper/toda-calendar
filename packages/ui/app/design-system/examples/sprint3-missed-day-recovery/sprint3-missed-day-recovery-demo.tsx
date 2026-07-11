@@ -9,7 +9,7 @@ import { Button } from "@workspace/ui/components/button"
 import {
   CalendarPreview,
   type CalendarPreviewDay,
-} from "@workspace/ui/components/calendar-preview"
+} from "../../_widgets/calendar-preview"
 import {
   SegmentedControl,
   type SegmentedControlOption,
@@ -103,11 +103,7 @@ const phaseContent = {
   }
 >
 
-export function MissedDayRecoveryDemo({
-  demo,
-}: {
-  demo: DemoExampleMetadata
-}) {
+export function MissedDayRecoveryDemo({ demo }: { demo: DemoExampleMetadata }) {
   const [target, setTarget] = React.useState<RecoveryTarget>("yesterday")
   const [phase, setPhase] = React.useState<DemoPhase>("home")
 
@@ -135,7 +131,11 @@ export function MissedDayRecoveryDemo({
               <Text as="p" tone="muted" variant="caption">
                 {demo.sprintId} / {demo.featureSlug}
               </Text>
-              <Text as="h1" className="mt-2 text-3xl sm:text-5xl" variant="display">
+              <Text
+                as="h1"
+                className="mt-2 text-3xl sm:text-5xl"
+                variant="display"
+              >
                 {demo.title}
               </Text>
               <Text className="mt-4 max-w-2xl" tone="secondary">
@@ -152,7 +152,10 @@ export function MissedDayRecoveryDemo({
               {demo.updatedAt}
             </Text>
             <div className="mt-5 space-y-3">
-              <MetaLine label="Route" value="/design-system/examples/sprint3-missed-day-recovery" />
+              <MetaLine
+                label="Route"
+                value="/design-system/examples/sprint3-missed-day-recovery"
+              />
               <MetaLine label="Entry" value="QuietNudge only" />
               <MetaLine label="Range" value="Home -> Sheet -> Toast" />
             </div>
@@ -208,7 +211,11 @@ export function MissedDayRecoveryDemo({
 
           <div className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-2">
-              <Surface className="rounded-[1.8rem]" padding="lg" variant="panel">
+              <Surface
+                className="rounded-[1.8rem]"
+                padding="lg"
+                variant="panel"
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge size="md" tone={currentPhase.badgeTone}>
                     {currentPhase.label}
@@ -229,11 +236,17 @@ export function MissedDayRecoveryDemo({
                 <ul className="mt-5 space-y-2 text-sm leading-6 text-foreground/66">
                   <RuleItem>{currentTarget.completionNote}</RuleItem>
                   <RuleItem>한 번에 하나의 날짜만 제안한다.</RuleItem>
-                  <RuleItem>닫기와 저장 없는 종료는 같은 24시간 규칙을 쓴다.</RuleItem>
+                  <RuleItem>
+                    닫기와 저장 없는 종료는 같은 24시간 규칙을 쓴다.
+                  </RuleItem>
                 </ul>
               </Surface>
 
-              <Surface className="rounded-[1.8rem]" padding="lg" variant="panel">
+              <Surface
+                className="rounded-[1.8rem]"
+                padding="lg"
+                variant="panel"
+              >
                 <Text variant="caption" tone="muted">
                   포함 화면
                 </Text>
@@ -286,11 +299,15 @@ export function MissedDayRecoveryDemo({
                       </div>
                       <div className="mt-3 grid gap-3 text-sm leading-6 text-foreground/66 md:grid-cols-2">
                         <p>
-                          <span className="font-semibold text-foreground/82">User:</span>{" "}
+                          <span className="font-semibold text-foreground/82">
+                            User:
+                          </span>{" "}
                           {step.userAction}
                         </p>
                         <p>
-                          <span className="font-semibold text-foreground/82">System:</span>{" "}
+                          <span className="font-semibold text-foreground/82">
+                            System:
+                          </span>{" "}
                           {step.systemResponse}
                         </p>
                       </div>
@@ -300,7 +317,11 @@ export function MissedDayRecoveryDemo({
               </Surface>
 
               <div className="space-y-4">
-                <Surface className="rounded-[1.8rem]" padding="lg" variant="panel">
+                <Surface
+                  className="rounded-[1.8rem]"
+                  padding="lg"
+                  variant="panel"
+                >
                   <Text variant="caption" tone="muted">
                     Entry points
                   </Text>
@@ -321,7 +342,11 @@ export function MissedDayRecoveryDemo({
                   </div>
                 </Surface>
 
-                <Surface className="rounded-[1.8rem]" padding="lg" variant="panel">
+                <Surface
+                  className="rounded-[1.8rem]"
+                  padding="lg"
+                  variant="panel"
+                >
                   <Text variant="caption" tone="muted">
                     Review checklist
                   </Text>
@@ -332,13 +357,23 @@ export function MissedDayRecoveryDemo({
                   </ul>
                 </Surface>
 
-                <Surface className="rounded-[1.8rem]" padding="lg" variant="panel">
+                <Surface
+                  className="rounded-[1.8rem]"
+                  padding="lg"
+                  variant="panel"
+                >
                   <Text variant="caption" tone="muted">
                     Design system usage
                   </Text>
                   <div className="mt-4 space-y-4">
-                    <MetaGroup title="Components" items={demo.designSystem.components} />
-                    <MetaGroup title="Tokens" items={demo.designSystem.tokens} />
+                    <MetaGroup
+                      title="Components"
+                      items={demo.designSystem.components}
+                    />
+                    <MetaGroup
+                      title="Tokens"
+                      items={demo.designSystem.tokens}
+                    />
                     <MetaGroup title="Notes" items={demo.designSystem.notes} />
                   </div>
                 </Surface>
@@ -419,7 +454,7 @@ function PhoneCanvas({
 
         {phase === "saved" ? <QuietToast label={targetState.toast} /> : null}
 
-        <div className="px-4 pb-4 pt-6">
+        <div className="px-4 pt-6 pb-4">
           <DockStub />
         </div>
 
@@ -466,7 +501,7 @@ function QuietNudgeCard({
         </div>
         <button
           aria-label="닫기"
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-black/4 text-sm font-semibold text-foreground/44 outline-none transition hover:text-foreground/68 focus-visible:ring-2 focus-visible:ring-[var(--ring)]/45"
+          className="grid size-8 shrink-0 place-items-center rounded-full bg-black/4 text-sm font-semibold text-foreground/44 transition outline-none hover:text-foreground/68 focus-visible:ring-2 focus-visible:ring-[var(--ring)]/45"
           type="button"
           onClick={onDismiss}
         >
@@ -490,7 +525,8 @@ function HiddenNudgeState() {
     <div className="rounded-[1.3rem] border border-dashed border-foreground/12 bg-white/48 px-4 py-3">
       <Text variant="label">오늘은 더 제안하지 않아요.</Text>
       <Text className="mt-1" tone="secondary">
-        닫기 또는 저장 없는 종료 후 24시간이 지나면 다음 첫 진입에서 다시 계산한다.
+        닫기 또는 저장 없는 종료 후 24시간이 지나면 다음 첫 진입에서 다시
+        계산한다.
       </Text>
     </div>
   )
@@ -545,11 +581,12 @@ function EditorSheetMock({
               {sheetDate}
             </Text>
             <Text className="mt-2" tone="secondary">
-              새 복구 페이지 없이 바로 열리고, 저장 없이 닫으면 오늘은 더 제안하지 않는다.
+              새 복구 페이지 없이 바로 열리고, 저장 없이 닫으면 오늘은 더
+              제안하지 않는다.
             </Text>
           </div>
           <button
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-black/4 text-sm font-semibold text-foreground/44 outline-none transition hover:text-foreground/68 focus-visible:ring-2 focus-visible:ring-[var(--ring)]/45"
+            className="grid size-8 shrink-0 place-items-center rounded-full bg-black/4 text-sm font-semibold text-foreground/44 transition outline-none hover:text-foreground/68 focus-visible:ring-2 focus-visible:ring-[var(--ring)]/45"
             type="button"
             onClick={onDismiss}
           >

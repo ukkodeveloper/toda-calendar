@@ -1,0 +1,300 @@
+/* ─────────────────────────────────────────────────────────────
+ * Design Tokens — 3계층 (primitive → semantic → component/compat)
+ *
+ *   primitive (--p-*)   원시 Linear 팔레트. 맥락 없음. 컴포넌트가 직접 참조 금지.
+ *   semantic  (--fill/--text/--border/--surface/--type/--elevation)
+ *                       Target·Role·Variant 네이밍. 컴포넌트는 이 층만 참조.
+ *   compat    (--background, --primary, --ds-…, --surface-…, --sheet-…)
+ *                       기존 shadcn·자체 토큰 이름을 semantic으로 흡수한 alias.
+ *
+ * 참조 방향은 아래로만: compat/component → semantic → primitive.
+ * 값은 DESIGN.md(Linear 정체성). 다크 네이티브가 기본(:root), .light 는 보조.
+ * ───────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════
+ * 1. PRIMITIVE — 원시 팔레트 (Linear hex → OKLCH). 참조 전용, 직접 쓰지 않는다.
+ * ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* dark surface 계단  #010102 → #08090a → #0f1011 → #191a1b → #28282c */
+  --p-ink-black: oklch(0.0692 0.008 284.11); /* #010102 marketing black */
+  --p-ink-900: oklch(0.139 0.0029 246.26); /* #08090a canvas */
+  --p-ink-800: oklch(0.1723 0.0026 247.98); /* #0f1011 panel */
+  --p-ink-700: oklch(0.2171 0.0025 247.94); /* #191a1b surface 3 */
+  --p-ink-600: oklch(0.2785 0.0073 285.92); /* #28282c surface 2 (hover) */
+
+  /* 텍스트 4단  #f7f8f8 → #d0d6e0 → #8a8f98 → #62666d */
+  --p-white-100: oklch(0.9784 0.0011 197.14); /* #f7f8f8 primary text */
+  --p-white-200: oklch(0.8744 0.0152 260.73); /* #d0d6e0 secondary */
+  --p-white-400: oklch(0.6488 0.0146 262.36); /* #8a8f98 tertiary */
+  --p-white-500: oklch(0.5092 0.0121 261.77); /* #62666d quaternary */
+  --p-white: oklch(1 0 0 / 1); /* pure white */
+
+  /* border — solid 다크 계단 + 반투명 흰 알파 */
+  --p-border-solid-1: oklch(0.2645 0.0098 268.31); /* #23252a */
+  --p-border-solid-2: oklch(0.3274 0.0105 285.81); /* #34343a */
+  --p-border-solid-3: oklch(0.3661 0.0102 285.88); /* #3e3e44 */
+  --p-line-tint: oklch(0.195 0.0026 247.96); /* #141516 */
+  --p-alpha-white-02: oklch(1 0 0 / 0.02);
+  --p-alpha-white-04: oklch(1 0 0 / 0.04);
+  --p-alpha-white-05: oklch(1 0 0 / 0.05); /* border subtle */
+  --p-alpha-white-08: oklch(1 0 0 / 0.08); /* border standard */
+  --p-alpha-white-10: oklch(1 0 0 / 0.1);
+
+  /* 인디고-바이올렛 스케일  #5e6ad2 brand / #7170ff accent / #828fff hover */
+  --p-indigo-brand: oklch(0.5674 0.1585 275.21); /* #5e6ad2 CTA bg */
+  --p-indigo-accent: oklch(0.6225 0.2069 278.85); /* #7170ff interactive */
+  --p-indigo-hover: oklch(0.6906 0.1637 276.24); /* #828fff hover */
+  --p-indigo-muted: oklch(0.61 0.0699 279.3); /* #7a7fad security lavender */
+
+  /* status green  #27a644 / #10b981 */
+  --p-green: oklch(0.6371 0.1749 146.7); /* #27a644 */
+  --p-emerald: oklch(0.6959 0.1491 162.48); /* #10b981 */
+  --p-amber: oklch(0.78 0.13 78); /* warning (Linear 무채 팔레트 밖 보조) */
+
+  /* light-mode 중립  #f7f8f8 / #f3f4f5 / #d0d6e0 / #e6e6e6 */
+  --p-light-100: oklch(0.9784 0.0011 197.14); /* #f7f8f8 */
+  --p-light-150: oklch(0.9667 0.0017 247.84); /* #f3f4f5 */
+  --p-light-200: oklch(0.9249 0 89.88); /* #e6e6e6 */
+  --p-light-border: oklch(0.8744 0.0152 260.73); /* #d0d6e0 */
+
+  /* radius scale — DESIGN.md: 2·4·6·8·12·22px + full/circle */
+  --p-radius-2: 0.125rem; /* 2px  micro badge */
+  --p-radius-4: 0.25rem; /* 4px  small container */
+  --p-radius-6: 0.375rem; /* 6px  button/input */
+  --p-radius-8: 0.5rem; /* 8px  card */
+  --p-radius-12: 0.75rem; /* 12px panel */
+  --p-radius-22: 1.375rem; /* 22px large panel */
+  --p-radius-full: 9999px;
+
+  /* space scale — 8px grid (4px 배수) */
+  --p-space-1: 0.25rem;
+  --p-space-2: 0.5rem;
+  --p-space-3: 0.75rem;
+  --p-space-4: 1rem;
+  --p-space-5: 1.25rem;
+  --p-space-6: 1.5rem;
+  --p-space-8: 2rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * 2. SEMANTIC — Target·Role·Variant. 다크 네이티브가 기본(:root).
+ *    컴포넌트는 이 층만 참조한다.
+ * ═══════════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: dark;
+
+  /* surface — 깊이(canvas→raised→overlay). 다크는 luminance stepping */
+  --surface-canvas: var(--p-ink-900); /* 페이지 배경 #08090a */
+  --surface-panel: var(--p-ink-800); /* 사이드바·패널 #0f1011 */
+  --surface-raised: var(--p-ink-700); /* 카드·드롭다운 #191a1b */
+  --surface-overlay: var(--p-ink-700); /* 팝오버·시트 표면 */
+  --surface-hover: var(--p-ink-600); /* hover 표면 #28282c */
+  --surface-glass: oklch(0.1723 0.0026 247.98 / 0.72); /* 반투명 패널 */
+  --surface-inset: var(--p-ink-black); /* 눌린/깊은 표면 */
+
+  /* fill — 채움 대상(브랜드·중립·상태) */
+  --fill-brand: var(--p-indigo-brand); /* CTA 배경 */
+  --fill-brand-hover: var(--p-indigo-hover);
+  --fill-neutral: var(--p-alpha-white-05); /* 중립 버튼/배지 배경 */
+  --fill-neutral-weak: var(--p-alpha-white-02); /* ghost 배경 */
+  --fill-neutral-strong: var(--p-alpha-white-08);
+  --fill-success: var(--p-emerald);
+  --fill-danger: var(
+    --p-indigo-accent
+  ); /* Linear 무채 — danger도 액센트 계열 */
+  --fill-warning: var(--p-amber);
+
+  /* text — 4단 계층 + 대상별 전경색 */
+  --text-primary: var(--p-white-100); /* 기본 텍스트 #f7f8f8 */
+  --text-secondary: var(--p-white-200); /* 본문 #d0d6e0 */
+  --text-tertiary: var(--p-white-400); /* placeholder/meta #8a8f98 */
+  --text-quaternary: var(--p-white-500); /* 타임스탬프/disabled #62666d */
+  --text-brand: var(--p-indigo-accent); /* 링크·활성 #7170ff */
+  --text-on-brand: var(--p-white); /* 브랜드 fill 위 텍스트 */
+  --text-on-fill: var(--p-white-100); /* 상태 fill 위 텍스트 */
+
+  /* border — subtle(기본) → standard → strong, 반투명 흰 */
+  --border-subtle: var(--p-alpha-white-05); /* 기본 rgba white .05 */
+  --border-standard: var(--p-alpha-white-08); /* 카드·입력 .08 */
+  --border-strong: var(--p-alpha-white-10);
+  --border-brand: var(--p-indigo-accent);
+  --border-line: var(--p-line-tint); /* 최소 구분선 #141516 */
+
+  /* ring — 포커스 */
+  --ring-focus: var(--p-indigo-accent);
+
+  /* elevation — 다크는 luminance step 기반, 그림자는 보조 */
+  --elevation-1: 0 1px 0 0 oklch(0 0 0 / 0.03);
+  --elevation-2: 0 0 0 1px oklch(0 0 0 / 0.2), 0 2px 4px oklch(0 0 0 / 0.24);
+  --elevation-3: 0 8px 24px oklch(0 0 0 / 0.44);
+  --backdrop-overlay: oklch(0 0 0 / 0.85); /* 모달 backdrop */
+
+  /* radius — 의도 기반 alias */
+  --radius-micro: var(--p-radius-2);
+  --radius-small: var(--p-radius-4);
+  --radius-control: var(--p-radius-6);
+  --radius-card: var(--p-radius-8);
+  --radius-panel: var(--p-radius-12);
+  --radius-hero: var(--p-radius-22);
+  --radius-pill: var(--p-radius-full);
+
+  /* type — Inter Variable, 웨이트 510 시그니처. font · weight · tracking */
+  /* --font-inter 는 next/font(Inter 가변)로 layout.tsx 에서 주입. */
+  --font-ui:
+    var(--font-inter), "Inter Variable", "Inter", -apple-system,
+    BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  --font-feature-linear: "cv01", "ss03";
+  --font-weight-read: 400;
+  --font-weight-emphasis: 510; /* Linear 시그니처 */
+  --font-weight-strong: 590;
+  --font-weight-light: 300;
+
+  /* 계층 타이포 — size / line-height / tracking */
+  --type-display-size: 3rem; /* 48px */
+  --type-display-lh: 1;
+  --type-display-tracking: -0.066rem; /* -1.056px */
+  --type-title-size: 1.25rem; /* 20px H3 */
+  --type-title-lh: 1.33;
+  --type-title-tracking: -0.015rem; /* -0.24px */
+  --type-body-size: 1rem; /* 16px */
+  --type-body-lh: 1.5;
+  --type-body-tracking: 0;
+  --type-caption-size: 0.8125rem; /* 13px */
+  --type-caption-lh: 1.5;
+  --type-caption-tracking: -0.008rem; /* -0.13px */
+  --type-label-size: 0.75rem; /* 12px */
+  --type-label-lh: 1.4;
+  --type-label-tracking: 0;
+}
+
+/* ── 라이트 = 보조 테마 (규칙10: 색·표면 토큰은 양쪽 정의) ── */
+.light {
+  color-scheme: light;
+
+  --surface-canvas: var(--p-light-100); /* #f7f8f8 */
+  --surface-panel: var(--p-light-150); /* #f3f4f5 */
+  --surface-raised: var(--p-white); /* 카드 흰색 */
+  --surface-overlay: var(--p-white);
+  --surface-hover: var(--p-light-150);
+  --surface-glass: oklch(1 0 0 / 0.72);
+  --surface-inset: var(--p-light-200);
+
+  --fill-brand: var(--p-indigo-brand);
+  --fill-brand-hover: var(--p-indigo-hover);
+  --fill-neutral: oklch(0 0 0 / 0.05);
+  --fill-neutral-weak: oklch(0 0 0 / 0.02);
+  --fill-neutral-strong: oklch(0 0 0 / 0.08);
+  --fill-success: var(--p-emerald);
+  --fill-danger: var(--p-indigo-brand);
+  --fill-warning: var(--p-amber);
+
+  --text-primary: var(--p-ink-800); /* 라이트에선 어두운 텍스트 */
+  --text-secondary: var(--p-white-500);
+  --text-tertiary: var(--p-white-400);
+  --text-quaternary: oklch(0.6488 0.0146 262.36 / 0.7);
+  --text-brand: var(--p-indigo-brand);
+  --text-on-brand: var(--p-white);
+  --text-on-fill: var(--p-white);
+
+  --border-subtle: oklch(0 0 0 / 0.06);
+  --border-standard: var(--p-light-border);
+  --border-strong: oklch(0 0 0 / 0.12);
+  --border-brand: var(--p-indigo-brand);
+  --border-line: var(--p-light-200);
+
+  --ring-focus: var(--p-indigo-brand);
+
+  --elevation-1: 0 1px 2px oklch(0 0 0 / 0.06);
+  --elevation-2: 0 4px 12px oklch(0 0 0 / 0.1);
+  --elevation-3: 0 12px 32px oklch(0 0 0 / 0.14);
+  --backdrop-overlay: oklch(0.19 0.02 260 / 0.44);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * 3. COMPAT — 기존 shadcn·--ds-*·--surface-*·--sheet-* 를 semantic 으로 흡수.
+ *    컴포넌트 파일을 안 건드리려고 이름은 유지, 값만 Linear semantic로 재배선.
+ *    새 코드는 이 층 대신 semantic(2)을 참조한다.
+ * ═══════════════════════════════════════════════════════════════ */
+:root,
+.light {
+  /* shadcn 색 토큰 (@theme inline 이 --color-* 로 노출) */
+  --background: var(--surface-canvas);
+  --foreground: var(--text-primary);
+  --card: var(--surface-raised);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-overlay);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--fill-brand);
+  --primary-foreground: var(--text-on-brand);
+  --secondary: var(--fill-neutral);
+  --secondary-foreground: var(--text-secondary);
+  --muted: var(--fill-neutral-weak);
+  --muted-foreground: var(--text-tertiary);
+  --accent: var(--fill-neutral);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--fill-danger);
+  --border: var(--border-standard);
+  --input: var(--border-standard);
+  --ring: var(--ring-focus);
+  --chart-1: var(--p-indigo-accent);
+  --chart-2: var(--p-indigo-brand);
+  --chart-3: var(--p-emerald);
+  --chart-4: var(--p-white-400);
+  --chart-5: var(--p-white-500);
+  --radius: var(--p-radius-12);
+
+  --sidebar: var(--surface-panel);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-primary: var(--fill-brand);
+  --sidebar-primary-foreground: var(--text-on-brand);
+  --sidebar-accent: var(--surface-hover);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-subtle);
+  --sidebar-ring: var(--ring-focus);
+
+  /* 자체 --surface-* / --sheet-* (three-stage sheet 등) */
+  --surface-elevated: var(--surface-raised);
+  --surface-subtle: var(--surface-panel);
+  --surface-panel: var(--surface-panel);
+  --sheet-backdrop: var(--backdrop-overlay);
+
+  /* --ds-* (design-system.ts foundations + 컴포넌트 참조) */
+  --ds-accent: var(--fill-brand);
+  --ds-success: var(--fill-success);
+  --ds-danger: var(--fill-danger);
+  --ds-warning: var(--fill-warning);
+  --ds-surface-canvas: var(--surface-canvas);
+  --ds-surface-raised: var(--surface-raised);
+  --ds-surface-glass: var(--surface-glass);
+  --ds-surface-inset: var(--surface-inset);
+  --ds-elevation-1: var(--elevation-1);
+  --ds-elevation-2: var(--elevation-2);
+  --ds-elevation-3: var(--elevation-3);
+
+  --ds-space-1: var(--p-space-1);
+  --ds-space-2: var(--p-space-2);
+  --ds-space-3: var(--p-space-3);
+  --ds-space-4: var(--p-space-4);
+  --ds-space-5: var(--p-space-5);
+  --ds-space-6: var(--p-space-6);
+  --ds-space-8: var(--p-space-8);
+
+  --ds-radius-sm: var(--radius-card);
+  --ds-radius-md: var(--radius-panel);
+  --ds-radius-lg: var(--radius-hero);
+  --ds-radius-xl: var(--radius-hero);
+
+  /* --ds-type-* : shorthand font (기존 컴포넌트가 `font: var(--ds-type-*)` 로 씀) */
+  --ds-type-caption: var(--font-weight-read) var(--type-caption-size) /
+    var(--type-caption-lh) var(--font-ui);
+  --ds-type-body: var(--font-weight-read) var(--type-body-size) /
+    var(--type-body-lh) var(--font-ui);
+  --ds-type-title: var(--font-weight-strong) var(--type-title-size) /
+    var(--type-title-lh) var(--font-ui);
+  --ds-type-display: var(--font-weight-emphasis) var(--type-display-size) /
+    var(--type-display-lh) var(--font-ui);
+
+  /* 폰트 패밀리 — @theme inline 의 --font-sans/--font-heading 이 참조 */
+  --font-sans: var(--font-ui);
+  --font-heading: var(--font-ui);
+}

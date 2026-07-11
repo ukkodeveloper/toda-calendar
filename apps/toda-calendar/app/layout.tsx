@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist_Mono } from "next/font/google"
 
 import "@workspace/ui/globals.css"
+import "./calendar-tokens.css"
 import { appCopy } from "@/lib/copy"
 import { AppProviders } from "@/providers/app-providers"
 import { cn } from "@workspace/ui/lib/utils"
