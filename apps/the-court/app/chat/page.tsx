@@ -439,6 +439,7 @@ function ChatPageInner() {
               variant="ghost"
               size="sm"
               aria-label="공표하기 (사건 등록)"
+              className="text-text-primary"
               onClick={() => setIsDeclareOpen(true)}
             >
               <Icon icon={Megaphone01Icon} />
@@ -447,6 +448,7 @@ function ChatPageInner() {
               variant="ghost"
               size="sm"
               aria-label="고발하기 (목격 등록)"
+              className="text-text-primary"
               onClick={() => setIsWitnessOpen(true)}
             >
               <Icon icon={ViewIcon} />
