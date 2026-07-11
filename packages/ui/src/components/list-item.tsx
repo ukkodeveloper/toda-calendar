@@ -70,8 +70,8 @@ function ListItem({
     >
       {leading ? <div className="shrink-0">{leading}</div> : null}
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-baseline gap-2">
-          <p className="min-w-0 truncate text-body font-strong text-text-primary">
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="min-w-0 flex-1 truncate text-body font-strong text-text-primary">
             {title}
           </p>
           {meta ? (
