@@ -35,3 +35,6 @@ export type {
   PatchDayRecordBody,
 } from "./calendar.js"
 export type { ApiErrorResponse, AuthErrorCode } from "./common.js"
+
+// 현행범(the-court) 계약 — REST DTO + WS 이벤트 SoT.
+export * from "./the-court/index.js"
