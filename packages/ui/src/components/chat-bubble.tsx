@@ -6,14 +6,15 @@ import { cn } from "@workspace/ui/lib/utils"
 
 /**
  * ChatBubble — 채팅 말풍선. 순수 표현.
- * incoming = 중립 표면, outgoing = brand fill + 흰색(on-fill) 텍스트.
+ * incoming = 중립 표면, outgoing = 옅은 브랜드 서피스(fill-brand-weak) + 어두운 텍스트.
+ * outgoing 은 밝은 brand fill 대신 옅은 초록으로, 어두운 글자 대비를 높여 가독성 확보(WCAG AA).
  * 색·라운드·타이포는 semantic 토큰만(규칙1·2·3).
  */
 const chatBubbleVariants = cva("max-w-[78%] rounded-panel font-emphasis", {
   variants: {
     side: {
       incoming: "rounded-bl-micro bg-fill-neutral text-text-primary",
-      outgoing: "ml-auto rounded-br-micro bg-fill-brand text-text-on-fill",
+      outgoing: "ml-auto rounded-br-micro bg-fill-brand-weak text-text-primary",
     },
     size: {
       sm: "px-3 py-2 text-caption",

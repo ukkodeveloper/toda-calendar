@@ -55,6 +55,12 @@
   --p-on-brand: oklch(
     0.1974 0.0082 17.87
   ); /* #191414 Spotify black — green fill 위 텍스트 (9.5:1) */
+  --p-green-tint: oklch(
+    0.925 0.05 150
+  ); /* #d0f0d5 옅은 민트 — outgoing 버블 라이트 배경 (ink 텍스트 15.5:1) */
+  --p-green-tint-dark: oklch(
+    0.32 0.075 150
+  ); /* #0f3d1d 어두운 초록 표면 — outgoing 버블 다크 배경 (흰 텍스트 11.6:1) */
 
   /* red — danger(의미색). green 브랜드와 구분되는 유일한 유채색. */
   --p-red: oklch(
@@ -113,6 +119,9 @@
   /* fill — 채움 대상(브랜드·중립·상태) */
   --fill-brand: var(--p-green-brand); /* CTA 배경 (Spotify green) */
   --fill-brand-hover: var(--p-green-hover);
+  --fill-brand-weak: var(
+    --p-green-tint-dark
+  ); /* 옅은 브랜드 서피스 — outgoing 버블 등 저강조 초록 배경 */
   --fill-neutral: var(--p-alpha-white-05); /* 중립 버튼/배지 배경 */
   --fill-neutral-weak: var(--p-alpha-white-02); /* ghost 배경 */
   --fill-neutral-strong: var(--p-alpha-white-08);
@@ -207,6 +216,9 @@
   --fill-brand-hover: var(
     --p-green-deep
   ); /* 라이트 hover 는 더 진하게(#1DB954) */
+  --fill-brand-weak: var(
+    --p-green-tint
+  ); /* 라이트 옅은 민트 — outgoing 버블 배경(ink 텍스트 15.5:1) */
   --fill-neutral: oklch(0 0 0 / 0.05);
   --fill-neutral-weak: oklch(0 0 0 / 0.02);
   --fill-neutral-strong: oklch(0 0 0 / 0.08);
