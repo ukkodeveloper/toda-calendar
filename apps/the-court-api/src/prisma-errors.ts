@@ -19,3 +19,23 @@ export function isUniqueViolation(err: unknown, constraint?: string): boolean {
   if (!msg.includes("23505")) return false
   return constraint ? msg.includes(constraint) : true
 }
+
+// User 를 참조하는 FK 컬럼들 — 이 값들이 실존 유저를 안 가리키면 P2003(FK 위반).
+// 1차 방어는 requireExistingUser 이지만, 존재확인~write 사이 삭제 race 등 잔여 경로를
+// 방어적으로 잡는다. **User FK 위반만** 좁혀 매핑한다(다른 FK 위반은 뭉개지 않음).
+const USER_FK_COLUMNS = [
+  "userUuid",
+  "defendantUuid",
+  "reporterUuid",
+  "voterUuid",
+  "uploaderUuid",
+] as const
+
+// P2003(FK 위반)이 User 참조 컬럼에서 났는지 판정. meta.field_name 은 Prisma/DB 버전에 따라
+// 컬럼명 또는 제약명(예: "Member_userUuid_fkey")으로 오므로 부분일치로 본다.
+export function isUserForeignKeyViolation(err: unknown): boolean {
+  if (!(err instanceof Prisma.PrismaClientKnownRequestError)) return false
+  if (err.code !== "P2003") return false
+  const field = String(err.meta?.["field_name"] ?? "")
+  return USER_FK_COLUMNS.some((col) => field.includes(col))
+}

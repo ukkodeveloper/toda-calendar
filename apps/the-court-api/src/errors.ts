@@ -14,6 +14,11 @@ export class AppError extends Error {
 export const unauthorized = () =>
   new AppError("AUTH_REQUIRED", 401, "X-User-Uuid 헤더가 필요합니다")
 
+// 헤더는 있으나 그 uuid 의 유저가 DB 에 없음(예: 삭제·재설치로 stale 해진 localStorage uuid).
+// 401 로 매핑해 프론트가 재발급(자가치유)하도록. 소유권 아님 → 404 아님.
+export const userNotFound = () =>
+  new AppError("USER_NOT_FOUND", 401, "유저를 찾을 수 없습니다")
+
 export const notFound = (code: string, message: string) =>
   new AppError(code, 404, message)
 

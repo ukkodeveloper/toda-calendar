@@ -9,11 +9,14 @@ import { Hono } from "hono"
 
 import { type AppEnv, requireUser } from "../context.js"
 import { prisma } from "../db.js"
-import { conflict, notFound } from "../errors.js"
+import { conflict, notFound, userNotFound } from "../errors.js"
 import { emitChatMessage } from "../ws/hub.js"
 import { createSystemMessage } from "../chat.js"
 import { toCaseDetail, toCaseSummary } from "../mappers.js"
-import { isUniqueViolation } from "../prisma-errors.js"
+import {
+  isUniqueViolation,
+  isUserForeignKeyViolation,
+} from "../prisma-errors.js"
 
 // 사건 — 공표·목록·상세. 4단 UI status 는 CaseSummary 필드에서 클라가 파생.
 export const caseRoutes = new Hono<AppEnv>()
@@ -60,11 +63,12 @@ caseRoutes.post("/rooms/:roomId/cases", async (c) => {
   const roomId = Number(c.req.param("roomId"))
   const body = createCaseRequestSchema.parse(await c.req.json())
 
+  // 공표는 defendant(User) FK 를 쓴다 — 존재확인으로 stale uuid 를 401 로 끊고, nickname 도 여기서.
   const user = await prisma.user.findUnique({
     where: { uuid },
     select: { nickname: true },
   })
-  if (!user) throw notFound("USER_NOT_FOUND", "유저를 찾을 수 없습니다")
+  if (!user) throw userNotFound()
 
   try {
     const { created, sys } = await prisma.$transaction(async (tx) => {
@@ -105,6 +109,7 @@ caseRoutes.post("/rooms/:roomId/cases", async (c) => {
         "이미 진행 중인 활성 사건이 있습니다"
       )
     }
+    if (isUserForeignKeyViolation(e)) throw userNotFound() // 존재확인~write 사이 삭제 race 방어
     throw e
   }
 })

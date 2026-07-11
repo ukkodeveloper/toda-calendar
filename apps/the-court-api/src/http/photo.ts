@@ -1,7 +1,7 @@
 import type { PhotoResponse } from "@workspace/contracts"
 import { Hono } from "hono"
 
-import { type AppEnv, requireUser } from "../context.js"
+import { type AppEnv, requireExistingUser } from "../context.js"
 import { prisma } from "../db.js"
 import { validationError } from "../errors.js"
 
@@ -13,7 +13,7 @@ const MAX_BYTES = 5 * 1024 * 1024 // 5MB
 
 // POST /api/photos (field: file) → {photoId, url}
 photoRoutes.post("/photos", async (c) => {
-  const uuid = requireUser(c)
+  const uuid = await requireExistingUser(c)
   const body = await c.req.parseBody()
   const file = body["file"]
   if (!(file instanceof File)) {

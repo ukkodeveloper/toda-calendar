@@ -9,7 +9,7 @@ import type {
 import { voteRequestSchema } from "@workspace/contracts"
 import { Hono } from "hono"
 
-import { type AppEnv, requireUser } from "../context.js"
+import { type AppEnv, requireExistingUser, requireUser } from "../context.js"
 import { createSystemMessage } from "../chat.js"
 import { prisma } from "../db.js"
 import {
@@ -85,7 +85,7 @@ trialRoutes.get("/trials/:trialId/participants", async (c) => {
 
 // POST /api/trials/:trialId/votes — 투표(VOTING 단계만, 본인 불가) → vote:updated broadcast.
 trialRoutes.post("/trials/:trialId/votes", async (c) => {
-  const uuid = requireUser(c)
+  const uuid = await requireExistingUser(c)
   const trialId = Number(c.req.param("trialId"))
   const body = voteRequestSchema.parse(await c.req.json())
 

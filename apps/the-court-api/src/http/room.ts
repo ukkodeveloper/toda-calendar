@@ -13,12 +13,15 @@ import {
 import type { Prisma } from "@prisma/client"
 import { Hono } from "hono"
 
-import { type AppEnv, requireUser } from "../context.js"
+import { type AppEnv, requireExistingUser, requireUser } from "../context.js"
 import { prisma } from "../db.js"
 import { generateRoomCode } from "../domain/generate.js"
-import { conflict, notFound } from "../errors.js"
+import { conflict, notFound, userNotFound } from "../errors.js"
 import { toMessageResponse } from "../mappers.js"
-import { isUniqueViolation } from "../prisma-errors.js"
+import {
+  isUniqueViolation,
+  isUserForeignKeyViolation,
+} from "../prisma-errors.js"
 
 // 방 생성·참여·조회 + 메시지 이력.
 export const roomRoutes = new Hono<AppEnv>()
@@ -42,7 +45,7 @@ roomRoutes.get("/rooms", async (c) => {
 
 // POST /api/rooms — 방 생성(참여코드 발급) + 생성자 자동 참여.
 roomRoutes.post("/rooms", async (c) => {
-  const uuid = requireUser(c)
+  const uuid = await requireExistingUser(c)
   const body = createRoomRequestSchema.parse(await c.req.json())
 
   // 참여코드 유니크 충돌 시 재시도(원자적: 방+생성자 멤버 중첩 생성).
@@ -66,6 +69,7 @@ roomRoutes.post("/rooms", async (c) => {
       )
     } catch (e) {
       if (isUniqueViolation(e, "code")) continue
+      if (isUserForeignKeyViolation(e)) throw userNotFound() // 존재확인~write 사이 삭제 race 방어
       throw e
     }
   }
@@ -77,7 +81,7 @@ roomRoutes.post("/rooms", async (c) => {
 
 // POST /api/rooms/join — 참여코드로 입장(이미 멤버면 그대로).
 roomRoutes.post("/rooms/join", async (c) => {
-  const uuid = requireUser(c)
+  const uuid = await requireExistingUser(c)
   const body = joinRoomRequestSchema.parse(await c.req.json())
   const room = await prisma.room.findUnique({
     where: { code: body.participationCode },

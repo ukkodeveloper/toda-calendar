@@ -2,13 +2,16 @@ import type { ReportResponse } from "@workspace/contracts"
 import { reportRequestSchema } from "@workspace/contracts"
 import { Hono } from "hono"
 
-import { type AppEnv, requireUser } from "../context.js"
+import { type AppEnv, requireExistingUser } from "../context.js"
 import { createSystemMessage } from "../chat.js"
 import { prisma } from "../db.js"
 import { assertCanStartTrial } from "../domain/state-transition.js"
-import { conflict, notFound } from "../errors.js"
+import { conflict, notFound, userNotFound } from "../errors.js"
 import { STATEMENT_WINDOW_MS } from "../mappers.js"
-import { isUniqueViolation } from "../prisma-errors.js"
+import {
+  isUniqueViolation,
+  isUserForeignKeyViolation,
+} from "../prisma-errors.js"
 import { emitChatMessage, emitTrialStarted } from "../ws/hub.js"
 
 // 목격 등록(고발) → 재판 개시. 증거사진 필수(photoId).
@@ -16,7 +19,7 @@ export const reportRoutes = new Hono<AppEnv>()
 
 // POST /api/reports — 고발(단일 트랜잭션: 사건 ON_TRIAL + Trial + Report + 시스템메시지) → broadcast.
 reportRoutes.post("/reports", async (c) => {
-  const uuid = requireUser(c)
+  const uuid = await requireExistingUser(c)
   const body = reportRequestSchema.parse(await c.req.json())
 
   const target = await prisma.case.findUnique({
@@ -78,6 +81,7 @@ reportRoutes.post("/reports", async (c) => {
     if (isUniqueViolation(e, "trial_one_active")) {
       throw conflict("TRIAL_ALREADY_ACTIVE", "이미 재판이 진행 중입니다")
     }
+    if (isUserForeignKeyViolation(e)) throw userNotFound() // 존재확인~write 사이 삭제 race 방어
     throw e
   }
 })
