@@ -69,7 +69,11 @@ function BottomSheet({
   const reducedMotion = useReducedMotion()
   const actionsRef = React.useRef<Dialog.Root.Actions | null>(null)
 
-  function handleDragEnd(_: PointerEvent, info: PanInfo) {
+  function handleDragEnd(_: PointerEvent, info?: PanInfo) {
+    // 방어: framer 의 drag 종료는 항상 PanInfo 를 넘기지만, 핸들러 병합·네이티브
+    // drag 이벤트 등 framer 밖 경로로 info 없이 불릴 수 있다(제스처 아님). 그때는
+    // `info.offset` 접근 크래시를 피하려 무시한다.
+    if (!info?.offset) return
     if (
       info.offset.y > motionTokens.gesture.sheetDismissOffset ||
       info.velocity.y > motionTokens.gesture.sheetDismissVelocity

@@ -272,8 +272,11 @@ function ThreeStageSheet({
 
   function handleDragEnd(
     _: PointerEvent | MouseEvent | TouchEvent,
-    info: PanInfo
+    info?: PanInfo
   ) {
+    // 방어: framer 밖 경로(핸들러 병합·네이티브 drag)로 info 없이 불리면 제스처가
+    // 아니므로 무시한다. `info.velocity` 접근 크래시를 막는다(BottomSheet 와 정합).
+    if (!info?.velocity) return
     const projected = y.get() + info.velocity.y * VELOCITY_PROJECTION
 
     let nearestId = detents[0]?.id ?? activeDetentId
