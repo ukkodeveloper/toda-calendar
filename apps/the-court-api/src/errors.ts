@@ -17,6 +17,9 @@ export const unauthorized = () =>
 export const notFound = (code: string, message: string) =>
   new AppError(code, 404, message)
 
+export const forbidden = (code: string, message: string) =>
+  new AppError(code, 403, message)
+
 export const conflict = (code: string, message: string) =>
   new AppError(code, 409, message)
 
