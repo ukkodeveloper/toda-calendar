@@ -2,60 +2,24 @@
 
 import { useEffect, useState } from "react"
 
-import {
-  ArrowRight01Icon,
-  Cancel01Icon,
-  JusticeScale01Icon,
-  LegalHammerIcon,
-  Megaphone01Icon,
-} from "@hugeicons/core-free-icons"
-import type { IconSvgElement } from "@hugeicons/react"
+import { Cancel01Icon } from "@hugeicons/core-free-icons"
 
-import { ActionCard } from "@workspace/ui/components/action-card"
-import { Badge, type BadgeTone } from "@workspace/ui/components/badge"
+import { CaseCard } from "@workspace/ui/components/case-card"
 import { DetentSheet } from "@workspace/ui/components/detent-sheet"
 import { Icon } from "@workspace/ui/components/icon"
 import { IconButton } from "@workspace/ui/components/icon-button"
 import { Text } from "@workspace/ui/components/text"
 
 import { caseApi } from "@/lib/api"
-import type { CaseStatus, CaseSummary } from "@/lib/api/types"
+import type { CaseSummary } from "@/lib/api/types"
+import {
+  CASE_STATUS_META,
+  CaseSubtitle,
+  deriveCaseStatus,
+} from "@/lib/case-status"
 
 // 사건 목록 아이템 = 계약 CaseSummary(4단 UI 파생 필드 포함).
 export type CaseItem = CaseSummary
-
-const STATUS_META: Record<
-  CaseStatus,
-  {
-    icon: IconSvgElement
-    tone: "brand" | "danger" | "neutral"
-    badgeTone: BadgeTone
-    badge: string
-    description: string
-  }
-> = {
-  DECLARED: {
-    icon: Megaphone01Icon,
-    tone: "brand",
-    badgeTone: "brand",
-    badge: "공표됨",
-    description: "공표됨 · 고발 대기 중",
-  },
-  ON_TRIAL: {
-    icon: JusticeScale01Icon,
-    tone: "danger",
-    badgeTone: "danger",
-    badge: "재판중",
-    description: "재판 진행 중",
-  },
-  CLOSED: {
-    icon: LegalHammerIcon,
-    tone: "neutral",
-    badgeTone: "neutral",
-    badge: "종결",
-    description: "선고 완료",
-  },
-}
 
 export function CaseListDrawer({
   isOpen,
@@ -127,29 +91,23 @@ export function CaseListDrawer({
       ) : (
         <div className="flex flex-col gap-2.5 py-2">
           {cases.map((c) => {
-            const meta = STATUS_META[c.caseStatus]
-            const isHighlighted = c.caseId === highlightCaseId
+            const meta = CASE_STATUS_META[deriveCaseStatus(c)]
             return (
-              <ActionCard
+              <CaseCard
                 key={c.caseId}
-                leading={<Icon icon={meta.icon} />}
-                leadingTone={meta.tone}
+                tone={meta.tone}
+                statusIcon={meta.icon}
+                statusLabel={meta.label}
+                avatarSeed={c.defendant.nickname}
                 title={c.title}
-                subtitle={meta.description}
-                trailing={
-                  <div className="flex items-center gap-2">
-                    <Badge tone={meta.badgeTone} size="sm">
-                      {meta.badge}
-                    </Badge>
-                    <Icon icon={ArrowRight01Icon} size="sm" />
-                  </div>
+                subtitle={
+                  <CaseSubtitle
+                    name={c.defendant.nickname}
+                    description={meta.description}
+                  />
                 }
+                selected={c.caseId === highlightCaseId}
                 onClick={() => onSelect?.(c)}
-                className={
-                  isHighlighted
-                    ? "border-border-brand ring-2 ring-ring-focus"
-                    : undefined
-                }
               />
             )
           })}
