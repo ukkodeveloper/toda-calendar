@@ -12,7 +12,7 @@ import {
   UserGroupIcon,
 } from "@hugeicons/core-free-icons"
 
-import { Badge } from "@workspace/ui/components/badge"
+import { AvatarStack } from "@workspace/ui/components/avatar-stack"
 import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
 import { Button } from "@workspace/ui/components/button"
 import { Field, FieldLabel } from "@workspace/ui/components/field"
@@ -187,10 +187,16 @@ export default function HomePage() {
                 density="regular"
                 divider={false}
                 title={room.title}
-                meta={
-                  <Badge tone="neutral" size="sm">
-                    {room.participantCount}명
-                  </Badge>
+                leading={
+                  <AvatarStack
+                    items={room.members.map((mem) => ({
+                      seed: mem.nickname,
+                      color: mem.color,
+                    }))}
+                    total={room.participantCount}
+                    max={3}
+                    size="sm"
+                  />
                 }
                 subtitle="참여 중"
                 trailing={
