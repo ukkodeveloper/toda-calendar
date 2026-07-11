@@ -31,7 +31,20 @@ roomRoutes.get("/rooms", async (c) => {
   const uuid = requireUser(c)
   const memberships = await prisma.member.findMany({
     where: { userUuid: uuid },
-    include: { room: { include: { _count: { select: { members: true } } } } },
+    include: {
+      room: {
+        include: {
+          _count: { select: { members: true } },
+          members: {
+            take: 3,
+            orderBy: { id: "asc" },
+            include: {
+              user: { select: { uuid: true, nickname: true, color: true } },
+            },
+          },
+        },
+      },
+    },
     orderBy: { id: "desc" },
   })
   const rooms: RoomListItem[] = memberships.map((m) => ({
@@ -39,6 +52,11 @@ roomRoutes.get("/rooms", async (c) => {
     title: m.room.title,
     code: m.room.code,
     participantCount: m.room._count.members,
+    members: m.room.members.map((mm) => ({
+      uuid: mm.user.uuid,
+      nickname: mm.user.nickname,
+      color: mm.user.color,
+    })),
   }))
   return c.json(rooms)
 })

@@ -25,13 +25,22 @@ export const joinRoomResponseSchema = z.object({
   myTitle: userTitleSchema,
 })
 
-// GET /rooms — 참여중인 방 리스트(title + N명 + 참여코드).
+// 방 목록의 멤버 미리보기(아바타 스택용) — 최대 3명, color 로 표시.
+export const roomMemberPreviewSchema = z.object({
+  uuid: z.string(),
+  nickname: z.string(),
+  color: z.string(),
+})
+
+// GET /rooms — 참여중인 방 리스트(title + N명 + 참여코드 + 멤버 미리보기).
 // code: 멤버만 자기 방 목록을 보므로 노출 안전(이미 참여자) — 홈에서 초대 공유용.
+// participantCount 는 총원(오버플로 "+N" 계산용), members 는 앞 3명 미리보기.
 export const roomListItemSchema = z.object({
   roomId: z.number().int(),
   title: z.string(),
   code: z.string(),
   participantCount: z.number().int().nonnegative(),
+  members: z.array(roomMemberPreviewSchema).max(3),
 })
 
 export const roomListResponseSchema = z.array(roomListItemSchema)
@@ -60,6 +69,7 @@ export type CreateRoomRequest = z.infer<typeof createRoomRequestSchema>
 export type RoomResponse = z.infer<typeof roomResponseSchema>
 export type JoinRoomRequest = z.infer<typeof joinRoomRequestSchema>
 export type JoinRoomResponse = z.infer<typeof joinRoomResponseSchema>
+export type RoomMemberPreview = z.infer<typeof roomMemberPreviewSchema>
 export type RoomListItem = z.infer<typeof roomListItemSchema>
 export type RoomListResponse = z.infer<typeof roomListResponseSchema>
 export type RoomDetailResponse = z.infer<typeof roomDetailResponseSchema>
