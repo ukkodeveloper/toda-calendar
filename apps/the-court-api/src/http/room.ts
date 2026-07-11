@@ -34,6 +34,7 @@ roomRoutes.get("/rooms", async (c) => {
   const rooms: RoomListItem[] = memberships.map((m) => ({
     roomId: m.roomId,
     title: m.room.title,
+    code: m.room.code,
     participantCount: m.room._count.members,
   }))
   return c.json(rooms)
@@ -108,6 +109,7 @@ roomRoutes.get("/rooms/:roomId", async (c) => {
   return c.json({
     roomId: room.id,
     title: room.title,
+    code: room.code,
     participantCount: room._count.members,
     myTitle: me?.title ?? "CITIZEN",
   } satisfies RoomDetailResponse)

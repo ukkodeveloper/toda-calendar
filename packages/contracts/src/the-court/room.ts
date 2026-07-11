@@ -25,10 +25,12 @@ export const joinRoomResponseSchema = z.object({
   myTitle: userTitleSchema,
 })
 
-// GET /rooms — 참여중인 방 리스트(title + N명).
+// GET /rooms — 참여중인 방 리스트(title + N명 + 참여코드).
+// code: 멤버만 자기 방 목록을 보므로 노출 안전(이미 참여자) — 홈에서 초대 공유용.
 export const roomListItemSchema = z.object({
   roomId: z.number().int(),
   title: z.string(),
+  code: z.string(),
   participantCount: z.number().int().nonnegative(),
 })
 
@@ -38,6 +40,7 @@ export const roomListResponseSchema = z.array(roomListItemSchema)
 export const roomDetailResponseSchema = z.object({
   roomId: z.number().int(),
   title: z.string(),
+  code: z.string(),
   participantCount: z.number().int().nonnegative(),
   myTitle: userTitleSchema,
 })
