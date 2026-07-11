@@ -37,6 +37,11 @@ export async function createUserMessage(input: {
     },
     include: { user: true, photo: true },
   })
+  // 작성자 본인은 방금 보낸 메시지를 이미 읽은 상태 → 자기 방에서 "안 읽음"으로 뜨지 않게 갱신.
+  await prisma.member.updateMany({
+    where: { roomId: input.roomId, userUuid: input.userUuid },
+    data: { lastReadAt: msg.createdAt },
+  })
   const title = await getMemberTitle(input.roomId, input.userUuid)
   return toMessageResponse(msg, title)
 }

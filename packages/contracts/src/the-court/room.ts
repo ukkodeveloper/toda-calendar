@@ -41,6 +41,8 @@ export const roomListItemSchema = z.object({
   code: z.string(),
   participantCount: z.number().int().nonnegative(),
   members: z.array(roomMemberPreviewSchema).max(3),
+  lastMessageAt: z.string().nullable(), // 방 최신 메시지 시각 ISO, 메시지 없으면 null
+  hasUnread: z.boolean(), // 내가 마지막으로 읽은 이후 새 메시지 존재
 })
 
 export const roomListResponseSchema = z.array(roomListItemSchema)

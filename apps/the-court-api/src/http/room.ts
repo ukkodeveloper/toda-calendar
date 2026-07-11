@@ -42,23 +42,53 @@ roomRoutes.get("/rooms", async (c) => {
               user: { select: { uuid: true, nickname: true, color: true } },
             },
           },
+          messages: {
+            take: 1,
+            orderBy: { createdAt: "desc" },
+            select: { createdAt: true },
+          },
         },
       },
     },
     orderBy: { id: "desc" },
   })
-  const rooms: RoomListItem[] = memberships.map((m) => ({
-    roomId: m.roomId,
-    title: m.room.title,
-    code: m.room.code,
-    participantCount: m.room._count.members,
-    members: m.room.members.map((mm) => ({
-      uuid: mm.user.uuid,
-      nickname: mm.user.nickname,
-      color: mm.user.color,
-    })),
-  }))
+  const rooms: RoomListItem[] = memberships.map((m) => {
+    const last = m.room.messages[0]?.createdAt
+    return {
+      roomId: m.roomId,
+      title: m.room.title,
+      code: m.room.code,
+      participantCount: m.room._count.members,
+      members: m.room.members.map((mm) => ({
+        uuid: mm.user.uuid,
+        nickname: mm.user.nickname,
+        color: mm.user.color,
+      })),
+      lastMessageAt: last?.toISOString() ?? null,
+      hasUnread: !!last && (!m.lastReadAt || last > m.lastReadAt),
+    }
+  })
+  // 채팅 목록 UX: 최신 활동 순(lastMessageAt desc, null=무메시지는 뒤로).
+  // 동률/무메시지는 orderBy id desc 로 이미 최근 가입 순 → 안정 정렬로 tie-break 유지.
+  rooms.sort((a, b) => {
+    if (a.lastMessageAt === b.lastMessageAt) return 0
+    if (a.lastMessageAt === null) return 1
+    if (b.lastMessageAt === null) return -1
+    return a.lastMessageAt < b.lastMessageAt ? 1 : -1
+  })
   return c.json(rooms)
+})
+
+// POST /api/rooms/:roomId/read — 방을 열 때 읽음 처리(내 lastReadAt 갱신).
+// 멤버가 아니면 0건 업데이트(무해). 소유권 확인은 updateMany where 절이 겸한다.
+roomRoutes.post("/rooms/:roomId/read", async (c) => {
+  const uuid = requireUser(c)
+  const roomId = Number(c.req.param("roomId"))
+  await prisma.member.updateMany({
+    where: { roomId, userUuid: uuid },
+    data: { lastReadAt: new Date() },
+  })
+  return c.json({ ok: true })
 })
 
 // POST /api/rooms — 방 생성(참여코드 발급) + 생성자 자동 참여.
