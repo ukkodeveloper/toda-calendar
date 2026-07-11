@@ -43,6 +43,12 @@ type BottomSheetProps = {
    * 대상 요소는 `fixed` 자손을 가두도록 containing block 이어야 한다(transform/contain 등).
    */
   container?: React.ComponentProps<typeof Dialog.Portal>["container"]
+  /**
+   * drag-to-dismiss 활성 여부. 기본 true.
+   * 내부에 스크롤·입력이 많은 키 큰 시트(예: 재판)는 제스처 충돌을 피해 false 로 끄고
+   * 닫기 버튼·backdrop·Escape 로 닫는다.
+   */
+  draggable?: boolean
 }
 
 function BottomSheet({
@@ -51,6 +57,7 @@ function BottomSheet({
   container,
   contentClassName,
   description,
+  draggable = true,
   footer,
   leadingAccessory,
   onOpenChange,
@@ -70,6 +77,19 @@ function BottomSheet({
       onOpenChange(false)
     }
   }
+
+  const dragProps = draggable
+    ? {
+        drag: "y" as const,
+        dragDirectionLock: true,
+        dragElastic: 0.12,
+        dragMomentum: false,
+        onDragEnd: handleDragEnd as (
+          event: MouseEvent | TouchEvent | PointerEvent,
+          info: PanInfo
+        ) => void,
+      }
+    : {}
 
   return (
     <Dialog.Root
@@ -107,16 +127,7 @@ function BottomSheet({
               <Dialog.Popup
                 render={
                   <motion.section
-                    drag="y"
-                    dragDirectionLock
-                    dragElastic={0.12}
-                    dragMomentum={false}
-                    onDragEnd={
-                      handleDragEnd as (
-                        event: MouseEvent | TouchEvent | PointerEvent,
-                        info: PanInfo
-                      ) => void
-                    }
+                    {...dragProps}
                     initial={
                       reducedMotion ? { opacity: 0 } : { opacity: 0, y: 24 }
                     }
@@ -139,7 +150,12 @@ function BottomSheet({
                 )}
               >
                 <div className="flex justify-center pt-2.5">
-                  <div className="h-1.5 w-10 rounded-pill bg-fill-neutral-strong" />
+                  <div
+                    className={cn(
+                      "h-1.5 w-10 rounded-pill bg-fill-neutral-strong",
+                      !draggable && "opacity-0"
+                    )}
+                  />
                 </div>
                 {title ||
                 description ||

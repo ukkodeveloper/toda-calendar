@@ -217,7 +217,10 @@ function ColorAvatar({
             <stop offset="1" stopColor={deep} />
           </radialGradient>
           <radialGradient id={`${gid}-sheen`} cx="32%" cy="22%" r="45%">
+            {/* 스펙큘러 하이라이트 — 순백 반사광은 테마 토큰이 아니라 광학 상수다(파일 헤더의 데이터 파생색 예외와 같은 범주). */}
+            {/* eslint-disable-next-line no-restricted-syntax */}
             <stop offset="0" stopColor="#ffffff" stopOpacity="0.35" />
+            {/* eslint-disable-next-line no-restricted-syntax */}
             <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
           </radialGradient>
           {blobs.map((b) => (
