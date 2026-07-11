@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
 import { Badge } from "@astryxdesign/core/Badge"
@@ -23,8 +23,9 @@ import { Text } from "@astryxdesign/core/Text"
 
 import { ColorAvatar } from "@workspace/ui/components/color-avatar"
 
-import { MOCK_TRIAL_MESSAGES, MOCK_TRIAL_PARTICIPANTS } from "@/lib/mock-chat"
-import type { TrialEndResponse } from "@/lib/api/types"
+import { chatApi, trialApi } from "@/lib/api"
+import { sendChatMessage, useTrialStream } from "@/lib/api/socket"
+import type { MessageResponse, TrialEndResponse } from "@/lib/api/types"
 
 // ─────────────────────────── 타입 ───────────────────────────
 
@@ -73,6 +74,19 @@ function formatTime(iso: string): string {
     ":" +
     String(m).padStart(2, "0")
   )
+}
+
+// 실 메시지 → 재판 스레드 메시지.
+function toTrialMessage(m: MessageResponse): TrialMessage {
+  return {
+    id: `m-${m.messageId}`,
+    senderUuid: m.user?.uuid ?? "system",
+    nickname: m.user?.nickname ?? "",
+    color: m.user?.color,
+    text: m.content,
+    time: formatTime(m.createdAt),
+    isSystem: m.type === "SYSTEM",
+  }
 }
 
 // ─────────────────────────── 참여자 원 ───────────────────────────
@@ -170,7 +184,29 @@ export function TrialSheet({
     null
   )
   const [value, setValue] = useState("")
+  // 내 표만 알 수 있다(백엔드는 개인 투표를 노출하지 않음).
+  // 최종 집계 수치는 선고 응답/verdict:revealed 의 verdictResult 에 담겨 온다.
   const [votes, setVotes] = useState<Record<string, VoteChoice>>({})
+
+  const seenIds = useRef<Set<string>>(new Set())
+  const lastMessageId = useRef<number>(0)
+
+  const appendThread = useCallback(
+    (msgs: MessageResponse[]) => {
+      const next: TrialMessage[] = []
+      for (const m of msgs) {
+        if (m.caseId !== caseId) continue
+        if (m.messageId > lastMessageId.current)
+          lastMessageId.current = m.messageId
+        const id = `m-${m.messageId}`
+        if (seenIds.current.has(id)) continue
+        seenIds.current.add(id)
+        next.push(toTrialMessage(m))
+      }
+      if (next.length) setMessages((prev) => [...prev, ...next])
+    },
+    [caseId]
+  )
 
   // 시트가 열리는 동안 body 스크롤 잠금
   useEffect(() => {
@@ -180,12 +216,67 @@ export function TrialSheet({
     }
   }, [isOpen])
 
-  // mock 데이터 로드
+  // 초기 데이터 로드 — 참여자·스레드 이력·투표 상태.
   useEffect(() => {
     if (!isOpen) return
-    setParticipants(MOCK_TRIAL_PARTICIPANTS)
-    setMessages(MOCK_TRIAL_MESSAGES)
-  }, [isOpen])
+    seenIds.current = new Set()
+    lastMessageId.current = 0
+    setMessages([])
+    setVerdictResult(null)
+
+    trialApi
+      .participants(trialId)
+      .then((p) => {
+        setParticipants([
+          { ...p.defendant },
+          ...p.witnesses.map((w) => ({ ...w })),
+        ])
+      })
+      .catch(() => {})
+
+    chatApi
+      .messages(roomId, { caseId })
+      .then(appendThread)
+      .catch(() => {})
+
+    trialApi
+      .voteResult(trialId)
+      .then((r) => {
+        setTrialStatus(r.status)
+        if (r.myVote !== null) {
+          setVotes({ [currentUserUuid]: r.myVote ? "GUILTY" : "NOT_GUILTY" })
+        }
+      })
+      .catch(() => {})
+  }, [isOpen, trialId, roomId, caseId, currentUserUuid, appendThread])
+
+  // 실시간 재판 스트림.
+  useTrialStream(isOpen ? trialId : null, {
+    onChatMessage: (m) => appendThread([m]),
+    onTrialStatus: (e) => setTrialStatus(e.status),
+    onVerdictRevealed: (e) => {
+      setTrialStatus("ENDED")
+      setVerdictResult({
+        trialId: e.trialId,
+        status: "ENDED",
+        verdict: e.verdict,
+        guiltyCount: e.guiltyCount,
+        notGuiltyCount: e.notGuiltyCount,
+        defendant: e.defendant,
+        caseStatus: e.caseStatus,
+      })
+    },
+    onReconnect: () => {
+      chatApi
+        .messages(roomId, { caseId })
+        .then(appendThread)
+        .catch(() => {})
+      trialApi
+        .voteResult(trialId)
+        .then((r) => setTrialStatus(r.status))
+        .catch(() => {})
+    },
+  })
 
   const isDefendant = currentUserUuid === defendantUuid
   const myVote = votes[currentUserUuid]
@@ -196,81 +287,38 @@ export function TrialSheet({
 
   const { label: statusLabel, badgeVariant } = STATUS_META[trialStatus]
 
-  const now = () => {
-    const d = new Date()
-    const h = d.getHours()
-    const m = d.getMinutes()
-    return (
-      (h < 12 ? "오전" : "오후") +
-      " " +
-      (h % 12 || 12) +
-      ":" +
-      String(m).padStart(2, "0")
-    )
-  }
-
   const handleSend = (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: "sent-" + String(prev.length),
-        senderUuid: currentUserUuid,
-        nickname: "나",
-        color: "teal",
-        text: trimmed,
-        time: now(),
-      },
-    ])
+    // 서버로만 발신 — 저장 후 chat:message echo 로 렌더(스레드는 caseId 로 라우팅).
+    sendChatMessage({ roomId, caseId, content: trimmed })
     setValue("")
   }
 
   const handleEndStatement = () => {
-    setTrialStatus("VOTING")
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: "sys-voting-" + String(prev.length),
-        senderUuid: "system",
-        nickname: "",
-        text: "⚖️ 최후진술이 종료되었습니다. 평결을 시작합니다.",
-        time: now(),
-        isSystem: true,
-      },
-    ])
+    trialApi
+      .endStatement(trialId)
+      .then((r) => setTrialStatus(r.status))
+      .catch(() => {})
   }
 
   const handleVote = (guilty: boolean) => {
+    // 낙관적 표시 — 서버 확정/집계는 vote:updated 로 반영.
     setVotes((prev) => ({
       ...prev,
       [currentUserUuid]: guilty ? "GUILTY" : "NOT_GUILTY",
     }))
+    trialApi.vote(trialId, { guilty }).catch(() => {})
   }
 
   const handleEndTrial = () => {
-    const guiltyCount = Object.values(votes).filter(
-      (v) => v === "GUILTY"
-    ).length
-    const notGuiltyCount = Object.values(votes).filter(
-      (v) => v === "NOT_GUILTY"
-    ).length
-    const verdict = guiltyCount >= notGuiltyCount ? "GUILTY" : "NOT_GUILTY"
-    setTrialStatus("ENDED")
-    setVerdictResult({
-      trialId,
-      status: "ENDED",
-      verdict,
-      guiltyCount,
-      notGuiltyCount,
-      defendant: {
-        uuid: "u-penguin",
-        nickname: "성난 펭귄",
-        newTitle: verdict === "GUILTY" ? "EX_CONVICT" : "CITIZEN",
-        convictionCount: verdict === "GUILTY" ? 1 : 0,
-      },
-      caseStatus: "CLOSED",
-    })
+    trialApi
+      .endTrial(trialId)
+      .then((r) => {
+        setTrialStatus("ENDED")
+        setVerdictResult(r)
+      })
+      .catch(() => {})
   }
 
   const composerAction =

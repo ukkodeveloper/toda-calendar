@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 import { Badge } from "@astryxdesign/core/Badge"
 import { Dialog } from "@astryxdesign/core/Dialog"
 import { Divider } from "@astryxdesign/core/Divider"
@@ -10,12 +12,11 @@ import { HStack, VStack } from "@astryxdesign/core/Layout"
 import { List, ListItem } from "@astryxdesign/core/List"
 import { Text } from "@astryxdesign/core/Text"
 
-import { MOCK_CASES } from "@/lib/mock-chat"
-import type { CaseDetailResponse, CaseResponse } from "@/lib/api/types"
+import { caseApi } from "@/lib/api"
+import type { CaseSummary } from "@/lib/api/types"
 
-export type TrialStatus = "STATEMENT" | "VOTING" | "ENDED"
-
-export type CaseItem = CaseDetailResponse
+// 사건 목록 아이템 = 계약 CaseSummary(4단 UI 파생 필드 포함).
+export type CaseItem = CaseSummary
 
 export function CaseListDrawer({
   isOpen,
@@ -27,14 +28,25 @@ export function CaseListDrawer({
   isOpen: boolean
   onClose: () => void
   roomId: number
-  onSelect?: (c: CaseDetailResponse) => void
+  onSelect?: (c: CaseSummary) => void
   highlightCaseId?: number
 }) {
-  const cases: CaseResponse[] = MOCK_CASES
-  const loading = false
+  const [cases, setCases] = useState<CaseSummary[]>([])
+  const [loading, setLoading] = useState(false)
 
-  const handleSelect = (c: CaseResponse) => {
-    onSelect?.(c as unknown as CaseDetailResponse)
+  // 열릴 때마다 최신 사건 목록(종료 포함)을 실 백엔드에서 로드.
+  useEffect(() => {
+    if (!isOpen || !roomId) return
+    setLoading(true)
+    caseApi
+      .listAll(roomId)
+      .then(setCases)
+      .catch(() => setCases([]))
+      .finally(() => setLoading(false))
+  }, [isOpen, roomId])
+
+  const handleSelect = (c: CaseSummary) => {
+    onSelect?.(c)
   }
 
   return (
@@ -81,16 +93,16 @@ export function CaseListDrawer({
             <List>
               {cases.map((c) => {
                 const badgeProps =
-                  c.status === "DECLARED"
+                  c.caseStatus === "DECLARED"
                     ? { variant: "info" as const, label: "공표됨" }
-                    : c.status === "ON_TRIAL"
+                    : c.caseStatus === "ON_TRIAL"
                       ? { variant: "warning" as const, label: "재판중" }
                       : { variant: "neutral" as const, label: "종결" }
 
                 const description =
-                  c.status === "DECLARED"
+                  c.caseStatus === "DECLARED"
                     ? "공표됨 · 고발 대기 중"
-                    : c.status === "ON_TRIAL"
+                    : c.caseStatus === "ON_TRIAL"
                       ? "재판 진행 중"
                       : "선고 완료"
 

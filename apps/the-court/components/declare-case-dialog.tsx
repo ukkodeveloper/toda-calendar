@@ -48,9 +48,12 @@ export function DeclareCaseDialog({
     if (!canSubmit) return
     setIsSubmitting(true)
     try {
+      // 시작일=공표 시각, 마감일=선택한 이행 기간. "기간"=둘 사이(계약 CreateCaseRequest).
       const data = await caseApi.declare(roomId, {
         title: title.trim(),
-        content: content.trim(),
+        // 계약상 content 는 필수(min 1) — 비면 제목으로 대체.
+        content: content.trim() || title.trim(),
+        startDate: new Date().toISOString(),
         deadline: deadline + "T00:00:00",
       })
       onDeclared?.(data.caseId, title.trim())

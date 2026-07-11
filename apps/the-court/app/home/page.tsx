@@ -1,93 +1,75 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { Badge } from "@astryxdesign/core/Badge"
+import {
+  Add01Icon,
+  Login03Icon,
+  PlusSignCircleIcon,
+  Share08Icon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons"
+
+// 다이얼로그(생성·참여)는 아직 Astryx — 이번 범위(헤더·드롭다운·방 목록)만 DS 로 교체.
 import { Button } from "@astryxdesign/core/Button"
-import { ClickableCard } from "@astryxdesign/core/ClickableCard"
 import { Dialog } from "@astryxdesign/core/Dialog"
-import { DropdownMenu, DropdownMenuItem } from "@astryxdesign/core/DropdownMenu"
 import { Heading } from "@astryxdesign/core/Heading"
-import { Icon } from "@astryxdesign/core/Icon"
-import { IconButton } from "@astryxdesign/core/IconButton"
 import { HStack, VStack } from "@astryxdesign/core/Layout"
-import { Spinner } from "@astryxdesign/core/Spinner"
-import { Text } from "@astryxdesign/core/Text"
 import { TextInput } from "@astryxdesign/core/TextInput"
 import { useToast } from "@astryxdesign/core/Toast"
 
-import { AppHeader } from "@/components/app-header"
+import { Badge } from "@workspace/ui/components/badge"
+import { Icon } from "@workspace/ui/components/icon"
+import { IconButton } from "@workspace/ui/components/icon-button"
+import { ListItem } from "@workspace/ui/components/list-item"
+import {
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger,
+} from "@workspace/ui/components/menu"
+import { PageHeader } from "@workspace/ui/components/page-header"
+import { Text } from "@workspace/ui/components/text"
+
 import { loadAuth, type AuthUser } from "@/lib/auth"
 import { roomApi } from "@/lib/api"
-import type {
-  RoomListResponse,
-  RoomResponse,
-  JoinRoomResponse,
-} from "@/lib/api/types"
-
-function ShareIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect
-        x="1"
-        y="6"
-        width="9"
-        height="9"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M5.5 5.5V3.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H11.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function PlusIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M8 2v12M2 8h12"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
+import { ApiError } from "@/lib/api/client"
+import type { RoomListItem, RoomResponse } from "@/lib/api/types"
 
 // 온보딩 이후 도착지. 왼쪽 로고 · 오른쪽 + (생성/참여) · 아래 참여중 채팅방 리스트.
 export default function HomePage() {
   const router = useRouter()
   const toast = useToast()
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [rooms, setRooms] = useState<RoomListResponse[] | null>(null)
+  const [rooms, setRooms] = useState<RoomListItem[] | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [joinOpen, setJoinOpen] = useState(false)
 
-  async function copyCode(code: string, roomTitle: string) {
+  // 참여코드는 백엔드가 방 목록에 내려주지 않고 방 생성 응답에만 담긴다.
+  // 그래서 목록의 공유 버튼은 코드가 없으면(=대부분) 안내만 한다.
+  async function copyCode(code: string | undefined, roomTitle: string) {
+    if (!code) {
+      toast({
+        body: "초대코드는 방을 만든 사람이 생성 직후 공유해요",
+        autoHideDuration: 3000,
+      })
+      return
+    }
     await navigator.clipboard.writeText(code)
     toast({
       body: `"${roomTitle}" 초대코드 ${code} 복사됨`,
       autoHideDuration: 3000,
     })
+  }
+
+  function reloadRooms() {
+    roomApi
+      .list()
+      .then(setRooms)
+      .catch(() => setRooms([]))
   }
 
   useEffect(() => {
@@ -97,117 +79,139 @@ export default function HomePage() {
       return
     }
     setUser(auth)
-    roomApi.list().then(setRooms)
+    reloadRooms()
   }, [router])
 
   if (!user) return null
 
   return (
-    <VStack style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh" }}>
-      {/* 헤더 — 왼쪽 로고(공통) · 오른쪽 + 드롭다운 */}
-      <AppHeader
-        endContent={
-          <DropdownMenu
-            hasChevron={false}
-            placement="below"
-            menuWidth={256}
-            button={{
-              label: "채팅방 추가",
-              isIconOnly: true,
-              variant: "primary",
-              size: "lg",
-              icon: <PlusIcon />,
-            }}
-          >
-            <DropdownMenuItem
-              label="채팅방 생성하기"
-              description="새 방을 만들고 초대코드를 공유해요"
-              onClick={() => setCreateOpen(true)}
+    <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col">
+      {/* 헤더 — 왼쪽 로고(→ 홈) · 오른쪽 + 프로스티드 드롭다운 */}
+      <PageHeader
+        align="center"
+        className="sticky top-0 z-10 bg-surface-canvas/80 backdrop-blur-xl"
+        title={
+          <Link href="/home" aria-label="현행범 홈" className="inline-flex">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hyeonhaengbeom_logo.png"
+              alt="현행범"
+              className="block h-6 w-auto"
             />
-            <DropdownMenuItem
-              label="채팅방 참여하기"
-              description="초대코드로 기존 방에 들어가요"
-              onClick={() => setJoinOpen(true)}
+          </Link>
+        }
+        trailing={
+          <Menu>
+            <MenuTrigger
+              render={
+                <IconButton variant="surface" aria-label="채팅방 추가">
+                  <Icon icon={Add01Icon} />
+                </IconButton>
+              }
             />
-          </DropdownMenu>
+            <MenuContent align="end" sideOffset={10}>
+              <MenuItem
+                icon={<Icon icon={PlusSignCircleIcon} />}
+                description="새 방을 만들고 초대코드를 공유해요"
+                onClick={() => setCreateOpen(true)}
+              >
+                채팅방 생성하기
+              </MenuItem>
+              <MenuSeparator />
+              <MenuItem
+                icon={<Icon icon={Login03Icon} />}
+                description="초대코드로 기존 방에 들어가요"
+                onClick={() => setJoinOpen(true)}
+              >
+                채팅방 참여하기
+              </MenuItem>
+            </MenuContent>
+          </Menu>
         }
       />
 
       {/* 참여중인 채팅방 리스트 */}
-      <VStack style={{ gap: 12, padding: "20px 20px 40px", flex: 1 }}>
-        <Heading level={5} style={{ paddingInline: 4 }}>
+      <div className="flex flex-1 flex-col gap-3 px-5 pt-2 pb-10">
+        <Text
+          as="h2"
+          variant="caption"
+          tone="tertiary"
+          className="px-1 font-strong"
+        >
           참여중인 채팅방
-        </Heading>
+        </Text>
 
         {rooms === null ? (
-          <HStack justify="center" style={{ padding: 40 }}>
-            <Spinner />
-          </HStack>
+          <div className="flex justify-center py-14">
+            <div
+              role="status"
+              aria-label="불러오는 중"
+              className="size-6 animate-spin rounded-pill border-2 border-border-subtle border-t-text-tertiary motion-reduce:[animation-duration:1.4s]"
+            />
+          </div>
         ) : rooms.length === 0 ? (
-          <VStack
-            align="center"
-            justify="center"
-            style={{ gap: 6, padding: "56px 24px", textAlign: "center" }}
-          >
-            <Text color="secondary">아직 참여중인 채팅방이 없어요</Text>
-            <Text color="disabled" type="supporting">
-              오른쪽 위 + 로 방을 만들거나 참여해 보세요
-            </Text>
-          </VStack>
+          <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
+            <div className="flex size-14 items-center justify-center rounded-pill bg-fill-neutral text-text-tertiary">
+              <Icon icon={UserGroupIcon} size="lg" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Text tone="secondary">아직 참여중인 채팅방이 없어요</Text>
+              <Text variant="caption" tone="tertiary">
+                오른쪽 위 + 로 방을 만들거나 참여해 보세요
+              </Text>
+            </div>
+          </div>
         ) : (
           rooms.map((room) => (
-            <ClickableCard
+            <Link
               key={room.roomId}
-              label={room.title}
               href={`/chat?roomId=${room.roomId}`}
+              className="block rounded-hero border border-border-subtle bg-surface-raised px-4 shadow-elevation-1 transition-[background-color,box-shadow] hover:bg-surface-hover hover:shadow-elevation-2"
             >
-              <HStack
-                align="center"
-                justify="between"
-                style={{ gap: 12, padding: "6px 0" }}
-              >
-                <VStack style={{ gap: 4, minWidth: 0, flex: 1 }}>
-                  <Heading level={5}>{room.title}</Heading>
-                  <Text color="secondary" type="supporting">
-                    {room.participantCount}명 참여 중
-                  </Text>
-                </VStack>
-                <HStack align="center" style={{ gap: 6 }}>
+              <ListItem
+                density="regular"
+                divider={false}
+                title={room.title}
+                meta={
+                  <Badge tone="neutral" size="sm">
+                    {room.participantCount}명
+                  </Badge>
+                }
+                subtitle="참여 중"
+                trailing={
                   <IconButton
-                    icon={<ShareIcon />}
-                    label="초대코드 공유"
                     variant="ghost"
                     size="sm"
+                    aria-label="초대코드 공유"
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      copyCode(room.participationCode, room.title)
+                      copyCode(undefined, room.title)
                     }}
-                  />
-                  <Badge variant="info" label={`${room.participantCount}명`} />
-                </HStack>
-              </HStack>
-            </ClickableCard>
+                  >
+                    <Icon icon={Share08Icon} size="sm" />
+                  </IconButton>
+                }
+              />
+            </Link>
           ))
         )}
-      </VStack>
+      </div>
 
       <CreateRoomDialog
         isOpen={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={(room) => {
           copyCode(room.participationCode, room.title)
-          roomApi.list().then(setRooms)
+          reloadRooms()
         }}
       />
       <JoinRoomDialog
         isOpen={joinOpen}
         onOpenChange={setJoinOpen}
-        onJoined={() => {
-          roomApi.list().then(setRooms)
-        }}
+        onJoined={reloadRooms}
       />
-    </VStack>
+    </div>
   )
 }
 
@@ -220,17 +224,24 @@ function CreateRoomDialog({
   onOpenChange: (open: boolean) => void
   onCreated: (room: RoomResponse) => void
 }) {
+  const toast = useToast()
   const [title, setTitle] = useState("")
   const [busy, setBusy] = useState(false)
 
   async function submit() {
     if (!title.trim() || busy) return
     setBusy(true)
-    const room = await roomApi.create({ title })
-    onCreated(room)
-    setBusy(false)
-    setTitle("")
-    onOpenChange(false)
+    try {
+      const room = await roomApi.create({ title })
+      onCreated(room)
+      setTitle("")
+      onOpenChange(false)
+    } catch (e) {
+      const msg = e instanceof ApiError ? e.message : "방 생성에 실패했어요"
+      toast({ body: msg, autoHideDuration: 3000 })
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -273,17 +284,29 @@ function JoinRoomDialog({
   onOpenChange: (open: boolean) => void
   onJoined: () => void
 }) {
+  const toast = useToast()
   const [code, setCode] = useState("")
   const [busy, setBusy] = useState(false)
 
   async function submit() {
     if (!code.trim() || busy) return
     setBusy(true)
-    await roomApi.join({ participationCode: code })
-    onJoined()
-    setBusy(false)
-    setCode("")
-    onOpenChange(false)
+    try {
+      await roomApi.join({ participationCode: code })
+      onJoined()
+      setCode("")
+      onOpenChange(false)
+    } catch (e) {
+      const msg =
+        e instanceof ApiError && e.isNotFound
+          ? "참여코드에 해당하는 방이 없어요"
+          : e instanceof ApiError
+            ? e.message
+            : "참여에 실패했어요"
+      toast({ body: msg, autoHideDuration: 3000 })
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (

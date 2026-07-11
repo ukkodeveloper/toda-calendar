@@ -1,11 +1,24 @@
-// 인메모리 목 — 백엔드 없이도 컴파일되게. 실제 채팅은 mock-chat 의 MOCK_CHAT_ITEMS 로 렌더된다.
-import type { MessageResponse } from "./types"
+// 채팅 이력 — 실 REST. 초기 로드·재연결 백필(after 커서)·재판 스레드(caseId).
+import { http } from "./client"
+import type { MessageListResponse } from "./types"
 
-const delay = (ms = 150) => new Promise<void>((r) => setTimeout(r, ms))
+type MessagesQuery = {
+  after?: number // 커서(이 id 이후만) — 재연결 백필
+  caseId?: number // 재판 스레드 이력(값=그 caseId)
+}
 
 export const chatApi = {
-  messages: async (_roomId: number): Promise<MessageResponse[]> => {
-    await delay()
-    return []
+  // GET /api/rooms/:id/messages?after=&caseId=
+  messages: (
+    roomId: number,
+    query: MessagesQuery = {}
+  ): Promise<MessageListResponse> => {
+    const params = new URLSearchParams()
+    if (query.after !== undefined) params.set("after", String(query.after))
+    if (query.caseId !== undefined) params.set("caseId", String(query.caseId))
+    const qs = params.toString()
+    return http.get<MessageListResponse>(
+      `/api/rooms/${roomId}/messages${qs ? `?${qs}` : ""}`
+    )
   },
 }

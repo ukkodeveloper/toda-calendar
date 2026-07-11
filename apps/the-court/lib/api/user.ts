@@ -1,29 +1,14 @@
-// 인메모리 목 — 백엔드 없이 온보딩이 돌게. shape 은 domain/api.md 유지.
-import { generateIdentity } from "@/lib/identity"
+// 유저 — 실 REST. 로그인 없음, 서버가 uuid 발급(클라 localStorage 저장).
+import { http } from "./client"
 import type { CreateUserRequest, NicknameResponse, UserResponse } from "./types"
 
-const delay = (ms = 200) => new Promise<void>((r) => setTimeout(r, ms))
-
-let seq = 1
-function makeUuid(): string {
-  return `u-mock-${seq++}`
-}
-
 export const userApi = {
-  create: async (body: CreateUserRequest): Promise<UserResponse> => {
-    await delay()
-    return { uuid: makeUuid(), nickname: body.nickname, color: body.color }
-  },
+  create: (body: CreateUserRequest): Promise<UserResponse> =>
+    http.post<UserResponse>("/api/users", { body }),
 
-  get: async (uuid: string): Promise<UserResponse> => {
-    await delay()
-    const { nickname, color } = generateIdentity()
-    return { uuid, nickname, color }
-  },
+  get: (uuid: string): Promise<UserResponse> =>
+    http.get<UserResponse>(`/api/users/${uuid}`),
 
-  randomNickname: async (): Promise<NicknameResponse> => {
-    await delay()
-    const { nickname, color } = generateIdentity()
-    return { nickname, color }
-  },
+  randomNickname: (): Promise<NicknameResponse> =>
+    http.get<NicknameResponse>("/api/users/nickname"),
 }

@@ -1,4 +1,6 @@
-// 인메모리 목 — 백엔드 없이 고발(report)·투표·평결이 돌게. shape 은 domain/api.md 유지.
+// 재판 — 실 REST. 고발(report)·투표·집계·최후진술 종료·선고.
+// write=REST → 서버가 결과를 WS broadcast. 여기선 REST 만 호출.
+import { http } from "./client"
 import type {
   ReportRequest,
   ReportResponse,
@@ -10,83 +12,23 @@ import type {
   VoteResultResponse,
 } from "./types"
 
-const delay = (ms = 220) => new Promise<void>((r) => setTimeout(r, ms))
-
-let nextTrialId = 100
-let nextReportId = 100
-
 export const trialApi = {
-  report: async (body: ReportRequest): Promise<ReportResponse> => {
-    await delay()
-    return {
-      reportId: nextReportId++,
-      caseId: body.caseId,
-      trialId: nextTrialId++,
-      caseStatus: "ON_TRIAL",
-      trialStatus: "STATEMENT",
-    }
-  },
+  // POST /api/reports — 고발 → 재판 개시(증거사진 photoId 필수).
+  report: (body: ReportRequest): Promise<ReportResponse> =>
+    http.post<ReportResponse>("/api/reports", { body }),
 
-  vote: async (trialId: number, body: VoteRequest): Promise<VoteResponse> => {
-    await delay()
-    return { trialId, guilty: body.guilty, votedCount: 1, totalVoters: 3 }
-  },
+  vote: (trialId: number, body: VoteRequest): Promise<VoteResponse> =>
+    http.post<VoteResponse>(`/api/trials/${trialId}/votes`, { body }),
 
-  voteResult: async (trialId: number): Promise<VoteResultResponse> => {
-    await delay()
-    return {
-      trialId,
-      status: "VOTING",
-      guiltyCount: 2,
-      notGuiltyCount: 1,
-      votedCount: 3,
-      totalVoters: 3,
-      verdict: "GUILTY",
-      hasVoted: false,
-      myVote: false,
-      remainingSeconds: 0,
-    }
-  },
+  voteResult: (trialId: number): Promise<VoteResultResponse> =>
+    http.get<VoteResultResponse>(`/api/trials/${trialId}/votes/result`),
 
-  participants: async (trialId: number): Promise<TrialParticipantsResponse> => {
-    await delay()
-    return {
-      trialId,
-      caseId: 0,
-      status: "STATEMENT",
-      defendant: {
-        uuid: "u-penguin",
-        nickname: "성난 펭귄",
-        isDefendant: true,
-      },
-      witnesses: [
-        { uuid: "u-tiger", nickname: "억울한 호랑이", isDefendant: false },
-        { uuid: "u-panda", nickname: "느긋한 판다", isDefendant: false },
-      ],
-      statementEndsAt: new Date().toISOString(),
-    }
-  },
+  participants: (trialId: number): Promise<TrialParticipantsResponse> =>
+    http.get<TrialParticipantsResponse>(`/api/trials/${trialId}/participants`),
 
-  endStatement: async (trialId: number): Promise<TrialStatusResponse> => {
-    await delay()
-    return { trialId, status: "VOTING" }
-  },
+  endStatement: (trialId: number): Promise<TrialStatusResponse> =>
+    http.post<TrialStatusResponse>(`/api/trials/${trialId}/statement/end`),
 
-  endTrial: async (trialId: number): Promise<TrialEndResponse> => {
-    await delay()
-    return {
-      trialId,
-      status: "ENDED",
-      verdict: "GUILTY",
-      guiltyCount: 2,
-      notGuiltyCount: 1,
-      defendant: {
-        uuid: "u-penguin",
-        nickname: "성난 펭귄",
-        newTitle: "EX_CONVICT",
-        convictionCount: 1,
-      },
-      caseStatus: "CLOSED",
-    }
-  },
+  endTrial: (trialId: number): Promise<TrialEndResponse> =>
+    http.post<TrialEndResponse>(`/api/trials/${trialId}/end`),
 }

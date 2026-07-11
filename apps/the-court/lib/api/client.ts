@@ -1,19 +1,78 @@
+// 실 백엔드(the-court-api · Hono REST) fetch 래퍼.
+// base = NEXT_PUBLIC_API_URL, 모든 요청에 X-User-Uuid(auth) 자동 첨부.
+// 에러는 백엔드 표준 응답 { error: { code, message, details? } } 로 파싱해 ApiError 로 표준화.
 import { loadAuth } from "@/lib/auth"
 
-// 빈 문자열 = 같은 origin (Next.js rewrites가 /api/* → 백엔드로 프록시)
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ""
+// 절대 URL 로 직접 호출(CORS). rewrite 프록시 제거.
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown
   userUuid?: string | null
 }
 
+// 백엔드 표준 에러: { error: { code, message, details? } }.
+export class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly code: string,
+    message: string,
+    public readonly details?: unknown
+  ) {
+    super(message)
+    this.name = "ApiError"
+  }
+
+  // 자주 분기하는 상태를 편하게.
+  get isUnauthorized() {
+    return this.status === 401
+  }
+  get isForbidden() {
+    return this.status === 403
+  }
+  get isNotFound() {
+    return this.status === 404
+  }
+  get isConflict() {
+    return this.status === 409
+  }
+  get isValidation() {
+    return this.status === 422
+  }
+}
+
+function resolveUuid(explicit: string | null | undefined): string | null {
+  if (explicit !== undefined) return explicit
+  return loadAuth()?.uuid ?? null
+}
+
+async function toApiError(res: Response): Promise<ApiError> {
+  const text = await res.text().catch(() => "")
+  let code = res.statusText || "HTTP_ERROR"
+  let message = text || res.statusText
+  let details: unknown
+  if (text) {
+    try {
+      const parsed = JSON.parse(text) as {
+        error?: { code?: string; message?: string; details?: unknown }
+      }
+      if (parsed.error) {
+        code = parsed.error.code ?? code
+        message = parsed.error.message ?? message
+        details = parsed.error.details
+      }
+    } catch {
+      // 비 JSON 응답은 텍스트 그대로.
+    }
+  }
+  return new ApiError(res.status, code, message, details)
+}
+
 async function request<T>(
   path: string,
   { body, userUuid, headers, ...init }: RequestOptions = {}
 ): Promise<T> {
-  const auth = loadAuth()
-  const uuid = userUuid !== undefined ? userUuid : (auth?.uuid ?? null)
+  const uuid = resolveUuid(userUuid)
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,
@@ -25,42 +84,26 @@ async function request<T>(
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "")
-    throw new ApiError(res.status, text || res.statusText)
-  }
+  if (!res.ok) throw await toApiError(res)
 
   const text = await res.text()
   return text ? (JSON.parse(text) as T) : (undefined as T)
 }
 
 async function upload<T>(path: string, file: File): Promise<T> {
-  const auth = loadAuth()
+  const uuid = loadAuth()?.uuid ?? null
   const formData = new FormData()
   formData.append("file", file)
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
-    headers: auth?.uuid ? { "X-User-Uuid": auth.uuid } : {},
+    // multipart 는 Content-Type 을 브라우저가 boundary 와 함께 지정하게 둔다.
+    headers: uuid ? { "X-User-Uuid": uuid } : {},
     body: formData,
   })
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "")
-    throw new ApiError(res.status, text || res.statusText)
-  }
-
+  if (!res.ok) throw await toApiError(res)
   return res.json() as Promise<T>
-}
-
-export class ApiError extends Error {
-  constructor(
-    public readonly status: number,
-    message: string
-  ) {
-    super(message)
-    this.name = "ApiError"
-  }
 }
 
 export const http = {

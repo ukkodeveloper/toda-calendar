@@ -17,7 +17,7 @@ import { Text } from "@astryxdesign/core/Text"
 
 import { caseApi, trialApi } from "@/lib/api"
 import { uploadPhoto } from "@/lib/api/photo"
-import type { CaseResponse } from "@/lib/api/types"
+import type { CaseSummary } from "@/lib/api/types"
 
 import { optimizeEvidencePhoto } from "@/lib/image"
 
@@ -42,7 +42,7 @@ export function WitnessDialog({
   const [isProcessing, setIsProcessing] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [declaredCases, setDeclaredCases] = useState<CaseResponse[]>([])
+  const [declaredCases, setDeclaredCases] = useState<CaseSummary[]>([])
   const [casesLoading, setCasesLoading] = useState(false)
 
   const canSubmit =
@@ -139,7 +139,7 @@ export function WitnessDialog({
                 onChange={setSelectedCaseId}
                 options={declaredCases.map((c) => ({
                   value: String(c.caseId),
-                  label: c.title + " · " + c.nickname,
+                  label: c.title + " · " + c.defendant.nickname,
                 }))}
                 isDisabled={casesLoading}
               />
