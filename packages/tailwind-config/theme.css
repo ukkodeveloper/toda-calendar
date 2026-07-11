@@ -107,6 +107,9 @@
 
   /* 타이포 스케일을 text-* 유틸리티로 (size/line-height/tracking 묶음).
    * 이름이 text-primary 같은 색 유틸과 겹치지 않게 계층 이름을 쓴다. */
+  --text-display: var(--type-display-size);
+  --text-display--line-height: var(--type-display-lh);
+  --text-display--letter-spacing: var(--type-display-tracking);
   --text-title: var(--type-title-size);
   --text-title--line-height: var(--type-title-lh);
   --text-title--letter-spacing: var(--type-title-tracking);

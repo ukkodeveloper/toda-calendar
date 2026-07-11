@@ -1,11 +1,15 @@
-import type { ComponentProps, ReactNode } from "react"
+import { type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@workspace/ui/lib/utils"
 
+/**
+ * ValueCard — 지표/수치 카드. 순수 표현.
+ * tone 은 상태 색조(10% 틴트 + 보더), 색·라운드·타이포는 semantic 토큰만(규칙1·2·3).
+ */
 const valueCardVariants = cva(
-  "rounded-[24px] border border-foreground/[0.06] bg-foreground/[0.045] text-left",
+  "rounded-card border border-border-subtle bg-fill-neutral text-left",
   {
     variants: {
       size: {
@@ -15,12 +19,9 @@ const valueCardVariants = cva(
       },
       tone: {
         neutral: "",
-        accent:
-          "border-[var(--ds-accent)]/12 bg-[var(--ds-accent)]/10 text-foreground",
-        success:
-          "border-[var(--ds-success)]/12 bg-[var(--ds-success)]/10 text-foreground",
-        danger:
-          "border-[var(--ds-danger)]/12 bg-[var(--ds-danger)]/10 text-foreground",
+        brand: "border-fill-brand/24 bg-fill-brand/14",
+        success: "border-fill-success/24 bg-fill-success/14",
+        danger: "border-fill-danger/24 bg-fill-danger/14",
       },
     },
     defaultVariants: {
@@ -30,39 +31,48 @@ const valueCardVariants = cva(
   }
 )
 
+/** `tone="accent"` 는 `brand` 의 하위호환 alias. */
+type ValueCardTone = "neutral" | "brand" | "accent" | "success" | "danger"
+
 type ValueCardProps = {
   description?: ReactNode
   label?: ReactNode
   leading?: ReactNode
   trailing?: ReactNode
   value: ReactNode
-} & ComponentProps<"div"> &
-  VariantProps<typeof valueCardVariants>
+  ref?: Ref<HTMLDivElement>
+} & ComponentPropsWithoutRef<"div"> &
+  Omit<VariantProps<typeof valueCardVariants>, "tone"> & {
+    tone?: ValueCardTone
+  }
 
 function ValueCard({
   className,
   description,
   label,
   leading,
+  ref,
   size,
-  tone,
+  tone = "neutral",
   trailing,
   value,
   ...props
 }: ValueCardProps) {
   const hasHeader = Boolean(label || leading || trailing)
+  const resolvedTone = tone === "accent" ? "brand" : tone
 
   return (
     <div
+      ref={ref}
       data-slot="value-card"
-      className={cn(valueCardVariants({ size, tone, className }))}
+      className={cn(valueCardVariants({ size, tone: resolvedTone, className }))}
       {...props}
     >
       {hasHeader ? (
         <div className="flex min-h-6 items-center gap-2">
           {leading ? <div className="shrink-0">{leading}</div> : null}
           {label ? (
-            <div className="min-w-0 flex-1 truncate text-[0.78rem] leading-5 font-semibold text-foreground/58">
+            <div className="min-w-0 flex-1 truncate text-caption font-strong text-text-tertiary">
               {label}
             </div>
           ) : (
@@ -73,14 +83,14 @@ function ValueCard({
       ) : null}
       <div
         className={cn(
-          "truncate text-[1.32rem] leading-8 font-semibold text-foreground",
+          "truncate text-title font-strong text-text-primary tabular-nums",
           hasHeader ? "mt-1" : ""
         )}
       >
         {value}
       </div>
       {description ? (
-        <div className="mt-1 text-[0.78rem] leading-5 font-medium text-foreground/48">
+        <div className="mt-1 text-caption font-read text-text-tertiary">
           {description}
         </div>
       ) : null}
@@ -89,3 +99,4 @@ function ValueCard({
 }
 
 export { ValueCard, valueCardVariants }
+export type { ValueCardProps, ValueCardTone }

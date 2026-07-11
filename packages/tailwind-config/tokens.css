@@ -189,9 +189,12 @@
   --fill-warning: var(--p-amber);
 
   --text-primary: var(--p-ink-800); /* 라이트에선 어두운 텍스트 */
-  --text-secondary: var(--p-white-500);
-  --text-tertiary: var(--p-white-400);
-  --text-quaternary: oklch(0.6488 0.0146 262.36 / 0.7);
+  /* 라이트 표면은 밝다 → tertiary/quaternary 를 다크보다 어둡게 잡아 4.5:1 확보(규칙10·대비). */
+  --text-secondary: oklch(0.4494 0.0137 262.36); /* ≈#565a61 본문 */
+  --text-tertiary: oklch(
+    0.4809 0.0129 262
+  ); /* meta — 틴트 패널 위에서도 4.5:1 */
+  --text-quaternary: oklch(0.5601 0.0134 262 / 0.92); /* 타임스탬프/disabled */
   --text-brand: var(--p-indigo-brand);
   --text-on-brand: var(--p-white);
   --text-on-fill: var(--p-white);

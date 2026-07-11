@@ -1,82 +1,26 @@
-import type { ComponentProps, ReactNode } from "react"
+import { type Ref } from "react"
 
-import { cva, type VariantProps } from "class-variance-authority"
+import {
+  PageHeader,
+  pageHeaderVariants,
+  type PageHeaderProps,
+} from "@workspace/ui/components/page-header"
 
-import { cn } from "@workspace/ui/lib/utils"
+/**
+ * AppBar — PageHeader 의 하위호환 alias. (S4a 통합)
+ *
+ * AppBar 와 PageHeader 는 leading/title/subtitle/trailing + size 로 사실상 같은
+ * 컴포넌트였다. 단일 구현(PageHeader)으로 합치되, 기존 소비처가 깨지지 않게
+ * AppBar 이름·기본값(align="center")을 유지한다. 새 코드는 PageHeader 를 쓴다.
+ */
+type AppBarProps = Omit<PageHeaderProps, "meta"> & { ref?: Ref<HTMLElement> }
 
-const appBarVariants = cva("flex shrink-0 items-center gap-3", {
-  variants: {
-    size: {
-      compact: "min-h-14 px-5 py-2",
-      regular: "min-h-16 px-5 py-3",
-      large: "min-h-[4.5rem] px-5 pt-5 pb-2.5",
-    },
-    align: {
-      start: "justify-start",
-      center: "justify-between",
-    },
-  },
-  defaultVariants: {
-    align: "center",
-    size: "regular",
-  },
-})
-
-const titleVariants = cva("min-w-0 font-semibold tracking-normal text-foreground", {
-  variants: {
-    size: {
-      compact: "text-[1.08rem] leading-6",
-      regular: "text-[1.24rem] leading-7",
-      large: "text-[1.72rem] leading-9",
-    },
-  },
-  defaultVariants: {
-    size: "regular",
-  },
-})
-
-type AppBarProps = {
-  leading?: ReactNode
-  subtitle?: ReactNode
-  title: ReactNode
-  trailing?: ReactNode
-} & ComponentProps<"header"> &
-  VariantProps<typeof appBarVariants>
-
-function AppBar({
-  align,
-  className,
-  leading,
-  size = "regular",
-  subtitle,
-  title,
-  trailing,
-  ...props
-}: AppBarProps) {
-  return (
-    <header
-      className={cn(appBarVariants({ align, size, className }))}
-      {...props}
-    >
-      {leading ? <div className="shrink-0">{leading}</div> : null}
-      <div
-        className={cn(
-          "min-w-0 flex-1",
-          align === "center" && leading && trailing && "text-center"
-        )}
-      >
-        <h1 className={cn(titleVariants({ size }))}>{title}</h1>
-        {subtitle ? (
-          <p className="mt-0.5 truncate text-[0.82rem] font-medium text-foreground/48">
-            {subtitle}
-          </p>
-        ) : null}
-      </div>
-      {trailing ? (
-        <div className="flex shrink-0 items-center gap-2">{trailing}</div>
-      ) : null}
-    </header>
-  )
+function AppBar({ align = "center", ...props }: AppBarProps) {
+  return <PageHeader align={align} {...props} />
 }
 
+// 하위호환: 기존 소비처가 appBarVariants 를 import.
+const appBarVariants = pageHeaderVariants
+
 export { AppBar, appBarVariants }
+export type { AppBarProps }

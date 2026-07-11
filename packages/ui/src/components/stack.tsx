@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react"
+import { type ComponentPropsWithoutRef, type Ref } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -31,9 +31,17 @@ function Stack({
   align,
   className,
   gap,
+  ref,
   ...props
-}: ComponentProps<"div"> & VariantProps<typeof stackVariants>) {
-  return <div className={cn(stackVariants({ align, gap, className }))} {...props} />
+}: ComponentPropsWithoutRef<"div"> &
+  VariantProps<typeof stackVariants> & { ref?: Ref<HTMLDivElement> }) {
+  return (
+    <div
+      ref={ref}
+      className={cn(stackVariants({ align, gap, className }))}
+      {...props}
+    />
+  )
 }
 
 export { Stack, stackVariants }

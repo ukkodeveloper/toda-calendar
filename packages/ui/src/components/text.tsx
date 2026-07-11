@@ -1,25 +1,31 @@
-import type { ElementType, ComponentPropsWithoutRef } from "react"
+import { type ComponentPropsWithoutRef, type ElementType } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@workspace/ui/lib/utils"
 
+/**
+ * Text — polymorphic 타이포 프리미티브(`as`). 계층 타이포·색은 semantic 토큰만(규칙1·2·3).
+ * variant 는 타입 계층 토큰(text-display/title/body/label/caption),
+ * tone 은 텍스트 색 계층(text-primary/secondary/tertiary/brand …)에 매핑한다.
+ */
 const textVariants = cva("min-w-0 text-pretty", {
   variants: {
     variant: {
-      display: "text-[1.9rem] leading-10 font-semibold tracking-normal",
-      title: "text-[1.18rem] leading-7 font-semibold tracking-normal",
-      body: "text-[0.93rem] leading-6 font-normal tracking-normal",
-      label: "text-[0.82rem] leading-5 font-semibold tracking-normal",
-      caption: "text-[0.72rem] leading-4 font-medium tracking-normal",
+      display: "text-display font-emphasis",
+      title: "text-title font-strong",
+      body: "text-body font-read",
+      label: "text-label font-strong",
+      caption: "text-caption font-emphasis",
     },
     tone: {
-      primary: "text-foreground",
-      secondary: "text-foreground/68",
-      muted: "text-foreground/46",
-      accent: "text-[var(--ds-accent)]",
-      danger: "text-[var(--ds-danger)]",
-      success: "text-[var(--ds-success)]",
+      primary: "text-text-primary",
+      secondary: "text-text-secondary",
+      tertiary: "text-text-tertiary",
+      quaternary: "text-text-quaternary",
+      brand: "text-text-brand",
+      danger: "text-fill-danger",
+      success: "text-fill-success",
     },
     align: {
       start: "text-left",
@@ -34,18 +40,47 @@ const textVariants = cva("min-w-0 text-pretty", {
   },
 })
 
+/** 하위호환 tone alias — 기존 소비처(muted/accent) 유지. */
+type TextTone =
+  | "primary"
+  | "secondary"
+  | "tertiary"
+  | "quaternary"
+  | "brand"
+  | "accent"
+  | "muted"
+  | "danger"
+  | "success"
+
+const toneAlias: Record<
+  TextTone,
+  NonNullable<VariantProps<typeof textVariants>["tone"]>
+> = {
+  primary: "primary",
+  secondary: "secondary",
+  tertiary: "tertiary",
+  quaternary: "quaternary",
+  brand: "brand",
+  accent: "brand",
+  muted: "tertiary",
+  danger: "danger",
+  success: "success",
+}
+
 type TextOwnProps<TElement extends ElementType> = {
   as?: TElement
-} & VariantProps<typeof textVariants>
+  tone?: TextTone
+} & Omit<VariantProps<typeof textVariants>, "tone">
 
 type TextProps<TElement extends ElementType> = TextOwnProps<TElement> &
   Omit<ComponentPropsWithoutRef<TElement>, keyof TextOwnProps<TElement>>
 
+// polymorphic 이라 ref 는 렌더 요소의 네이티브 ref 로 자연히 흘려보낸다(별도 타입 강제 X).
 function Text<TElement extends ElementType = "p">({
   align,
   as,
   className,
-  tone,
+  tone = "primary",
   variant,
   ...props
 }: TextProps<TElement>) {
@@ -53,10 +88,13 @@ function Text<TElement extends ElementType = "p">({
 
   return (
     <Component
-      className={cn(textVariants({ align, tone, variant, className }))}
+      className={cn(
+        textVariants({ align, tone: toneAlias[tone], variant, className })
+      )}
       {...props}
     />
   )
 }
 
 export { Text, textVariants }
+export type { TextProps, TextTone }

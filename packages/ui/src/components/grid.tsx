@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react"
+import { type ComponentPropsWithoutRef, type Ref } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -28,9 +28,17 @@ function Grid({
   className,
   columns,
   gap,
+  ref,
   ...props
-}: ComponentProps<"div"> & VariantProps<typeof gridVariants>) {
-  return <div className={cn(gridVariants({ columns, gap, className }))} {...props} />
+}: ComponentPropsWithoutRef<"div"> &
+  VariantProps<typeof gridVariants> & { ref?: Ref<HTMLDivElement> }) {
+  return (
+    <div
+      ref={ref}
+      className={cn(gridVariants({ columns, gap, className }))}
+      {...props}
+    />
+  )
 }
 
 export { Grid, gridVariants }

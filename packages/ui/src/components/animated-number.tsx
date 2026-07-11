@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { ComponentProps } from "react"
+import type { ComponentPropsWithoutRef, Ref } from "react"
 
 import { animate, motion, useReducedMotion } from "framer-motion"
 
@@ -16,7 +16,9 @@ type AnimatedNumberProps = {
   respectReducedMotion?: boolean
   startValue?: number
   value: number | string
-} & Omit<ComponentProps<"span">, "children">
+  /** React 19: ref 는 일반 prop. */
+  ref?: Ref<HTMLSpanElement>
+} & Omit<ComponentPropsWithoutRef<"span">, "children">
 
 const digitSequence = Array.from({ length: 20 }, (_, index) => index % 10)
 const digitPattern = /\d/
@@ -40,6 +42,7 @@ function AnimatedNumber({
   duration = 1,
   formatOptions,
   locale = "ko-KR",
+  ref,
   respectReducedMotion = true,
   startValue = 0,
   value,
@@ -99,9 +102,11 @@ function AnimatedNumber({
 
   return (
     <span
+      ref={ref}
+      data-slot="animated-number"
       aria-label={ariaLabel ?? numericSpec.finalText}
       className={cn(
-        "inline-flex items-baseline tabular-nums leading-none tracking-normal",
+        "inline-flex items-baseline leading-none tracking-normal tabular-nums",
         className
       )}
       data-animated-number-current={valueText}
@@ -112,7 +117,7 @@ function AnimatedNumber({
         {parts.map((part) => {
           if (part.type === "static") {
             return (
-              <span key={part.id} className="whitespace-pre leading-none">
+              <span key={part.id} className="leading-none whitespace-pre">
                 {part.char}
               </span>
             )
@@ -238,7 +243,7 @@ const RollingDigit = React.memo(function RollingDigit({
       data-animated-number-digit=""
     >
       <motion.span
-        className="absolute top-0 left-0 flex origin-right flex-col will-change-transform transform-gpu"
+        className="absolute top-0 left-0 flex origin-right transform-gpu flex-col will-change-transform"
         data-animated-number-reel=""
         initial={false}
         animate={{ y: `-${finalIndex}em` }}

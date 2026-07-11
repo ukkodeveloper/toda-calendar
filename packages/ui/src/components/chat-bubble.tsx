@@ -1,40 +1,43 @@
-import type { ComponentProps, ReactNode } from "react"
+import { type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@workspace/ui/lib/utils"
 
-const chatBubbleVariants = cva(
-  "max-w-[78%] rounded-[22px] px-4 py-2.5 text-[0.93rem] font-medium leading-6",
-  {
-    variants: {
-      side: {
-        incoming: "rounded-bl-[8px] bg-foreground/[0.06] text-foreground",
-        outgoing:
-          "ml-auto rounded-br-[8px] bg-[var(--ds-accent)] text-white",
-      },
-      size: {
-        sm: "px-3 py-2 text-[0.82rem] leading-5",
-        md: "px-4 py-2.5 text-[0.93rem] leading-6",
-        lg: "px-4 py-3 text-[1rem] leading-6",
-      },
+/**
+ * ChatBubble — 채팅 말풍선. 순수 표현.
+ * incoming = 중립 표면, outgoing = brand fill + on-brand 텍스트.
+ * 색·라운드·타이포는 semantic 토큰만(규칙1·2·3).
+ */
+const chatBubbleVariants = cva("max-w-[78%] rounded-panel font-emphasis", {
+  variants: {
+    side: {
+      incoming: "rounded-bl-micro bg-fill-neutral text-text-primary",
+      outgoing: "ml-auto rounded-br-micro bg-fill-brand text-text-on-brand",
     },
-    defaultVariants: {
-      side: "incoming",
-      size: "md",
+    size: {
+      sm: "px-3 py-2 text-caption",
+      md: "px-4 py-2.5 text-body",
+      lg: "px-4 py-3 text-body",
     },
-  }
-)
+  },
+  defaultVariants: {
+    side: "incoming",
+    size: "md",
+  },
+})
 
 type ChatBubbleProps = {
   meta?: ReactNode
-} & ComponentProps<"div"> &
+  ref?: Ref<HTMLDivElement>
+} & ComponentPropsWithoutRef<"div"> &
   VariantProps<typeof chatBubbleVariants>
 
 function ChatBubble({
   children,
   className,
   meta,
+  ref,
   side = "incoming",
   size,
   ...props
@@ -46,11 +49,16 @@ function ChatBubble({
         side === "outgoing" ? "justify-end" : "justify-start"
       )}
     >
-      <div className={cn(chatBubbleVariants({ side, size, className }))} {...props}>
+      <div
+        ref={ref}
+        data-slot="chat-bubble"
+        className={cn(chatBubbleVariants({ side, size, className }))}
+        {...props}
+      >
         {children}
       </div>
       {meta ? (
-        <span className="pb-1 text-[0.72rem] font-medium text-foreground/36">
+        <span className="pb-1 text-label font-emphasis text-text-quaternary">
           {meta}
         </span>
       ) : null}
@@ -59,3 +67,4 @@ function ChatBubble({
 }
 
 export { ChatBubble, chatBubbleVariants }
+export type { ChatBubbleProps }

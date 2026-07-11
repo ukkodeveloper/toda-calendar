@@ -1599,7 +1599,7 @@ function TopBar({ activeComponent }: { activeComponent: ComponentItem }) {
     <header className="border-b border-foreground/[0.08] bg-[var(--surface-panel)] px-4 py-3 backdrop-blur-2xl lg:px-5">
       <div className="flex min-w-0 items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
+          <p className="text-label font-strong text-text-secondary uppercase">
             Toda Mobile UI
           </p>
           <h1 className="truncate text-lg font-semibold">
@@ -1713,15 +1713,15 @@ function ComponentSidebar({
   return (
     <aside className="hidden min-h-0 overflow-y-auto border-r border-foreground/[0.08] bg-[var(--surface-subtle)] px-3 py-3 backdrop-blur-2xl lg:block">
       <div className="mb-3 px-2">
-        <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
+        <p className="text-label font-strong text-text-secondary uppercase">
           Design System
         </p>
-        <p className="mt-1 text-sm leading-5 text-foreground/54">
+        <p className="mt-1 text-caption leading-5 text-text-secondary">
           카테고리를 나누고 모바일 프레임에서 각각 검증합니다.
         </p>
       </div>
       <LayoutGroup id="design-system-section-tabs">
-        <div className="mb-4 grid gap-1 rounded-[18px] bg-foreground/[0.045] p-1">
+        <div className="mb-4 grid gap-1 rounded-panel bg-fill-neutral p-1">
           {designNavSections.map((section) => {
             const selected = activeSection === section.id
 
@@ -1730,10 +1730,10 @@ function ComponentSidebar({
                 key={section.id}
                 type="button"
                 className={cn(
-                  "relative min-h-10 rounded-[14px] px-3 text-left text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
+                  "relative min-h-11 rounded-control px-3 text-left text-caption font-strong transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-surface-canvas",
                   selected
-                    ? "text-foreground"
-                    : "text-foreground/46 hover:text-foreground/72"
+                    ? "text-text-primary"
+                    : "text-text-secondary hover:text-text-primary"
                 )}
                 onClick={() => onSelectSection(section.id)}
               >
@@ -1741,13 +1741,13 @@ function ComponentSidebar({
                   <motion.span
                     layoutId="sidebar-active-section"
                     aria-hidden="true"
-                    className="absolute inset-0 rounded-[14px] bg-background shadow-[var(--ds-elevation-1)]"
+                    className="absolute inset-0 rounded-control bg-surface-raised shadow-elevation-2"
                     transition={motionTokens.intent.selectionFlow}
                   />
                 ) : null}
                 <span className="relative z-10 flex items-center justify-between gap-2">
                   <span>{section.label}</span>
-                  <span className="truncate text-[0.68rem] font-medium text-foreground/38">
+                  <span className="truncate text-label font-emphasis text-text-tertiary">
                     {section.description}
                   </span>
                 </span>
@@ -1826,7 +1826,7 @@ function ComponentSidebar({
                 key={group}
                 className="min-w-0 border-t border-foreground/[0.08] pt-4 first:border-t-0 first:pt-0"
               >
-                <p className="mb-1 px-2 text-[0.68rem] font-semibold tracking-normal text-foreground/38 uppercase">
+                <p className="mb-1 px-2 text-label font-strong text-text-secondary uppercase">
                   {componentCategoryLabels[group]}
                 </p>
                 <div className="space-y-1">
@@ -1938,7 +1938,7 @@ function MobileComponentNav({
 
         <div className="rounded-[22px] bg-background/64 p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
           <div className="mb-2 flex items-center justify-between gap-3">
-            <span className="truncate text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
+            <span className="truncate text-label font-strong text-text-secondary uppercase">
               {activeSection === "examples" ? "Example" : "Component"}
             </span>
             {activeComponent ? (
@@ -2873,7 +2873,7 @@ function ControlsPanel(props: {
   return (
     <aside className="border-t border-foreground/[0.08] bg-[var(--surface-subtle)] px-4 py-4 backdrop-blur-2xl lg:col-start-2 xl:col-auto xl:min-h-0 xl:overflow-y-auto xl:border-t-0 xl:border-l">
       <div className="mb-4">
-        <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
+        <p className="text-label font-strong text-text-secondary uppercase">
           Controls
         </p>
         <h2 className="mt-1 text-lg font-semibold">UI variant</h2>
@@ -4689,7 +4689,7 @@ function PhoneSection({
 }) {
   return (
     <section className="min-h-full">
-      <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
+      <p className="text-label font-strong text-text-secondary uppercase">
         Preview
       </p>
       <h3 className="mt-1.5 text-[1.7rem] leading-8 font-semibold text-balance">
@@ -4708,7 +4708,7 @@ function ComponentUsage({ item }: { item: ComponentItem }) {
     <section className="mx-3 mt-4 rounded-[28px] bg-background/58 p-4 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)] backdrop-blur-xl sm:mx-0 sm:mt-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[0.72rem] font-semibold tracking-normal text-foreground/42 uppercase">
+          <p className="text-label font-strong text-text-secondary uppercase">
             Usage
           </p>
           <h2 className="mt-1 text-xl font-semibold">{item.title}</h2>
@@ -4825,9 +4825,11 @@ function ControlOptions<T extends string>({
 
   return (
     <div>
-      <p className="mb-2 text-sm font-semibold text-foreground/72">{label}</p>
+      <p className="mb-2 text-caption font-strong text-text-secondary">
+        {label}
+      </p>
       <LayoutGroup id={groupId}>
-        <div className="grid gap-1 rounded-[18px] bg-black/[0.045] p-1">
+        <div className="grid gap-1 rounded-panel bg-fill-neutral p-1">
           {options.map((option) => {
             const selected = value === option.value
 
@@ -4836,10 +4838,10 @@ function ControlOptions<T extends string>({
                 key={option.value}
                 type="button"
                 className={cn(
-                  "relative min-h-10 rounded-[14px] px-3 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
+                  "relative min-h-11 rounded-control px-3 text-caption font-emphasis transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-surface-canvas",
                   selected
-                    ? "text-foreground"
-                    : "text-foreground/48 hover:text-foreground/72"
+                    ? "text-text-primary"
+                    : "text-text-tertiary hover:text-text-secondary"
                 )}
                 onClick={() => onChange(option.value)}
               >
@@ -4847,7 +4849,7 @@ function ControlOptions<T extends string>({
                   <motion.span
                     layoutId="control-option-selection"
                     aria-hidden="true"
-                    className="absolute inset-0 rounded-[14px] bg-white shadow-[var(--ds-elevation-1)]"
+                    className="absolute inset-0 rounded-control bg-surface-raised shadow-elevation-2"
                     transition={
                       reducedMotion
                         ? { duration: motionTokens.duration.instant }
@@ -4887,6 +4889,16 @@ function ToggleControl({
   )
 }
 
+const statusBadgeTone: Record<
+  ComponentStatus,
+  "success" | "brand" | "neutral"
+> = {
+  "사용 가능": "success",
+  초안: "neutral",
+  패턴: "brand",
+  토큰: "neutral",
+}
+
 function StatusBadge({
   compact = false,
   status,
@@ -4894,18 +4906,10 @@ function StatusBadge({
   compact?: boolean
   status: ComponentStatus
 }) {
+  // Linear 팔레트는 무채(sky/emerald 텍스트 X) — Badge 의 semantic 틴트로 대비를 맞춘다(규칙1·10, WCAG 4.5:1).
   return (
-    <span
-      className={cn(
-        "shrink-0 rounded-full px-2 py-1 font-semibold",
-        compact ? "text-[0.62rem]" : "text-[0.68rem]",
-        status === "사용 가능" && "bg-emerald-500/10 text-emerald-700",
-        status === "초안" && "bg-[var(--ds-accent)]/10 text-[var(--ds-accent)]",
-        status === "패턴" && "bg-sky-500/10 text-sky-700",
-        status === "토큰" && "bg-foreground/[0.06] text-foreground/52"
-      )}
-    >
+    <Badge tone={statusBadgeTone[status]} size={compact ? "sm" : "md"}>
       {status}
-    </span>
+    </Badge>
   )
 }
