@@ -1220,6 +1220,9 @@ export function DesignSystemDemo({
   const router = useRouter()
   const reducedMotion = useReducedMotion()
   const previewScrollRef = React.useRef<HTMLElement | null>(null)
+  // 폰 프레임 박스 ref — BottomSheet 포탈을 이 안에 가둬 브라우저 전면 대신
+  // 프리뷰 프레임 안에서만 뜨게 한다(데모 전용, 앱 동작엔 무영향).
+  const phoneFrameRef = React.useRef<HTMLDivElement | null>(null)
   const routeKey = routeSegments.join("/")
   const routedState = React.useMemo(
     () => getRouteState(routeKey ? routeKey.split("/") : []),
@@ -1387,7 +1390,7 @@ export function DesignSystemDemo({
             className="min-h-0 overflow-y-auto bg-[var(--ds-surface-inset)] px-0 py-0 sm:px-3 sm:py-4 lg:px-6 lg:py-5"
           >
             <div className="mx-auto w-full sm:max-w-[28rem]">
-              <PreviewCanvas>
+              <PreviewCanvas frameRef={phoneFrameRef}>
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
                     key={
@@ -1572,6 +1575,7 @@ export function DesignSystemDemo({
       </div>
 
       <BottomSheet
+        container={phoneFrameRef}
         description="공통 BottomSheet는 현재 화면 맥락 위에 임시 표면으로 올라옵니다."
         onOpenChange={setIsBottomSheetOpen}
         open={isBottomSheetOpen}
@@ -1606,7 +1610,7 @@ function TopBar({ activeComponent }: { activeComponent: ComponentItem }) {
       <div className="flex min-w-0 items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-label font-strong text-text-secondary uppercase">
-            Toda Mobile UI
+            Mobile UI
           </p>
           <h1 className="truncate text-lg font-semibold">
             {activeComponent.title}
@@ -4655,10 +4659,23 @@ function ExampleScreen({
   )
 }
 
-function PreviewCanvas({ children }: { children: React.ReactNode }) {
+function PreviewCanvas({
+  children,
+  frameRef,
+}: {
+  children: React.ReactNode
+  frameRef?: React.Ref<HTMLDivElement>
+}) {
   return (
     <div className="w-full bg-[var(--ds-surface-inset)] sm:mx-auto sm:rounded-[34px] sm:p-2 sm:shadow-[0_28px_80px_rgba(15,23,42,0.16)]">
-      <div className="relative h-[calc(100dvh-13.75rem)] min-h-[560px] overflow-hidden bg-[var(--calendar-app-bg)] sm:h-[780px] sm:max-h-[calc(100dvh-7rem)] sm:rounded-[28px] sm:ring-1 sm:ring-foreground/[0.08]">
+      {/* contain-paint: fixed 자손(BottomSheet 포탈)의 containing block 을 만들어
+       * 시트가 뷰포트가 아니라 이 프레임 기준으로 뜨게 하고 클립한다. transform 대신
+       * contain 을 쓰는 이유 — transform 은 좌표계를 새로 만들어 framer-motion 드래그
+       * 계산을 어긋나게 한다. contain 은 좌표계를 안 만들어 drag-to-dismiss 가 온전하다. */}
+      <div
+        ref={frameRef}
+        className="relative h-[calc(100dvh-13.75rem)] min-h-[560px] overflow-hidden bg-[var(--calendar-app-bg)] contain-paint sm:h-[780px] sm:max-h-[calc(100dvh-7rem)] sm:rounded-[28px] sm:ring-1 sm:ring-foreground/[0.08]"
+      >
         {children}
       </div>
     </div>
