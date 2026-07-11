@@ -2,18 +2,12 @@
 
 import { useEffect, useState } from "react"
 
-import { Button } from "@astryxdesign/core/Button"
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog"
-import { FileInput } from "@astryxdesign/core/FileInput"
-import {
-  HStack,
-  Layout,
-  LayoutContent,
-  LayoutFooter,
-  VStack,
-} from "@astryxdesign/core/Layout"
-import { Selector } from "@astryxdesign/core/Selector"
-import { Text } from "@astryxdesign/core/Text"
+import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
+import { Button } from "@workspace/ui/components/button"
+import { Field, FieldLabel } from "@workspace/ui/components/field"
+import { FileField } from "@workspace/ui/components/file-field"
+import { Select } from "@workspace/ui/components/select"
+import { Text } from "@workspace/ui/components/text"
 
 import { caseApi, trialApi } from "@/lib/api"
 import { uploadPhoto } from "@/lib/api/photo"
@@ -59,8 +53,7 @@ export function WitnessDialog({
   }, [isOpen, roomId])
 
   // 증거사진은 한 장만. 선택 즉시 프론트에서 리사이즈·압축하고 HEIC 등은 JPEG 로 변환한다.
-  const handlePhotoChange = async (f: File | File[] | null) => {
-    const picked = Array.isArray(f) ? (f[0] ?? null) : f
+  const handlePhotoChange = async (picked: File | null) => {
     if (!picked) {
       setPhoto(null)
       setPhotoError(null)
@@ -107,84 +100,68 @@ export function WitnessDialog({
     }
   }
 
+  const photoName = isProcessing
+    ? "사진을 최적화하는 중…"
+    : (photo?.name ?? null)
+
   return (
-    <Dialog
-      isOpen={isOpen}
+    <BottomSheet
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) handleClose()
       }}
-      purpose="form"
-      width={360}
+      title="고발하기"
+      description="증거사진과 함께 목격한 사건을 고발해요"
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="lg" onClick={handleClose}>
+            취소
+          </Button>
+          <Button
+            variant="primary"
+            size="lg"
+            loading={isSubmitting}
+            disabled={!canSubmit}
+            onClick={handleSubmit}
+          >
+            고발하기
+          </Button>
+        </div>
+      }
     >
-      <Layout
-        header={
-          <DialogHeader
-            title="고발하기"
-            subtitle="증거사진과 함께 목격한 사건을 고발하세요"
-            onOpenChange={(open) => {
-              if (!open) handleClose()
-            }}
-            hasDivider
+      <div className="flex flex-col gap-5 py-2">
+        <Field>
+          <FieldLabel>고발할 사건 선택</FieldLabel>
+          <Select
+            value={selectedCaseId}
+            onValueChange={setSelectedCaseId}
+            disabled={casesLoading}
+            placeholder={
+              casesLoading ? "사건 목록 불러오는 중…" : "사건을 선택하세요"
+            }
+            options={declaredCases.map((c) => ({
+              value: String(c.caseId),
+              label: c.title + " · " + c.defendant.nickname,
+            }))}
           />
-        }
-        content={
-          <LayoutContent>
-            <VStack gap={5}>
-              <Selector
-                label="고발할 사건 선택"
-                placeholder={
-                  casesLoading ? "사건 목록 불러오는 중…" : "사건을 선택하세요"
-                }
-                value={selectedCaseId}
-                onChange={setSelectedCaseId}
-                options={declaredCases.map((c) => ({
-                  value: String(c.caseId),
-                  label: c.title + " · " + c.defendant.nickname,
-                }))}
-                isDisabled={casesLoading}
-              />
+        </Field>
 
-              <VStack gap={2}>
-                <FileInput
-                  label="증거사진 (필수)"
-                  value={photo}
-                  onChange={handlePhotoChange}
-                  accept={PHOTO_ACCEPT}
-                  isDisabled={isProcessing}
-                  isRequired
-                />
-                {isProcessing && (
-                  <Text type="supporting" color="secondary">
-                    사진을 최적화하는 중…
-                  </Text>
-                )}
-                {photoError && (
-                  <Text
-                    type="supporting"
-                    style={{ color: "var(--color-text-red)" }}
-                  >
-                    {photoError}
-                  </Text>
-                )}
-              </VStack>
-            </VStack>
-          </LayoutContent>
-        }
-        footer={
-          <LayoutFooter hasDivider>
-            <HStack justify="end" gap={2}>
-              <Button label="취소" variant="ghost" onClick={handleClose} />
-              <Button
-                label="고발하기"
-                variant="primary"
-                isDisabled={!canSubmit}
-                isLoading={isSubmitting}
-                onClick={handleSubmit}
-              />
-            </HStack>
-          </LayoutFooter>
-        }
-      />
-    </Dialog>
+        <div className="flex flex-col gap-2">
+          <FileField
+            label="증거사진 (필수)"
+            accept={PHOTO_ACCEPT}
+            disabled={isProcessing}
+            fileName={photoName}
+            placeholder="사진 선택 또는 촬영"
+            onChange={handlePhotoChange}
+          />
+          {photoError ? (
+            <Text variant="label" tone="danger">
+              {photoError}
+            </Text>
+          ) : null}
+        </div>
+      </div>
+    </BottomSheet>
   )
 }

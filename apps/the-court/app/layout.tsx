@@ -2,14 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Figtree, Montserrat } from "next/font/google"
 import localFont from "next/font/local"
 
-// Astryx design system — reset → compiled component styles → Stone 테마 토큰.
-// Stone 은 프리컴파일 CSS. <Providers>/<Theme> 가 data-astryx-theme="stone" 만 붙인다.
-import "@astryxdesign/core/reset.css"
-import "@astryxdesign/core/astryx.css"
-import "@astryxdesign/theme-stone/theme.css"
-// 자체 DS(@workspace/ui) Tailwind 진입 — Astryx 를 페이지별로 걷어내는 중.
-// Astryx CSS 는 unlayered 라 Tailwind 레이어(preflight)를 이겨 기존 Astryx 화면은 보존되고,
-// DS 컴포넌트(astryx 클래스 없음)만 Tailwind 유틸을 받는다.
+// 자체 DS(@workspace/ui) Tailwind 진입. Astryx 는 완전히 제거됨.
 import "@workspace/ui/globals.css"
 import "./globals.css"
 
@@ -61,7 +54,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  // 흰 앱 프레임 상단과 맞춘 상태바 크롬 (앱 프레임 배경 = #fff).
+  // 흰 앱 프레임 상단과 맞춘 상태바 크롬. <meta name="theme-color"> 는 리터럴 색만 허용(토큰 불가).
+  // eslint-disable-next-line no-restricted-syntax -- meta theme-color 는 CSS 토큰을 쓸 수 없다
   themeColor: "#ffffff",
 }
 
@@ -70,12 +64,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // data-theme on <html> avoids a flash of the wrong color-scheme before hydration.
   return (
     <html
       lang="ko"
-      data-theme="light"
-      // `light` = @workspace/ui 토큰을 라이트로 고정(DS 기본은 :root=다크). Astryx 는 data-theme 로 별개.
+      // `light` 클래스로 @workspace/ui 토큰을 라이트에 고정(DS 기본 :root=다크). 하이드레이션 전 flash 방지.
       className={`light ${pretendard.variable} ${figtree.variable} ${montserrat.variable}`}
     >
       <body>

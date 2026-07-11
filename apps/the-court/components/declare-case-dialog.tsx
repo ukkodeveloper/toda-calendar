@@ -2,15 +2,13 @@
 
 import { useState } from "react"
 
-import { caseApi } from "@/lib/api"
+import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
+import { Button } from "@workspace/ui/components/button"
+import { Field, FieldLabel } from "@workspace/ui/components/field"
+import { Input } from "@workspace/ui/components/input"
+import { Textarea } from "@workspace/ui/components/textarea"
 
-import { Button } from "@astryxdesign/core/Button"
-import { type ISODateString } from "@astryxdesign/core/Calendar"
-import { DateInput } from "@astryxdesign/core/DateInput"
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog"
-import { HStack, Layout, LayoutFooter, VStack } from "@astryxdesign/core/Layout"
-import { TextArea } from "@astryxdesign/core/TextArea"
-import { TextInput } from "@astryxdesign/core/TextInput"
+import { caseApi } from "@/lib/api"
 
 interface Props {
   isOpen: boolean
@@ -27,16 +25,16 @@ export function DeclareCaseDialog({
 }: Props) {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
-  const [deadline, setDeadline] = useState<ISODateString | undefined>()
+  const [deadline, setDeadline] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const today = new Date().toISOString().split("T")[0] as ISODateString
-  const canSubmit = title.trim().length > 0 && deadline != null
+  const today = new Date().toISOString().split("T")[0]
+  const canSubmit = title.trim().length > 0 && deadline !== ""
 
   const reset = () => {
     setTitle("")
     setContent("")
-    setDeadline(undefined)
+    setDeadline("")
   }
 
   const handleCancel = () => {
@@ -67,68 +65,60 @@ export function DeclareCaseDialog({
   }
 
   return (
-    <Dialog
-      isOpen={isOpen}
-      onOpenChange={handleCancel}
-      purpose="form"
-      width={480}
+    <BottomSheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleCancel()
+      }}
+      title="공표하기"
+      description="어떤 결심을 걸 건가요?"
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="lg" onClick={handleCancel}>
+            취소
+          </Button>
+          <Button
+            variant="primary"
+            size="lg"
+            loading={isSubmitting}
+            disabled={!canSubmit}
+            onClick={handleSubmit}
+          >
+            공표하기
+          </Button>
+        </div>
+      }
     >
-      <Layout
-        padding={4}
-        header={
-          <DialogHeader
-            title="공표하기"
-            subtitle="어떤 결심을 걸 건가요?"
-            onOpenChange={handleCancel}
+      <div className="flex flex-col gap-4 py-2">
+        <Field>
+          <FieldLabel>제목</FieldLabel>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="야식 금지"
           />
-        }
-        content={
-          <VStack gap={4} style={{ padding: "var(--spacing-4, 16px)" }}>
-            <TextInput
-              label="제목"
-              value={title}
-              onChange={setTitle}
-              placeholder="야식 금지"
-              isRequired
-            />
-            <TextArea
-              label="내용"
-              value={content}
-              onChange={setContent}
-              placeholder="공약 세부 내용을 적어주세요 (예: 밤 9시 이후 금식)"
-              rows={3}
-              isOptional
-            />
-            <DateInput
-              label="이행 기간"
-              value={deadline}
-              onChange={setDeadline}
-              min={today}
-              isRequired
-            />
-          </VStack>
-        }
-        footer={
-          <LayoutFooter hasDivider padding={3}>
-            <HStack gap={2} justify="end">
-              <Button
-                label="취소"
-                variant="ghost"
-                size="lg"
-                onClick={handleCancel}
-              />
-              <Button
-                label="공표하기"
-                variant="primary"
-                size="lg"
-                isDisabled={!canSubmit}
-                isLoading={isSubmitting}
-                onClick={handleSubmit}
-              />
-            </HStack>
-          </LayoutFooter>
-        }
-      />
-    </Dialog>
+        </Field>
+
+        <Field>
+          <FieldLabel>내용</FieldLabel>
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="공약 세부 내용을 적어주세요 (예: 밤 9시 이후 금식)"
+            rows={3}
+          />
+        </Field>
+
+        <Field>
+          <FieldLabel>이행 기간</FieldLabel>
+          <Input
+            type="date"
+            value={deadline}
+            min={today}
+            onChange={(e) => setDeadline(e.target.value)}
+          />
+        </Field>
+      </div>
+    </BottomSheet>
   )
 }

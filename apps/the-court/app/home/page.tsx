@@ -12,17 +12,13 @@ import {
   UserGroupIcon,
 } from "@hugeicons/core-free-icons"
 
-// 다이얼로그(생성·참여)는 아직 Astryx — 이번 범위(헤더·드롭다운·방 목록)만 DS 로 교체.
-import { Button } from "@astryxdesign/core/Button"
-import { Dialog } from "@astryxdesign/core/Dialog"
-import { Heading } from "@astryxdesign/core/Heading"
-import { HStack, VStack } from "@astryxdesign/core/Layout"
-import { TextInput } from "@astryxdesign/core/TextInput"
-import { useToast } from "@astryxdesign/core/Toast"
-
 import { Badge } from "@workspace/ui/components/badge"
+import { BottomSheet } from "@workspace/ui/components/bottom-sheet"
+import { Button } from "@workspace/ui/components/button"
+import { Field, FieldLabel } from "@workspace/ui/components/field"
 import { Icon } from "@workspace/ui/components/icon"
 import { IconButton } from "@workspace/ui/components/icon-button"
+import { Input } from "@workspace/ui/components/input"
 import { ListItem } from "@workspace/ui/components/list-item"
 import {
   Menu,
@@ -33,6 +29,7 @@ import {
 } from "@workspace/ui/components/menu"
 import { PageHeader } from "@workspace/ui/components/page-header"
 import { Text } from "@workspace/ui/components/text"
+import { useToast } from "@workspace/ui/components/toast"
 
 import { loadAuth, type AuthUser } from "@/lib/auth"
 import { roomApi } from "@/lib/api"
@@ -54,14 +51,14 @@ export default function HomePage() {
     if (!code) {
       toast({
         body: "초대코드는 방을 만든 사람이 생성 직후 공유해요",
-        autoHideDuration: 3000,
+        duration: 3000,
       })
       return
     }
     await navigator.clipboard.writeText(code)
     toast({
       body: `"${roomTitle}" 초대코드 ${code} 복사됨`,
-      autoHideDuration: 3000,
+      duration: 3000,
     })
   }
 
@@ -78,8 +75,17 @@ export default function HomePage() {
       router.replace("/onboarding")
       return
     }
-    setUser(auth)
-    reloadRooms()
+    let active = true
+    // setState 를 await 뒤로 미뤄 effect 동기 setState(cascading render)를 피한다.
+    void (async () => {
+      const list = await roomApi.list().catch(() => null)
+      if (!active) return
+      setUser(auth)
+      setRooms(list ?? [])
+    })()
+    return () => {
+      active = false
+    }
   }, [router])
 
   if (!user) return null
@@ -238,40 +244,46 @@ function CreateRoomDialog({
       onOpenChange(false)
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : "방 생성에 실패했어요"
-      toast({ body: msg, autoHideDuration: 3000 })
+      toast({ body: msg, duration: 3000 })
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} width={380}>
-      <VStack style={{ gap: 16, padding: 20 }}>
-        <Heading level={4}>채팅방 생성하기</Heading>
-        <TextInput
-          label="방 제목"
-          value={title}
-          onChange={setTitle}
-          placeholder="예: 우리 다이어트 모임"
-        />
-        <HStack justify="end" style={{ gap: 8 }}>
-          <Button
-            variant="ghost"
-            size="lg"
-            label="취소"
-            onClick={() => onOpenChange(false)}
-          />
+    <BottomSheet
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title="채팅방 생성하기"
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="lg" onClick={() => onOpenChange(false)}>
+            취소
+          </Button>
           <Button
             variant="primary"
             size="lg"
-            label="생성"
-            isLoading={busy}
-            isDisabled={!title.trim()}
+            loading={busy}
+            disabled={!title.trim()}
             onClick={submit}
+          >
+            생성
+          </Button>
+        </div>
+      }
+    >
+      <div className="py-2">
+        <Field>
+          <FieldLabel>방 제목</FieldLabel>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="예: 우리 다이어트 모임"
+            autoFocus
           />
-        </HStack>
-      </VStack>
-    </Dialog>
+        </Field>
+      </div>
+    </BottomSheet>
   )
 }
 
@@ -303,39 +315,45 @@ function JoinRoomDialog({
           : e instanceof ApiError
             ? e.message
             : "참여에 실패했어요"
-      toast({ body: msg, autoHideDuration: 3000 })
+      toast({ body: msg, duration: 3000 })
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} width={380}>
-      <VStack style={{ gap: 16, padding: 20 }}>
-        <Heading level={4}>채팅방 참여하기</Heading>
-        <TextInput
-          label="참여코드"
-          value={code}
-          onChange={(v) => setCode(v.toUpperCase())}
-          placeholder="예: QWERTZ"
-        />
-        <HStack justify="end" style={{ gap: 8 }}>
-          <Button
-            variant="ghost"
-            size="lg"
-            label="취소"
-            onClick={() => onOpenChange(false)}
-          />
+    <BottomSheet
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title="채팅방 참여하기"
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="lg" onClick={() => onOpenChange(false)}>
+            취소
+          </Button>
           <Button
             variant="primary"
             size="lg"
-            label="참여"
-            isLoading={busy}
-            isDisabled={!code.trim()}
+            loading={busy}
+            disabled={!code.trim()}
             onClick={submit}
+          >
+            참여
+          </Button>
+        </div>
+      }
+    >
+      <div className="py-2">
+        <Field>
+          <FieldLabel>참여코드</FieldLabel>
+          <Input
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="예: QWERTZ"
+            autoFocus
           />
-        </HStack>
-      </VStack>
-    </Dialog>
+        </Field>
+      </div>
+    </BottomSheet>
   )
 }

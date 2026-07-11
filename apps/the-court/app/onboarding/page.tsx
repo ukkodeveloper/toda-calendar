@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { Text } from "@astryxdesign/core/Text"
-import { VStack } from "@astryxdesign/core/Layout"
-
 import { Button } from "@workspace/ui/components/button"
 import { ColorAvatar } from "@workspace/ui/components/color-avatar"
+import { Text } from "@workspace/ui/components/text"
 
 import { isLoggedIn, login } from "@/lib/auth"
 import { userApi } from "@/lib/api/user"
@@ -42,32 +40,21 @@ export default function OnboardingPage() {
   if (!identity) return null
 
   return (
-    <VStack
-      align="center"
-      justify="between"
-      minHeight="100dvh"
-      style={{ maxWidth: 420, margin: "0 auto", padding: "28px 24px 40px" }}
-    >
+    <div className="mx-auto flex min-h-dvh w-full max-w-[420px] flex-col items-center justify-between px-6 pt-7 pb-10">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/hyeonhaengbeom_logo.png"
         alt="현행범"
         height={32}
-        style={{ height: 32, width: "auto", display: "block" }}
+        className="block h-8 w-auto"
       />
 
-      <VStack align="center" justify="center" style={{ gap: 24, flex: 1 }}>
+      <div className="flex flex-1 flex-col items-center justify-center gap-6">
         <button
           type="button"
           onClick={reroll}
           aria-label="닉네임 다시 뽑기"
-          style={{
-            border: "none",
-            padding: 0,
-            background: "none",
-            lineHeight: 0,
-            cursor: "pointer",
-          }}
+          className="cursor-pointer border-0 bg-none p-0 leading-none"
         >
           <ColorAvatar
             seed={identity.nickname}
@@ -77,21 +64,14 @@ export default function OnboardingPage() {
           />
         </button>
 
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            lineHeight: 1.2,
-            textAlign: "center",
-          }}
-        >
+        <Text as="h1" variant="title" align="center">
           {identity.nickname}
         </Text>
-      </VStack>
+      </div>
 
       <Button variant="primary" size="xl" onClick={start} className="w-full">
         현행범 시작하기
       </Button>
-    </VStack>
+    </div>
   )
 }

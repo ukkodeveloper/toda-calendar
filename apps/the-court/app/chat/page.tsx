@@ -3,25 +3,26 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 
-import { Icon } from "@astryxdesign/core/Icon"
-import { IconButton } from "@astryxdesign/core/IconButton"
-import { HStack, VStack } from "@astryxdesign/core/Layout"
-import { Text } from "@astryxdesign/core/Text"
-
-import { ColorAvatar } from "@workspace/ui/components/color-avatar"
 import {
-  ChatComposer,
-  ChatLayout,
-  ChatMessage,
-  ChatMessageBubble,
-  ChatMessageList,
-  ChatMessageMetadata,
-  ChatSystemMessage,
-} from "@astryxdesign/core/Chat"
+  ArrowRight01Icon,
+  JusticeScale01Icon,
+  LegalHammerIcon,
+  Megaphone01Icon,
+  Menu01Icon,
+  ViewIcon,
+} from "@hugeicons/core-free-icons"
+import type { IconSvgElement } from "@hugeicons/react"
+
+import { ActionCard } from "@workspace/ui/components/action-card"
+import { ChatComposer } from "@workspace/ui/components/chat-composer"
+import { ChatMessage } from "@workspace/ui/components/chat-message"
+import { ChatSystemMessage } from "@workspace/ui/components/chat-system-message"
+import { ColorAvatar } from "@workspace/ui/components/color-avatar"
+import { Icon } from "@workspace/ui/components/icon"
+import { IconButton } from "@workspace/ui/components/icon-button"
 
 import { AppHeader } from "@/components/app-header"
 import { type CaseItem, CaseListDrawer } from "@/components/case-list-drawer"
-import { DeclareIcon, WitnessIcon } from "@/components/chat-action-icons"
 import { DeclareCaseDialog } from "@/components/declare-case-dialog"
 import { TrialSheet } from "@/components/trial-sheet"
 import { WitnessDialog } from "@/components/witness-dialog"
@@ -113,16 +114,26 @@ function messageToItem(
 
 const EVENT_META: Record<
   EventCard["eventType"],
-  { icon: string; subtitle: string }
+  {
+    icon: IconSvgElement
+    subtitle: string
+    tone: "brand" | "danger" | "neutral"
+  }
 > = {
-  DECLARED: { icon: "📋", subtitle: "사건 공표됨 · 클릭해서 확인" },
+  DECLARED: {
+    icon: Megaphone01Icon,
+    subtitle: "사건이 공표됐어요 · 눌러서 확인해요",
+    tone: "brand",
+  },
   TRIAL_STARTED: {
-    icon: "⚖️",
-    subtitle: "재판이 시작되었습니다 · 클릭해서 입장",
+    icon: JusticeScale01Icon,
+    subtitle: "재판이 시작됐어요 · 눌러서 입장해요",
+    tone: "danger",
   },
   TRIAL_ENDED: {
-    icon: "🔨",
-    subtitle: "재판이 종료되었습니다 · 클릭해서 결과 보기",
+    icon: LegalHammerIcon,
+    subtitle: "재판이 끝났어요 · 눌러서 결과를 봐요",
+    tone: "neutral",
   },
 }
 
@@ -135,65 +146,21 @@ function ChatEventCard({
   onClickDeclared: (caseId: number) => void
   onClickTrial: (caseId: number) => void
 }) {
-  const { icon, subtitle } = EVENT_META[card.eventType]
-
-  const handleClick = () => {
-    if (card.eventType === "DECLARED") {
-      onClickDeclared(card.caseId)
-    } else {
-      onClickTrial(card.caseId)
-    }
-  }
+  const { icon, subtitle, tone } = EVENT_META[card.eventType]
 
   return (
-    <button
-      onClick={handleClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        width: "100%",
-        padding: "12px 14px",
-        borderRadius: "var(--radius-container, 12px)",
-        background: "var(--color-background-surface, rgba(0,0,0,0.04))",
-        border: "1px solid var(--color-border, rgba(0,0,0,0.08))",
-        cursor: "pointer",
-        textAlign: "left",
-      }}
-    >
-      <div
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: "var(--radius-element, 8px)",
-          background: "var(--color-background-body, #fff)",
-          border: "1px solid var(--color-border, rgba(0,0,0,0.08))",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-          fontSize: 20,
-        }}
-      >
-        {icon}
-      </div>
-      <VStack style={{ flex: 1, gap: 2, minWidth: 0 }}>
-        <Text
-          weight="semibold"
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {card.caseTitle}
-        </Text>
-        <Text color="secondary" size="sm">
-          {subtitle}
-        </Text>
-      </VStack>
-      <Icon icon="chevronRight" size="sm" />
-    </button>
+    <ActionCard
+      leading={<Icon icon={icon} />}
+      leadingTone={tone}
+      title={card.caseTitle}
+      subtitle={subtitle}
+      trailing={<Icon icon={ArrowRight01Icon} size="sm" />}
+      onClick={() =>
+        card.eventType === "DECLARED"
+          ? onClickDeclared(card.caseId)
+          : onClickTrial(card.caseId)
+      }
+    />
   )
 }
 
@@ -211,6 +178,8 @@ function ChatPageInner() {
   const [isCaseListOpen, setIsCaseListOpen] = useState(false)
   const [trialCase, setTrialCase] = useState<OpenTrial | null>(null)
   const [highlightCaseId, setHighlightCaseId] = useState<number | undefined>()
+
+  const streamRef = useRef<HTMLDivElement>(null)
 
   // 중복 방지(WS echo·재연결 백필) + 백필 커서(마지막 messageId).
   const seenIds = useRef<Set<string>>(new Set())
@@ -238,12 +207,26 @@ function ChatPageInner() {
     if (!roomId || Number.isNaN(roomId)) return
     seenIds.current = new Set()
     lastMessageId.current = 0
-    setItems([])
+
+    let active = true
+    // 리셋 setState 를 마이크로태스크로 미뤄 effect 동기 setState(cascading render)를 피한다.
+    void Promise.resolve().then(() => {
+      if (active) setItems([])
+    })
     chatApi
       .messages(roomId)
       .then(appendMessages)
       .catch(() => {})
+    return () => {
+      active = false
+    }
   }, [roomId, appendMessages])
+
+  // 새 메시지가 들어오면 스트림 하단으로.
+  useEffect(() => {
+    const el = streamRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [items])
 
   // 실시간 스트림.
   const { sendChat } = useRoomStream(
@@ -361,111 +344,116 @@ function ChatPageInner() {
   }
 
   return (
-    <VStack
-      height="100dvh"
-      style={{
-        maxWidth: 480,
-        margin: "0 auto",
-        width: "100%",
-        overflow: "hidden",
-      }}
-    >
+    <div className="mx-auto flex h-dvh w-full max-w-[480px] flex-col overflow-hidden bg-surface-canvas">
       <AppHeader
         endContent={
           <IconButton
-            label="메뉴 열기"
-            variant="ghost"
-            icon={<Icon icon="menu" size="lg" />}
+            variant="surface"
+            aria-label="사건 목록 열기"
             onClick={() => setIsCaseListOpen(true)}
-          />
+          >
+            <Icon icon={Menu01Icon} />
+          </IconButton>
         }
       />
 
-      <ChatLayout
-        composer={
-          <ChatComposer
-            value={value}
-            onChange={setValue}
-            onSubmit={handleSubmit}
-            placeholder="메시지를 입력하세요"
-            headerActions={
-              <HStack align="center" gap={2}>
-                <IconButton
-                  label="공표하기 (사건 등록)"
-                  variant="ghost"
-                  size="sm"
-                  icon={<Icon icon={DeclareIcon} size="md" />}
-                  onClick={() => setIsDeclareOpen(true)}
-                />
-                <IconButton
-                  label="고발하기 (목격 등록)"
-                  variant="ghost"
-                  size="sm"
-                  icon={<Icon icon={WitnessIcon} size="md" />}
-                  onClick={() => setIsWitnessOpen(true)}
-                />
-              </HStack>
-            }
-          />
-        }
+      {/* 메시지 스트림 */}
+      <div
+        ref={streamRef}
+        className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-3"
       >
-        <ChatMessageList>
-          <ChatSystemMessage variant="divider">오늘</ChatSystemMessage>
-          {items.map((item, i) => {
-            // ── 시스템 알림
-            if (item.kind === "system") {
-              return (
-                <ChatSystemMessage key={item.id} variant="default">
-                  {item.text}
-                </ChatSystemMessage>
-              )
-            }
+        <ChatSystemMessage variant="divider">오늘</ChatSystemMessage>
 
-            // ── 이벤트 카드
-            if (item.kind === "event") {
-              return (
-                <div key={item.id} style={{ padding: "4px 16px" }}>
-                  <ChatEventCard
-                    card={item}
-                    onClickDeclared={handleEventDeclared}
-                    onClickTrial={openTrialByCase}
-                  />
-                </div>
-              )
-            }
-
-            // ── 일반 채팅 버블
-            const next = items[i + 1]
-            const nextChat = next?.kind === "chat" ? next : null
-            const isLastInGroup =
-              !nextChat ||
-              nextChat.sender !== item.sender ||
-              nextChat.name !== item.name ||
-              nextChat.time !== item.time
-
+        {items.map((item, i) => {
+          // ── 시스템 알림
+          if (item.kind === "system") {
             return (
-              <ChatMessage
-                key={item.id}
-                sender={item.sender}
-                name={item.name}
-                avatar={
-                  item.sender === "assistant" ? (
-                    <ColorAvatar
-                      seed={item.name ?? ""}
-                      color={item.color}
-                      size="sm"
-                      animated={false}
-                    />
-                  ) : undefined
-                }
-              >
-                <ChatMessageBubble>{item.text}</ChatMessageBubble>
-                {isLastInGroup && <ChatMessageMetadata timestamp={item.time} />}
-              </ChatMessage>
+              <ChatSystemMessage key={item.id} variant="default">
+                {item.text}
+              </ChatSystemMessage>
             )
-          })}
-        </ChatMessageList>
-      </ChatLayout>
+          }
+
+          // ── 이벤트 카드
+          if (item.kind === "event") {
+            return (
+              <div key={item.id} className="py-1">
+                <ChatEventCard
+                  card={item}
+                  onClickDeclared={handleEventDeclared}
+                  onClickTrial={openTrialByCase}
+                />
+              </div>
+            )
+          }
+
+          // ── 일반 채팅 버블 (그룹핑: 첫 발화 이름·마지막 발화 아바타/시간)
+          const isOutgoing = item.sender === "user"
+          const prev = items[i - 1]
+          const next = items[i + 1]
+          const prevChat = prev?.kind === "chat" ? prev : null
+          const nextChat = next?.kind === "chat" ? next : null
+
+          const isFirstInGroup =
+            !prevChat ||
+            prevChat.sender !== item.sender ||
+            prevChat.name !== item.name
+          const isLastInGroup =
+            !nextChat ||
+            nextChat.sender !== item.sender ||
+            nextChat.name !== item.name ||
+            nextChat.time !== item.time
+
+          return (
+            <ChatMessage
+              key={item.id}
+              side={isOutgoing ? "outgoing" : "incoming"}
+              name={!isOutgoing && isFirstInGroup ? item.name : undefined}
+              avatar={
+                !isOutgoing && isLastInGroup ? (
+                  <ColorAvatar
+                    seed={item.name ?? ""}
+                    color={item.color}
+                    size="sm"
+                    animated={false}
+                  />
+                ) : undefined
+              }
+              time={isLastInGroup ? item.time : undefined}
+            >
+              {item.text}
+            </ChatMessage>
+          )
+        })}
+      </div>
+
+      {/* 컴포저 */}
+      <ChatComposer
+        value={value}
+        onChange={setValue}
+        onSubmit={handleSubmit}
+        placeholder="메시지를 입력하세요"
+        actions={
+          <>
+            <IconButton
+              variant="ghost"
+              size="sm"
+              aria-label="공표하기 (사건 등록)"
+              onClick={() => setIsDeclareOpen(true)}
+            >
+              <Icon icon={Megaphone01Icon} />
+            </IconButton>
+            <IconButton
+              variant="ghost"
+              size="sm"
+              aria-label="고발하기 (목격 등록)"
+              onClick={() => setIsWitnessOpen(true)}
+            >
+              <Icon icon={ViewIcon} />
+            </IconButton>
+          </>
+        }
+      />
 
       <WitnessDialog
         isOpen={isWitnessOpen}
@@ -504,7 +492,7 @@ function ChatPageInner() {
           defendantUuid={trialCase.defendantUuid}
         />
       ) : null}
-    </VStack>
+    </div>
   )
 }
 
