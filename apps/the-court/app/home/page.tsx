@@ -186,35 +186,38 @@ export default function HomePage() {
               <ListItem
                 density="regular"
                 divider={false}
-                title={room.title}
-                subtitle="참여 중"
+                title={
+                  // 제목 한 단 키움: text-body(15) → text-title(18). 좌측 상단 고정.
+                  <Text as="span" variant="title">
+                    {room.title}
+                  </Text>
+                }
+                subtitle={
+                  // 제목 바로 아래 참여자 아바타 줄(왼쪽 정렬). "참여 중" 텍스트를 대체.
+                  <AvatarStack
+                    items={room.members.map((mem) => ({
+                      seed: mem.nickname,
+                      color: mem.color,
+                    }))}
+                    total={room.participantCount}
+                    max={3}
+                    size="xs"
+                    separatorClassName="ring-surface-raised group-hover:ring-surface-hover"
+                  />
+                }
                 trailing={
-                  // 세로 컬럼: 위 공유 버튼 · 아래 아바타 스택(우측 정렬).
-                  // 제목은 title 슬롯에 좌측 고정, 아바타 뭉치는 카드 우하단에 앉는다.
-                  <div className="flex flex-col items-end gap-2">
-                    <IconButton
-                      variant="ghost"
-                      size="sm"
-                      aria-label="초대코드 공유"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        copyCode(undefined, room.title)
-                      }}
-                    >
-                      <Icon icon={Share08Icon} size="sm" />
-                    </IconButton>
-                    <AvatarStack
-                      items={room.members.map((mem) => ({
-                        seed: mem.nickname,
-                        color: mem.color,
-                      }))}
-                      total={room.participantCount}
-                      max={3}
-                      size="xxs"
-                      separatorClassName="ring-surface-raised group-hover:ring-surface-hover"
-                    />
-                  </div>
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    aria-label="초대코드 공유"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      copyCode(undefined, room.title)
+                    }}
+                  >
+                    <Icon icon={Share08Icon} size="sm" />
+                  </IconButton>
                 }
               />
             </Link>
