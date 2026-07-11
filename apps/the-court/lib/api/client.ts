@@ -1,10 +1,23 @@
 // 실 백엔드(the-court-api · Hono REST) fetch 래퍼.
 // base = NEXT_PUBLIC_API_URL, 모든 요청에 X-User-Uuid(auth) 자동 첨부.
 // 에러는 백엔드 표준 응답 { error: { code, message, details? } } 로 파싱해 ApiError 로 표준화.
-import { loadAuth } from "@/lib/auth"
+import { clearAuth, loadAuth } from "@/lib/auth"
 
 // 절대 URL 로 직접 호출(CORS). rewrite 프록시 제거.
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+
+/**
+ * 자가치유 — uuid 를 보냈는데 401 이면 신원이 무효(예: DB 리셋으로 stale uuid).
+ * 저장된 auth 를 비우고 온보딩으로 하드 리다이렉트해 새 계정을 발급받게 한다.
+ * (온보딩 콜은 uuid 를 안 보내므로 여기 안 걸리고, 리다이렉트 루프도 없다.)
+ */
+function healStaleIdentity(status: number, sentUuid: string | null): void {
+  if (status !== 401 || !sentUuid || typeof window === "undefined") return
+  clearAuth()
+  if (window.location.pathname !== "/onboarding") {
+    window.location.href = "/onboarding"
+  }
+}
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown
@@ -84,7 +97,10 @@ async function request<T>(
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
 
-  if (!res.ok) throw await toApiError(res)
+  if (!res.ok) {
+    healStaleIdentity(res.status, uuid)
+    throw await toApiError(res)
+  }
 
   const text = await res.text()
   return text ? (JSON.parse(text) as T) : (undefined as T)
@@ -102,7 +118,10 @@ async function upload<T>(path: string, file: File): Promise<T> {
     body: formData,
   })
 
-  if (!res.ok) throw await toApiError(res)
+  if (!res.ok) {
+    healStaleIdentity(res.status, uuid)
+    throw await toApiError(res)
+  }
   return res.json() as Promise<T>
 }
 

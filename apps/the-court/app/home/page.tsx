@@ -55,11 +55,20 @@ export default function HomePage() {
       })
       return
     }
-    await navigator.clipboard.writeText(code)
-    toast({
-      body: `"${roomTitle}" 초대코드 ${code} 복사됨`,
-      duration: 3000,
-    })
+    // 자동복사는 사용자 제스처 안에서만 허용된다. 방 생성 직후(await·시트 닫힘 뒤)엔
+    // 제스처가 만료돼 NotAllowedError 가 날 수 있으니, 막히면 코드를 보여줘 수동복사하게 한다.
+    try {
+      await navigator.clipboard.writeText(code)
+      toast({
+        body: `"${roomTitle}" 초대코드 ${code} 복사됨`,
+        duration: 4000,
+      })
+    } catch {
+      toast({
+        body: `초대코드 ${code} · 길게 눌러 복사하세요`,
+        duration: 6000,
+      })
+    }
   }
 
   function reloadRooms() {
