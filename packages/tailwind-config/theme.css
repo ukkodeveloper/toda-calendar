@@ -85,16 +85,34 @@
   --color-border-brand: var(--border-brand);
   --color-surface-canvas: var(--surface-canvas);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-surface-glass: var(--surface-glass);
   --color-surface-hover: var(--surface-hover);
+  --color-surface-inset: var(--surface-inset);
+  --color-backdrop-overlay: var(--backdrop-overlay);
+  --color-ring-focus: var(--ring-focus);
+
+  /* elevation 그림자 유틸 (shadow-elevation-*) — 시트·팝오버 깊이.
+   * 인라인 shadow-[...] 매직넘버 대신 semantic 그림자 토큰을 참조한다(규칙2). */
+  --shadow-elevation-1: var(--elevation-1);
+  --shadow-elevation-2: var(--elevation-2);
+  --shadow-elevation-3: var(--elevation-3);
 
   --radius-micro: var(--p-radius-2);
   --radius-control: var(--p-radius-6);
   --radius-card: var(--p-radius-8);
   --radius-panel: var(--p-radius-12);
+  --radius-hero: var(--p-radius-22);
   --radius-pill: var(--p-radius-full);
 
   /* 타이포 스케일을 text-* 유틸리티로 (size/line-height/tracking 묶음).
    * 이름이 text-primary 같은 색 유틸과 겹치지 않게 계층 이름을 쓴다. */
+  --text-title: var(--type-title-size);
+  --text-title--line-height: var(--type-title-lh);
+  --text-title--letter-spacing: var(--type-title-tracking);
+  --text-body: var(--type-body-size);
+  --text-body--line-height: var(--type-body-lh);
+  --text-body--letter-spacing: var(--type-body-tracking);
   --text-caption: var(--type-caption-size);
   --text-caption--line-height: var(--type-caption-lh);
   --text-caption--letter-spacing: var(--type-caption-tracking);
