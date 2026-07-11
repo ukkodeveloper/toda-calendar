@@ -88,6 +88,7 @@ model Member {
   title           Title    @default(CITIZEN)
   convictionCount Int      @default(0)
   joinedAt        DateTime @default(now())
+  lastReadAt      DateTime? // 이 유저가 이 방을 마지막으로 읽은 시각. null = 가입만·미열람
 
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userUuid], references: [uuid])
