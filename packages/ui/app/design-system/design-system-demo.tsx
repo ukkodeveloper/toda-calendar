@@ -647,9 +647,10 @@ const surfacePaddings = ["sm", "md", "lg"] as const
 const calendarDensities = ["compact", "comfortable", "spacious"] as const
 const previewStyles = ["채움", "선", "줄"] as const
 const sheetStages: Array<{ value: SheetStage; label: string }> = [
-  { value: "compact", label: "컴팩트" },
-  { value: "medium", label: "중간" },
-  { value: "expanded", label: "확장" },
+  { value: "closed", label: "닫힘" },
+  { value: "peek", label: "핸들만" },
+  { value: "half", label: "절반" },
+  { value: "tall", label: "크게" },
 ]
 const segmentOptions: Array<
   SegmentedControlOption<"first" | "second" | "third">
@@ -1219,6 +1220,9 @@ export function DesignSystemDemo({
   const router = useRouter()
   const reducedMotion = useReducedMotion()
   const previewScrollRef = React.useRef<HTMLElement | null>(null)
+  // 폰 프레임 박스 ref — BottomSheet 포탈을 이 안에 가둬 브라우저 전면 대신
+  // 프리뷰 프레임 안에서만 뜨게 한다(데모 전용, 앱 동작엔 무영향).
+  const phoneFrameRef = React.useRef<HTMLDivElement | null>(null)
   const routeKey = routeSegments.join("/")
   const routedState = React.useMemo(
     () => getRouteState(routeKey ? routeKey.split("/") : []),
@@ -1295,7 +1299,8 @@ export function DesignSystemDemo({
     React.useState<CalendarDensity>("comfortable")
   const [activePreviewStyle, setActivePreviewStyle] =
     React.useState<(typeof previewStyles)[number]>("채움")
-  const [activeStage, setActiveStage] = React.useState<SheetStage>("compact")
+  const [activeStage, setActiveStage] = React.useState<SheetStage>("half")
+  const [sheetDismissible, setSheetDismissible] = React.useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = React.useState(false)
   const [selectedOptions, setSelectedOptions] = React.useState({
     alpha: true,
@@ -1385,7 +1390,7 @@ export function DesignSystemDemo({
             className="min-h-0 overflow-y-auto bg-[var(--ds-surface-inset)] px-0 py-0 sm:px-3 sm:py-4 lg:px-6 lg:py-5"
           >
             <div className="mx-auto w-full sm:max-w-[28rem]">
-              <PreviewCanvas>
+              <PreviewCanvas frameRef={phoneFrameRef}>
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
                     key={
@@ -1411,6 +1416,8 @@ export function DesignSystemDemo({
                       activeComponentId={activeComponentId}
                       activePreviewStyle={activePreviewStyle}
                       activeStage={activeStage}
+                      setActiveStage={setActiveStage}
+                      sheetDismissible={sheetDismissible}
                       actionGridColumn={actionGridColumn}
                       animatedNumberSample={animatedNumberSample}
                       appBarAlign={appBarAlign}
@@ -1511,6 +1518,8 @@ export function DesignSystemDemo({
             setActionGridColumn={setActionGridColumn}
             setActivePreviewStyle={setActivePreviewStyle}
             setActiveStage={setActiveStage}
+            sheetDismissible={sheetDismissible}
+            setSheetDismissible={setSheetDismissible}
             setAnimatedNumberSample={setAnimatedNumberSample}
             setAppBarAlign={setAppBarAlign}
             setAppBarSize={setAppBarSize}
@@ -1566,6 +1575,7 @@ export function DesignSystemDemo({
       </div>
 
       <BottomSheet
+        container={phoneFrameRef}
         description="공통 BottomSheet는 현재 화면 맥락 위에 임시 표면으로 올라옵니다."
         onOpenChange={setIsBottomSheetOpen}
         open={isBottomSheetOpen}
@@ -1600,7 +1610,7 @@ function TopBar({ activeComponent }: { activeComponent: ComponentItem }) {
       <div className="flex min-w-0 items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-label font-strong text-text-secondary uppercase">
-            Toda Mobile UI
+            Mobile UI
           </p>
           <h1 className="truncate text-lg font-semibold">
             {activeComponent.title}
@@ -1914,27 +1924,16 @@ function MobileComponentNav({
   return (
     <nav className="border-b border-foreground/[0.08] bg-[var(--surface-panel)] px-3 py-3 backdrop-blur-2xl lg:hidden">
       <div className="mx-auto max-w-[28rem] space-y-3">
-        <div className="grid grid-cols-4 gap-1 rounded-[18px] bg-foreground/[0.045] p-1">
-          {designNavSections.map((section) => {
-            const selected = activeSection === section.id
-
-            return (
-              <button
-                key={section.id}
-                type="button"
-                className={cn(
-                  "min-h-10 min-w-0 rounded-[14px] px-1.5 text-center text-[0.86rem] font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-accent)]/35",
-                  selected
-                    ? "bg-background text-foreground shadow-[var(--ds-elevation-1)]"
-                    : "text-foreground/48"
-                )}
-                onClick={() => onSelectSection(section.id)}
-              >
-                <span className="block truncate">{section.mobileLabel}</span>
-              </button>
-            )
-          })}
-        </div>
+        <SegmentedControl
+          ariaLabel="디자인 섹션"
+          size="sm"
+          options={designNavSections.map((section) => ({
+            value: section.id,
+            label: section.mobileLabel,
+          }))}
+          value={activeSection}
+          onValueChange={onSelectSection}
+        />
 
         <div className="rounded-[22px] bg-background/64 p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
           <div className="mb-2 flex items-center justify-between gap-3">
@@ -2002,6 +2001,8 @@ function PreviewStage(props: {
   activeComponentId: ComponentId
   activePreviewStyle: string
   activeStage: SheetStage
+  setActiveStage: (value: SheetStage) => void
+  sheetDismissible: boolean
   actionGridColumn: ActionGridColumns
   animatedNumberSample: AnimatedNumberSample
   appBarAlign: AppBarAlign
@@ -2760,7 +2761,8 @@ function PreviewStage(props: {
         {activeComponentId === "three-stage-sheet" ? (
           <ThreeStageSheetPreview
             activeStage={props.activeStage}
-            className="rounded-[28px]"
+            dismissible={props.sheetDismissible}
+            onStageChange={props.setActiveStage}
           />
         ) : null}
 
@@ -2817,6 +2819,8 @@ function ControlsPanel(props: {
   setActionGridColumn: (value: ActionGridColumns) => void
   setActivePreviewStyle: (value: (typeof previewStyles)[number]) => void
   setActiveStage: (value: SheetStage) => void
+  sheetDismissible: boolean
+  setSheetDismissible: (value: boolean) => void
   setAnimatedNumberSample: (value: AnimatedNumberSample) => void
   setAppBarAlign: (value: AppBarAlign) => void
   setAppBarSize: (value: AppBarSize) => void
@@ -3267,12 +3271,19 @@ function ControlsPanel(props: {
         ) : null}
 
         {props.activeComponentId === "three-stage-sheet" ? (
-          <ControlOptions
-            label="Stage"
-            options={sheetStages}
-            value={props.activeStage}
-            onChange={props.setActiveStage}
-          />
+          <>
+            <ControlOptions
+              label="Stage"
+              options={sheetStages}
+              value={props.activeStage}
+              onChange={props.setActiveStage}
+            />
+            <ToggleControl
+              checked={props.sheetDismissible}
+              label="Dismissible"
+              onChange={props.setSheetDismissible}
+            />
+          </>
         ) : null}
 
         {props.activeComponentId === "example-pages" ? (
@@ -4637,10 +4648,23 @@ function ExampleScreen({
   )
 }
 
-function PreviewCanvas({ children }: { children: React.ReactNode }) {
+function PreviewCanvas({
+  children,
+  frameRef,
+}: {
+  children: React.ReactNode
+  frameRef?: React.Ref<HTMLDivElement>
+}) {
   return (
     <div className="w-full bg-[var(--ds-surface-inset)] sm:mx-auto sm:rounded-[34px] sm:p-2 sm:shadow-[0_28px_80px_rgba(15,23,42,0.16)]">
-      <div className="relative h-[calc(100dvh-13.75rem)] min-h-[560px] overflow-hidden bg-[var(--calendar-app-bg)] sm:h-[780px] sm:max-h-[calc(100dvh-7rem)] sm:rounded-[28px] sm:ring-1 sm:ring-foreground/[0.08]">
+      {/* contain-paint: fixed 자손(BottomSheet 포탈)의 containing block 을 만들어
+       * 시트가 뷰포트가 아니라 이 프레임 기준으로 뜨게 하고 클립한다. transform 대신
+       * contain 을 쓰는 이유 — transform 은 좌표계를 새로 만들어 framer-motion 드래그
+       * 계산을 어긋나게 한다. contain 은 좌표계를 안 만들어 drag-to-dismiss 가 온전하다. */}
+      <div
+        ref={frameRef}
+        className="relative h-[calc(100dvh-13.75rem)] min-h-[560px] overflow-hidden bg-[var(--calendar-app-bg)] contain-paint sm:h-[780px] sm:max-h-[calc(100dvh-7rem)] sm:rounded-[28px] sm:ring-1 sm:ring-foreground/[0.08]"
+      >
         {children}
       </div>
     </div>
@@ -4820,49 +4844,21 @@ function ControlOptions<T extends string>({
   options: Array<{ label: string; value: T }>
   value: T
 }) {
-  const groupId = React.useId()
-  const reducedMotion = useReducedMotion()
-
+  // 세로 단일선택 컨트롤 = DS SegmentedControl(vertical) 로 dogfood.
+  // 슬라이딩 인디케이터·roving tabindex·a11y 를 손으로 재구현하지 않는다.
   return (
     <div>
       <p className="mb-2 text-caption font-strong text-text-secondary">
         {label}
       </p>
-      <LayoutGroup id={groupId}>
-        <div className="grid gap-1 rounded-panel bg-fill-neutral p-1">
-          {options.map((option) => {
-            const selected = value === option.value
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                className={cn(
-                  "relative min-h-11 rounded-control px-3 text-caption font-emphasis transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-surface-canvas",
-                  selected
-                    ? "text-text-primary"
-                    : "text-text-tertiary hover:text-text-secondary"
-                )}
-                onClick={() => onChange(option.value)}
-              >
-                {selected ? (
-                  <motion.span
-                    layoutId="control-option-selection"
-                    aria-hidden="true"
-                    className="absolute inset-0 rounded-control bg-surface-raised shadow-elevation-2"
-                    transition={
-                      reducedMotion
-                        ? { duration: motionTokens.duration.instant }
-                        : motionTokens.intent.selectionFlow
-                    }
-                  />
-                ) : null}
-                <span className="relative z-10">{option.label}</span>
-              </button>
-            )
-          })}
-        </div>
-      </LayoutGroup>
+      <SegmentedControl
+        ariaLabel={label}
+        size="sm"
+        orientation="vertical"
+        options={options}
+        value={value}
+        onValueChange={onChange}
+      />
     </div>
   )
 }

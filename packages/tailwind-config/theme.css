@@ -128,3 +128,10 @@
   --font-weight-emphasis: var(--font-weight-emphasis);
   --font-weight-strong: var(--font-weight-strong);
 }
+
+/* safe-area 유틸 — 하단 안전영역(홈 인디케이터) 회피.
+ * 최소 space-4(1rem) 를 보장하고, 인셋이 그보다 크면 인셋까지 키운다.
+ * 시트·FAB·바텀바 등 화면 하단에 닿는 표면이 인라인 env() 없이 이걸 쓴다(P0.5 최초 도입). */
+@utility pb-safe {
+  padding-bottom: max(var(--p-space-4), var(--inset-safe-bottom));
+}

@@ -37,11 +37,18 @@ type BottomSheetProps = {
   className?: string
   contentClassName?: string
   scrollable?: boolean
+  /**
+   * 포탈이 렌더될 부모 요소. 미지정이면 `<body>` — 즉 뷰포트 전면 모달(앱 기본).
+   * 특정 컨테이너에 가두려면(예: 디자인 데모의 폰 프레임) 그 요소/ref 를 넘긴다.
+   * 대상 요소는 `fixed` 자손을 가두도록 containing block 이어야 한다(transform/contain 등).
+   */
+  container?: React.ComponentProps<typeof Dialog.Portal>["container"]
 }
 
 function BottomSheet({
   children,
   className,
+  container,
   contentClassName,
   description,
   footer,
@@ -77,7 +84,7 @@ function BottomSheet({
       }}
       actionsRef={actionsRef}
     >
-      <Dialog.Portal keepMounted>
+      <Dialog.Portal keepMounted container={container}>
         <AnimatePresence onExitComplete={() => actionsRef.current?.unmount()}>
           {open ? (
             <div className="fixed inset-0 z-50 flex items-end justify-center overscroll-contain">
@@ -161,7 +168,7 @@ function BottomSheet({
                 ) : null}
                 <div
                   className={cn(
-                    "min-h-0 flex-1 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5",
+                    "min-h-0 flex-1 px-4 pb-safe sm:px-5",
                     scrollable ? "overflow-y-auto" : "overflow-hidden",
                     contentClassName
                   )}
@@ -169,7 +176,7 @@ function BottomSheet({
                   {children}
                 </div>
                 {footer ? (
-                  <footer className="border-t border-border-subtle px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5">
+                  <footer className="border-t border-border-subtle px-4 pt-3 pb-safe sm:px-5">
                     {footer}
                   </footer>
                 ) : null}
