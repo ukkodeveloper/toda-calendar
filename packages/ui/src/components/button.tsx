@@ -41,6 +41,8 @@ const buttonVariants = cva(
         default:
           "h-11 px-4 has-data-[icon=inline-end]:pe-3 has-data-[icon=inline-start]:ps-3",
         lg: "h-12 gap-2 px-5 text-base has-data-[icon=inline-end]:pe-4 has-data-[icon=inline-start]:ps-4",
+        // xl = 히어로 CTA(온보딩 "시작하기"·선고 등). full-width 는 소비처에서 w-full 로.
+        xl: "h-14 gap-2 px-6 text-base has-data-[icon=inline-end]:pe-5 has-data-[icon=inline-start]:ps-5",
         icon: "size-11",
         "icon-lg": "size-12",
       },

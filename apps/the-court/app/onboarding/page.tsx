@@ -89,12 +89,7 @@ export default function OnboardingPage() {
         </Text>
       </VStack>
 
-      <Button
-        variant="primary"
-        size="lg"
-        onClick={start}
-        className="h-16 w-full text-lg"
-      >
+      <Button variant="primary" size="xl" onClick={start} className="w-full">
         현행범 시작하기
       </Button>
     </VStack>

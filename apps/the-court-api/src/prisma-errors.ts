@@ -1,11 +1,12 @@
 import { Prisma } from "@prisma/client"
 
 // unique 위반 판정 — 동시 고발/공표 race 를 409 로 매핑하기 위한 감지.
-//   - Prisma 가 아는 @@unique 위반 → P2002
-//   - 수동 partial unique(case_one_active_per_defendant · trial_one_active_per_case)는
-//     Prisma 가 모르므로 Postgres 코드 23505 를 raw 로 확인한다.
-//   ⚠️ worker-db 확인 요청: 수동 partial index 위반이 P2002 로 오는지 23505(raw)로 오는지
-//     실제 DB 붙을 때 한 번 검증 필요(둘 다 커버해 두었음).
+//   - @@unique 도, 수동 partial unique(case_one_active_per_defendant · trial_one_active_per_case)도
+//     모두 Prisma 가 P2002 로 정규화한다. (실 DB end-to-end 로 검증 완료 — 2026-07-11)
+//     이때 meta.target 은 인덱스명이 아니라 **컬럼명 배열**이다(예: ["roomId","defendantUuid"]).
+//   - constraint 인자는 target 이 문자열일 때만 매칭에 쓰이고, 배열(partial index)이면 true 폴백.
+//     한 create 가 유니크 제약을 여럿 가지면 meta.target 컬럼셋 비교로 좁혀야 함(현재는 후보 1개라 안전).
+//   - 아래 raw 23505 브랜치는 Prisma 경유 시 실측상 도달하지 않으나, 방어적 폴백으로 남긴다.
 export function isUniqueViolation(err: unknown, constraint?: string): boolean {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code !== "P2002") return false
