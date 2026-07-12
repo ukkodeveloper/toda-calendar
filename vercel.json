@@ -2,6 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm --filter the-court build",
+  "buildCommand": "pnpm run build:packages && pnpm --filter the-court build",
   "outputDirectory": "apps/the-court/.next"
 }
