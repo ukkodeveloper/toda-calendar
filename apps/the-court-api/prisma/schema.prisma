@@ -46,6 +46,12 @@ enum MessageType {
   SYSTEM
 }
 
+// 대화 종류 — ROOM=방 본문(caseId null) · TRIAL=재판 스레드(caseId 값).
+enum ConversationKind {
+  ROOM
+  TRIAL
+}
+
 // ─── User ──────────────────────────────────────────────────────────────────
 // 전역 신원. uuid 는 서버가 발급(@default(uuid), 클라 localStorage 저장)하고
 // 모든 소유 FK 의 참조 대상이 된다. nickname/color 는 unique 아님(익명·변경 자유).
@@ -63,6 +69,7 @@ model User {
   reports  Report[]
   messages Message[]
   photos   Photo[]
+  reads    ConversationRead[] // 대화별 읽음 워터마크
 }
 
 // ─── Room ──────────────────────────────────────────────────────────────────
@@ -73,9 +80,10 @@ model Room {
   code      String   @unique // 참여코드(대문자6) — join 조회 키
   createdAt DateTime @default(now())
 
-  members  Member[]
-  cases    Case[]
-  messages Message[]
+  members       Member[]
+  cases         Case[]
+  messages      Message[]
+  conversations Conversation[] // 방 본문 1개 + 사건 스레드 N개
 }
 
 // ─── Member ────────────────────────────────────────────────────────────────
@@ -115,11 +123,12 @@ model Case {
   status        CaseStatus @default(DECLARED)
   createdAt     DateTime   @default(now())
 
-  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  defendant User      @relation("CaseDefendant", fields: [defendantUuid], references: [uuid])
-  trials    Trial[]
-  reports   Report[]
-  messages  Message[]
+  room         Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  defendant    User          @relation("CaseDefendant", fields: [defendantUuid], references: [uuid])
+  trials       Trial[]
+  reports      Report[]
+  messages     Message[]
+  conversation Conversation? // 사건당 TRIAL 스레드 대화 0..1
 
   @@index([roomId, status]) // 방 사건목록·status 필터
 }
@@ -192,24 +201,77 @@ model Vote {
   @@index([trialId]) // 집계
 }
 
+// ─── Conversation (대화) ──────────────────────────────────────────────────────
+// 방 본문 1개(ROOM, caseId null) + 사건 스레드 N개(TRIAL, caseId 값).
+// 네 역할 겸함: (1) 디스크리미네이터 앵커 (2) seq 카운터(lastSeq)
+//   (3) 영수증 앵커(ConversationRead) (4) 방 목록 정렬 비정규(lastMessageAt).
+// 유니크 2개는 partial index 로 수동(마이그레이션 SQL):
+//   conversation_one_room_body  — (roomId) WHERE caseId IS NULL   → 방당 ROOM 1개
+//   conversation_one_per_case   — (caseId) WHERE caseId IS NOT NULL → 사건당 TRIAL 1개
+
+model Conversation {
+  id            Int              @id @default(autoincrement()) // 대화 수 유한(방+사건) → Int 충분
+  roomId        Int
+  caseId        Int?             @unique // null = 방 본문(ROOM), 값 = 스레드(TRIAL). @unique = 1:1(Case) 성립용;
+  //                              물리 인덱스는 partial conversation_one_per_case 가 담당(마이그레이션 SQL).
+  kind          ConversationKind
+  lastSeq       BigInt           @default(0) // 단조 증가 카운터 — seq bump 의 잠금 대상
+  lastMessageAt DateTime?        @db.Timestamptz(3) // 방 목록 정렬 비정규
+  createdAt     DateTime         @default(now()) @db.Timestamptz(3)
+
+  room     Room               @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  case     Case?              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  messages Message[]
+  reads    ConversationRead[]
+
+  @@index([roomId]) // 방의 대화 목록
+}
+
+// ─── ConversationRead (읽음 워터마크) ─────────────────────────────────────────
+// 대화·유저당 1행. lastReadSeq 정수 비교로 안읽음 판정(시계 무관·스레드 독립).
+
+model ConversationRead {
+  conversationId Int
+  userUuid       String
+  lastReadSeq    BigInt   @default(0)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
+
+  @@id([conversationId, userUuid]) // 대화·유저당 1행
+  @@index([userUuid]) // 내 안읽음 집계
+}
+
 // ─── Message ─────────────────────────────────────────────────────────────────
-// 단일 테이블: caseId=null → 방 본문 / caseId=값 → 재판 스레드(=caseId).
+// 단일 테이블. 앵커는 conversationId(NOT NULL). caseId 는 wire 계약·비정규로 존치
+//   (대화에서 파생, INSERT 시 세팅): caseId null → 방 본문 / 값 → 재판 스레드.
 // userUuid=null → SYSTEM 메시지. photoId → 재판 채팅 사진 첨부(nullable).
+// seq = 대화별 서버할당 단조 순서·커서 키. clientMsgId = 클라 멱등키(USER 만; SYSTEM null).
+// 멱등 partial unique 는 수동 SQL:
+//   message_idempotency — (conversationId, userUuid, clientMsgId) WHERE clientMsgId IS NOT NULL
 
 model Message {
-  id        Int         @id @default(autoincrement())
-  roomId    Int
-  caseId    Int?
-  userUuid  String?
-  photoId   Int?
-  type      MessageType @default(USER)
-  content   String
-  createdAt DateTime    @default(now())
+  id             BigInt      @id @default(autoincrement()) // 유일 무한증가 테이블 → BIGINT
+  conversationId Int // 신규 앵커 (NOT NULL)
+  roomId         Int // 존치(방 스코프 쿼리·broadcast)
+  caseId         Int? // 존치(wire 계약·비정규) — 대화에서 파생
+  seq            BigInt // 대화별 단조 순서·커서 키
+  userUuid       String?
+  photoId        Int?
+  clientMsgId    String? // 클라 생성 멱등키(USER 만; SYSTEM 은 null)
+  type           MessageType @default(USER)
+  content        String
+  editedAt       DateTime?   @db.Timestamptz(3) // 미래 edit (지금 미사용)
+  deletedAt      DateTime?   @db.Timestamptz(3) // 미래 soft-delete (지금 미사용)
+  createdAt      DateTime    @default(now()) @db.Timestamptz(3)
 
-  room  Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  case  Case?  @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  user  User?  @relation(fields: [userUuid], references: [uuid])
-  photo Photo? @relation(fields: [photoId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  room         Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  case         Case?        @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userUuid], references: [uuid])
+  photo        Photo?       @relation(fields: [photoId], references: [id])
 
-  @@index([roomId, caseId, createdAt]) // 방/스레드 시간순 페치 + ?after=id 백필
+  @@unique([conversationId, seq]) // 순서·커서·유니크 겸함(keyset + 중복 seq 방지)
+  @@index([roomId]) // 방 broadcast·room 목록 보조
 }
