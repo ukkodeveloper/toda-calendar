@@ -82,10 +82,11 @@ caseRoutes.post("/rooms/:roomId/cases", async (c) => {
           deadline: new Date(body.deadline),
         },
       })
+      // 공표는 방 본문(ROOM) 공지 — caseId=null. 방 전원이 본문에서 본다(decision §3).
       const sys = await createSystemMessage(
         tx,
         roomId,
-        created.id,
+        null,
         `📢 ${user.nickname}님이 '${body.title}' 공약을 공표했습니다`
       )
       return { created, sys }
