@@ -18,7 +18,7 @@ import { Text } from "@workspace/ui/components/text"
 import { motionTokens } from "@workspace/ui/lib/motion"
 import { cn } from "@workspace/ui/lib/utils"
 
-import { chatApi, trialApi } from "@/lib/api"
+import { chatApi, roomApi, trialApi } from "@/lib/api"
 import { sendChatMessage, useTrialStream } from "@/lib/api/socket"
 import { useStickToBottom } from "@/lib/use-stick-to-bottom"
 import type { MessageResponse, TrialEndResponse } from "@/lib/api/types"
@@ -171,15 +171,15 @@ export function TrialSheet({
   const { ref: threadRef, onScroll: onThreadScroll } =
     useStickToBottom<HTMLDivElement>(messages)
   const seenIds = useRef<Set<string>>(new Set())
-  const lastMessageId = useRef<number>(0)
+  // 이 스레드(TRIAL 대화) 커서 — 재연결 gapless 백필용(seq 는 대화별).
+  const lastThreadSeq = useRef<number>(0)
 
   const appendThread = useCallback(
     (msgs: MessageResponse[]) => {
       const next: TrialMessage[] = []
       for (const m of msgs) {
         if (m.caseId !== caseId) continue
-        if (m.messageId > lastMessageId.current)
-          lastMessageId.current = m.messageId
+        if (m.seq > lastThreadSeq.current) lastThreadSeq.current = m.seq
         const id = `m-${m.messageId}`
         if (seenIds.current.has(id)) continue
         seenIds.current.add(id)
@@ -194,7 +194,7 @@ export function TrialSheet({
   useEffect(() => {
     if (!isOpen) return
     seenIds.current = new Set()
-    lastMessageId.current = 0
+    lastThreadSeq.current = 0
 
     let active = true
     // 리셋 setState 를 마이크로태스크로 미뤄 effect 동기 setState(cascading render)를 피한다.
@@ -217,7 +217,13 @@ export function TrialSheet({
 
     chatApi
       .messages(roomId, { caseId })
-      .then(appendThread)
+      .then((msgs) => {
+        appendThread(msgs)
+        // 스레드 열람 = 이 스레드 읽음(per-스레드 워터마크 전진).
+        roomApi
+          .read(roomId, { caseId, seq: lastThreadSeq.current })
+          .catch(() => {})
+      })
       .catch(() => {})
 
     trialApi
@@ -252,8 +258,9 @@ export function TrialSheet({
       })
     },
     onReconnect: () => {
+      // 스레드 seq 커서로 gapless 백필(놓친 발언 무손실).
       chatApi
-        .messages(roomId, { caseId })
+        .messages(roomId, { caseId, afterSeq: lastThreadSeq.current })
         .then(appendThread)
         .catch(() => {})
       trialApi
@@ -275,9 +282,12 @@ export function TrialSheet({
   const handleSend = (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
-    // 서버로만 발신 — 저장 후 chat:message echo 로 렌더(스레드는 caseId 로 라우팅).
-    sendChatMessage({ roomId, caseId, content: trimmed })
+    // 서버로만 발신 — echo 로 렌더(스레드는 caseId 라우팅). clientMsgId 자동 주입(멱등).
     setValue("")
+    sendChatMessage({ roomId, caseId, content: trimmed }, (r) => {
+      // 서버 거부면 텍스트 복구. timeout 은 통과 간주(echo 가 확인).
+      if (r.status === "error") setValue(trimmed)
+    })
   }
 
   const handleEndStatement = () => {

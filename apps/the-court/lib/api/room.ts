@@ -27,7 +27,14 @@ export const roomApi = {
   members: (roomId: number): Promise<RoomMembersResponse> =>
     http.get<RoomMembersResponse>(`/api/rooms/${roomId}/members`),
 
-  // POST /api/rooms/{id}/read — 요청 유저의 이 방 읽음 처리(안읽음 해제). fire-and-forget.
-  read: (roomId: number): Promise<{ ok: boolean }> =>
-    http.post<{ ok: boolean }>(`/api/rooms/${roomId}/read`),
+  // POST /api/rooms/{id}/read — 읽음 워터마크 전진(안읽음 해제). fire-and-forget.
+  //   seq 주면 그 seq 까지, 없으면 대화 현재 lastSeq 까지. caseId 주면 그 스레드 읽음.
+  read: (
+    roomId: number,
+    opts?: { seq?: number; caseId?: number }
+  ): Promise<{ ok: boolean }> =>
+    http.post<{ ok: boolean }>(
+      `/api/rooms/${roomId}/read`,
+      opts ? { body: opts } : undefined
+    ),
 }

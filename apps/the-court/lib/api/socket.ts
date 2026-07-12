@@ -10,6 +10,7 @@ import { io, type Socket } from "socket.io-client"
 
 import {
   WS_EVENTS,
+  type ChatAck,
   type ChatMessageEvent,
   type ChatSendPayload,
   type TrialStartedEvent,
@@ -19,6 +20,37 @@ import {
 } from "@workspace/contracts"
 
 import { loadAuth } from "@/lib/auth"
+
+// chat:send 결과 — 서버 ack(ok/error) 또는 클라 타임아웃.
+//   ok      → 서버가 저장·seq 확정(렌더는 chat:message echo 로).
+//   error   → 서버가 거부(rate limit·검증·내부오류) — 발신 텍스트 복구 등 표면화.
+//   timeout → ack 못 받음(전달됐을 수도) — 낙관적으로 통과 간주(echo 가 확인).
+export type ChatSendResult = ChatAck | { status: "timeout" }
+
+// 발신 공통 — clientMsgId(멱등키) 자동 주입 + (onResult 주면) ack 콜백.
+// clientMsgId 를 실으면 소켓 재연결 버퍼 재전송·앱 재시도가 서버에서 1행으로 dedup 된다.
+function emitChat(
+  socket: Socket | null,
+  payload: ChatSendPayload,
+  onResult?: (r: ChatSendResult) => void
+): void {
+  if (!socket) {
+    onResult?.({ status: "timeout" })
+    return
+  }
+  const withId: ChatSendPayload = payload.clientMsgId
+    ? payload
+    : { ...payload, clientMsgId: crypto.randomUUID() }
+  if (onResult) {
+    socket
+      .timeout(5000)
+      .emit(WS_EVENTS.CHAT_SEND, withId, (err: unknown, ack: ChatAck) => {
+        onResult(err ? { status: "timeout" } : ack)
+      })
+  } else {
+    socket.emit(WS_EVENTS.CHAT_SEND, withId)
+  }
+}
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8080"
 
@@ -51,9 +83,12 @@ function ensureSocket(): Socket | null {
 
 // chat:send 직접 발신 — join/leave 를 건드리지 않는다(공유 소켓의 room 멤버십 보존).
 // 재판 시트가 스레드 발언(caseId 포함)을 보낼 때 사용. 서버가 저장 후 room 으로 echo.
-export function sendChatMessage(payload: ChatSendPayload): void {
-  const socket = ensureSocket()
-  socket?.emit(WS_EVENTS.CHAT_SEND, payload)
+// onResult 를 주면 ack(전달 확인·실패)을 받는다. clientMsgId 는 자동 주입(멱등).
+export function sendChatMessage(
+  payload: ChatSendPayload,
+  onResult?: (r: ChatSendResult) => void
+): void {
+  emitChat(ensureSocket(), payload, onResult)
 }
 
 // ─── 방 스트림 훅 ──────────────────────────────────────────────────────────────
@@ -68,7 +103,11 @@ export type RoomStreamHandlers = {
 
 export type RoomStreamApi = {
   // chat:send — content 또는 photoId 중 하나는 필수(빈 발언 금지).
-  sendChat: (input: Omit<ChatSendPayload, "roomId">) => void
+  // onResult 를 주면 ack(전달 확인·실패)을 받는다. clientMsgId 자동 주입(멱등).
+  sendChat: (
+    input: Omit<ChatSendPayload, "roomId">,
+    onResult?: (r: ChatSendResult) => void
+  ) => void
 }
 
 export function useRoomStream(
@@ -123,9 +162,9 @@ export function useRoomStream(
   }, [roomId])
 
   return {
-    sendChat: (input) => {
+    sendChat: (input, onResult) => {
       if (roomId === null) return
-      socketRef.current?.emit(WS_EVENTS.CHAT_SEND, { roomId, ...input })
+      emitChat(socketRef.current, { roomId, ...input }, onResult)
     },
   }
 }
