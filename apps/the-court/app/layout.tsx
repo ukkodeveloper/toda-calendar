@@ -57,6 +57,12 @@ export const viewport: Viewport = {
   // 입력 필드(14px)가 16px 미만이어도 iOS Safari 가 포커스 시 화면을 자동 줌인하지 않도록
   // 확대 상한을 1로 고정. (iOS 는 접근성 핀치줌은 대체로 계속 허용.)
   maximumScale: 1,
+  // 뷰포트를 안전영역(노치·홈 인디케이터)까지 확장 → `env(safe-area-inset-*)` 가 iOS 에서
+  // 실제 값을 갖는다(cover 없으면 항상 0). 이게 켜져야 `--inset-safe-bottom`(tokens.css)·
+  // `pb-safe`·`pb-keyboard`·상단 안전영역(globals 의 .app-header-safe)이 실효화된다.
+  // (interactive-widget 은 명시하지 않는다 — DS 키보드 훅이 resizes-visual 전제라
+  //  기본값 유지가 안전. 바꾸려면 DS 훅 측정식과 함께 검증. — spec §3)
+  viewportFit: "cover",
   // 흰 앱 프레임 상단과 맞춘 상태바 크롬. <meta name="theme-color"> 는 리터럴 색만 허용(토큰 불가).
   // eslint-disable-next-line no-restricted-syntax -- meta theme-color 는 CSS 토큰을 쓸 수 없다
   themeColor: "#ffffff",

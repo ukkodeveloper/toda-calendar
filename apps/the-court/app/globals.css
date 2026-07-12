@@ -29,6 +29,10 @@ body {
 /*
  * 앱 루트 프레임 = .app-shell(body 직속 div). 폭 800px 중앙 정렬 + 흰 배경 →
  * 바깥엔 body 거터가 드러난다. (포털 시트·토스트·메뉴는 이 프레임 밖에 렌더된다.)
+ * min-height 100dvh + viewport-fit=cover(layout.tsx) → 흰 프레임이 안전영역까지 칠해져
+ * 노치·홈 인디케이터 뒤로 회색 거터가 새지 않는다. 셸에 top 패딩을 주면 chat 의 경직
+ * h-viewport 자식(100dvh)이 넘쳐 하단이 잘리므로, 상단 안전영역은 셸이 아니라 헤더에서
+ * 흡수한다(.app-header-safe). 하단은 컴포저의 pb-safe 가 흡수.
  */
 .app-shell {
   max-width: 800px;
@@ -37,6 +41,16 @@ body {
   background: #ffffff;
   /* 거터와 앱 경계를 얇게 구분 */
   box-shadow: 0 0 0 1px rgba(28, 27, 33, 0.06);
+}
+
+/*
+ * 상단 안전영역(노치·상태바) 회피 — DS 는 하단(--inset-safe-bottom)만 토큰/유틸로 갖는다.
+ * 상단은 앱 레벨에서 sticky AppHeader 에만 준다. viewport-fit=cover 로 켜진 env() 를 읽어
+ * standalone PWA·노치 기기의 스크롤 상단에서 헤더가 상태바 아래로 내려온다.
+ * 브라우저 기본 상태에선 env=0 → 시각 변화 없음. 최소 py 는 헤더의 기존 상하 여백(0.5rem).
+ */
+.app-header-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
 }
 
 /*

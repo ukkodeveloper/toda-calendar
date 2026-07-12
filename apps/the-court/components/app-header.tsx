@@ -8,7 +8,7 @@ import Link from "next/link"
 // @workspace/ui semantic 토큰 유틸만 사용(규칙1·3). 프로스티드 sticky 헤더(home 과 정합).
 export function AppHeader({ endContent }: { endContent?: ReactNode }) {
   return (
-    <header className="sticky top-0 z-10 flex min-h-14 shrink-0 items-center justify-between gap-3 bg-surface-canvas/80 px-5 py-2 backdrop-blur-xl">
+    <header className="app-header-safe sticky top-0 z-10 flex min-h-14 shrink-0 items-center justify-between gap-3 bg-surface-canvas/80 px-5 pb-2 backdrop-blur-xl">
       <Link href="/home" aria-label="현행범 홈" className="inline-flex">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

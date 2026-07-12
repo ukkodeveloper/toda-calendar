@@ -7,6 +7,7 @@ import type {
   VoteResultResponse,
 } from "@workspace/contracts"
 import { voteRequestSchema } from "@workspace/contracts"
+import type { Prisma, PrismaClient } from "@prisma/client"
 import { Hono } from "hono"
 
 import { type AppEnv, requireExistingUser, requireUser } from "../context.js"
@@ -30,12 +31,15 @@ import {
 // 재판 — 참여자·투표·집계·최후진술 종료·선고. write=REST → 결과 WS broadcast.
 export const trialRoutes = new Hono<AppEnv>()
 
+type DbClient = PrismaClient | Prisma.TransactionClient
+
 // 투표 집계 헬퍼 — guilty/notGuilty 표 수 + 방 인원 기준 totalVoters(피고 제외).
-async function tally(trialId: number, roomId: number) {
+// client 를 받아 선고 tx 안에서도(verdict 확정과 원자) 같은 스냅샷으로 집계할 수 있게 한다.
+async function tally(client: DbClient, trialId: number, roomId: number) {
   const [guiltyCount, notGuiltyCount, memberCount] = await Promise.all([
-    prisma.vote.count({ where: { trialId, guilty: true } }),
-    prisma.vote.count({ where: { trialId, guilty: false } }),
-    prisma.member.count({ where: { roomId } }),
+    client.vote.count({ where: { trialId, guilty: true } }),
+    client.vote.count({ where: { trialId, guilty: false } }),
+    client.member.count({ where: { roomId } }),
   ])
   return {
     guiltyCount,
@@ -107,7 +111,7 @@ trialRoutes.post("/trials/:trialId/votes", async (c) => {
     update: { guilty: body.guilty }, // 재투표 = 표 갱신(1인1표)
   })
 
-  const counts = await tally(trialId, trial.case.roomId)
+  const counts = await tally(prisma, trialId, trial.case.roomId)
   emitVoteUpdated(trialId, { trialId, ...counts })
 
   return c.json(
@@ -131,7 +135,7 @@ trialRoutes.get("/trials/:trialId/votes/result", async (c) => {
   })
   if (!trial) throw notFound("TRIAL_NOT_FOUND", "재판을 찾을 수 없습니다")
 
-  const counts = await tally(trialId, trial.case.roomId)
+  const counts = await tally(prisma, trialId, trial.case.roomId)
   const myVote = await prisma.vote.findUnique({
     where: { trialId_voterUuid: { trialId, voterUuid: uuid } },
     select: { guilty: true },
@@ -195,48 +199,54 @@ trialRoutes.post("/trials/:trialId/end", async (c) => {
   if (!trial) throw notFound("TRIAL_NOT_FOUND", "재판을 찾을 수 없습니다")
   assertCanEndTrial(trial.status) // VOTING 에서만(중복 선고 방지)
 
-  const counts = await tally(trialId, trial.case.roomId)
-  const verdict = computeVerdict(counts)
-  const caseStatus = caseStatusAfterVerdict(verdict)
   const roomId = trial.case.roomId
   const defendantUuid = trial.case.defendantUuid
 
-  // 다중행 변경은 한 트랜잭션. 유죄면 전과+1·칭호 EX_CONVICT.
-  const member = await prisma.$transaction(async (tx) => {
-    await tx.trial.update({
-      where: { id: trialId },
-      data: { status: "ENDED", verdict },
-    })
-    await tx.case.update({
-      where: { id: trial.caseId },
-      data: { status: caseStatus },
-    })
-    if (verdict === "GUILTY") {
-      return tx.member.update({
-        where: { roomId_userUuid: { roomId, userUuid: defendantUuid } },
-        data: { convictionCount: { increment: 1 }, title: "EX_CONVICT" },
+  // 집계·평결·상태전이·전과갱신·시스템메시지를 한 트랜잭션으로(선고 원자성).
+  //   tally 를 tx 안으로 옮겨 verdict 확정과 같은 스냅샷·원자로 묶는다.
+  //   유죄면 전과+1·칭호 EX_CONVICT. 선고 공지는 방 본문(ROOM, caseId=null)으로(decision §3).
+  const { verdict, caseStatus, counts, defendant, sys } =
+    await prisma.$transaction(async (tx) => {
+      const counts = await tally(tx, trialId, roomId)
+      const verdict = computeVerdict(counts)
+      const caseStatus = caseStatusAfterVerdict(verdict)
+
+      await tx.trial.update({
+        where: { id: trialId },
+        data: { status: "ENDED", verdict },
       })
-    }
-    return tx.member.findUnique({
-      where: { roomId_userUuid: { roomId, userUuid: defendantUuid } },
+      await tx.case.update({
+        where: { id: trial.caseId },
+        data: { status: caseStatus },
+      })
+      const member =
+        verdict === "GUILTY"
+          ? await tx.member.update({
+              where: { roomId_userUuid: { roomId, userUuid: defendantUuid } },
+              data: { convictionCount: { increment: 1 }, title: "EX_CONVICT" },
+            })
+          : await tx.member.findUnique({
+              where: { roomId_userUuid: { roomId, userUuid: defendantUuid } },
+            })
+
+      const defendant = {
+        uuid: defendantUuid,
+        nickname: trial.case.defendant.nickname,
+        newTitle: member?.title ?? "CITIZEN",
+        convictionCount: member?.convictionCount ?? 0,
+      }
+
+      const sys = await createSystemMessage(
+        tx,
+        roomId,
+        null,
+        verdict === "GUILTY"
+          ? `⚖️ 유죄 확정! ${defendant.nickname}님이 전과 ${defendant.convictionCount}범이 되었습니다`
+          : `⚖️ 무죄! ${defendant.nickname}님이 풀려났습니다`
+      )
+      return { verdict, caseStatus, counts, defendant, sys }
     })
-  })
 
-  const defendant = {
-    uuid: defendantUuid,
-    nickname: trial.case.defendant.nickname,
-    newTitle: member?.title ?? "CITIZEN",
-    convictionCount: member?.convictionCount ?? 0,
-  }
-
-  const sys = await createSystemMessage(
-    prisma,
-    roomId,
-    trial.caseId,
-    verdict === "GUILTY"
-      ? `⚖️ 유죄 확정! ${defendant.nickname}님이 전과 ${defendant.convictionCount}범이 되었습니다`
-      : `⚖️ 무죄! ${defendant.nickname}님이 풀려났습니다`
-  )
   emitChatMessage(roomId, sys)
   emitVerdictRevealed(roomId, trialId, {
     trialId,

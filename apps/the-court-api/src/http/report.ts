@@ -48,10 +48,12 @@ reportRoutes.post("/reports", async (c) => {
           content: body.content ?? null,
         },
       })
+      // 고발은 방 본문(ROOM) 공지 — caseId=null. 카톡식 "🚨 고발" 을 방 전원이 본문에서(decision §3).
+      // 딥링크(재판 보기)는 trial:started(caseId·trialId) 도메인 이벤트가 담당.
       const sys = await createSystemMessage(
         tx,
         target.roomId,
-        body.caseId,
+        null,
         `🚨 ${target.defendant.nickname}님이 고발당했습니다`
       )
       return { report, trial, sys }

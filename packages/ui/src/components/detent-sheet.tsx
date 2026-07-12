@@ -9,6 +9,7 @@ import {
   ThreeStageSheet,
   type ThreeStageSheetDetent,
 } from "@workspace/ui/components/three-stage-sheet"
+import { useKeyboardAwareScroll } from "@workspace/ui/hooks/use-keyboard-aware-scroll"
 import { cn } from "@workspace/ui/lib/utils"
 
 /**
@@ -94,7 +95,12 @@ function DetentSheet({
 }: DetentSheetProps) {
   const reducedMotion = useReducedMotion()
   const actionsRef = React.useRef<Dialog.Root.Actions | null>(null)
+  const scrollRef = React.useRef<HTMLDivElement | null>(null)
   const [activeDetentId, setActiveDetentId] = React.useState(initialDetentId)
+
+  // 본문 스크롤 컨테이너 안 입력이 키보드에 가리면 컨테이너를 스크롤해 끌어올린다(버그 D).
+  // 리프트(--inset-keyboard)로 컨테이너가 줄면 ResizeObserver 가 재보정한다.
+  useKeyboardAwareScroll(scrollRef, open)
 
   // 열릴 때마다 시작 detent 로 리셋.
   React.useEffect(() => {
@@ -191,6 +197,7 @@ function DetentSheet({
                      *   짧으면 mid 에서 푸터까지 보이고 길면 스크롤로 닿는다.
                      * fill=true(리스트·재판): 본문만 스크롤하고 푸터(컴포저 등)는 하단 고정. */}
                     <div
+                      ref={scrollRef}
                       className={cn(
                         "min-h-0 flex-1 overflow-y-auto",
                         contentClassName

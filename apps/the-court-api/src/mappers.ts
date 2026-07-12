@@ -65,7 +65,9 @@ export function toMessageResponse(
   memberTitle: UserTitle | null
 ): MessageResponse {
   return {
-    messageId: m.id,
+    // BIGINT → number: JSON.stringify 는 bigint 에서 예외. 2^53 전까지 안전(단일 메시지 테이블).
+    messageId: Number(m.id),
+    seq: Number(m.seq),
     type: m.type,
     caseId: m.caseId,
     content: m.content,
@@ -80,6 +82,7 @@ export function toMessageResponse(
             color: m.user.color,
           }
         : null,
+    clientMsgId: m.clientMsgId,
     createdAt: m.createdAt.toISOString(),
   }
 }
