@@ -70,6 +70,11 @@ export function DeclareCaseDialog({
       onOpenChange={(open) => {
         if (!open) handleCancel()
       }}
+      // 텍스트 입력(제목·내용)이 있는 폼 → full 로 열어 키보드가 떠도 입력이 접히지 않게.
+      // (spec 버그 D — 시트 안 입력이 키보드에 가림. DS 가 focusin scrollIntoView 를 보태고,
+      //  앱은 입력이 안 접히는 detent 로 연다.) fill 로 열어 푸터(취소·공표)는 하단 고정.
+      fill
+      initialDetentId="full"
       title="공표하기"
       description="어떤 결심을 걸 건가요?"
       footer={

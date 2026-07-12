@@ -30,6 +30,7 @@ import {
   type CaseVisualStatus,
 } from "@/lib/case-status"
 import { loadAuth } from "@/lib/auth"
+import { useStickToBottom } from "@/lib/use-stick-to-bottom"
 import type { MessageResponse, TrialStatus } from "@/lib/api/types"
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
@@ -165,7 +166,9 @@ function ChatPageInner() {
   const [trialCase, setTrialCase] = useState<OpenTrial | null>(null)
   const [highlightCaseId, setHighlightCaseId] = useState<number | undefined>()
 
-  const streamRef = useRef<HTMLDivElement>(null)
+  // 메시지 리스트 하단 고정(새 메시지·키보드 열림 시 최하단, 위로 보는 중이면 억제).
+  const { ref: streamRef, onScroll: onStreamScroll } =
+    useStickToBottom<HTMLDivElement>(items)
 
   // 채팅은 h-viewport 셸(키보드만큼 줄어듦)이라 문서 스크롤이 필요 없다.
   // 이 라우트 동안만 document 스크롤을 잠가, 키보드가 열렸을 때 body(min-h-dvh)의
@@ -231,12 +234,6 @@ function ChatPageInner() {
       active = false
     }
   }, [roomId, appendMessages])
-
-  // 새 메시지가 들어오면 스트림 하단으로.
-  useEffect(() => {
-    const el = streamRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [items])
 
   // 실시간 스트림.
   const { sendChat } = useRoomStream(
@@ -377,6 +374,7 @@ function ChatPageInner() {
       {/* 메시지 스트림 */}
       <div
         ref={streamRef}
+        onScroll={onStreamScroll}
         className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain px-4 py-3"
       >
         <ChatSystemMessage variant="divider">오늘</ChatSystemMessage>

@@ -20,6 +20,7 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { chatApi, trialApi } from "@/lib/api"
 import { sendChatMessage, useTrialStream } from "@/lib/api/socket"
+import { useStickToBottom } from "@/lib/use-stick-to-bottom"
 import type { MessageResponse, TrialEndResponse } from "@/lib/api/types"
 
 // ─────────────────────────── 타입 ───────────────────────────
@@ -166,7 +167,9 @@ export function TrialSheet({
   // 최종 집계 수치는 선고 응답/verdict:revealed 의 verdictResult 에 담겨 온다.
   const [votes, setVotes] = useState<Record<string, VoteChoice>>({})
 
-  const threadRef = useRef<HTMLDivElement>(null)
+  // 재판 스레드도 채팅과 동일한 하단 고정(새 발언·키보드 열림 시 최하단, 위로 보는 중 억제).
+  const { ref: threadRef, onScroll: onThreadScroll } =
+    useStickToBottom<HTMLDivElement>(messages)
   const seenIds = useRef<Set<string>>(new Set())
   const lastMessageId = useRef<number>(0)
 
@@ -231,12 +234,6 @@ export function TrialSheet({
       active = false
     }
   }, [isOpen, trialId, roomId, caseId, currentUserUuid, appendThread])
-
-  // 새 발언이 오면 스레드 하단으로.
-  useEffect(() => {
-    const el = threadRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [messages])
 
   // 실시간 재판 스트림.
   useTrialStream(isOpen ? trialId : null, {
@@ -413,6 +410,7 @@ export function TrialSheet({
       {/* ── 재판 채팅 스레드 (나머지 공간 전부) */}
       <div
         ref={threadRef}
+        onScroll={onThreadScroll}
         className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-3"
       >
         <ChatSystemMessage variant="divider">재판 시작</ChatSystemMessage>
