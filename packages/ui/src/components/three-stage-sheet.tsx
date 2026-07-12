@@ -347,7 +347,11 @@ function ThreeStageSheet({
       </div>
       {/* pb-safe: 하단 홈 인디케이터 회피(= max(space-4, safe-area-inset-bottom)).
        * 표면은 bottom-0 까지 붙고 padding 은 내부라 detent 수학(ratio→visible)에 무영향.
-       * NOTE: 키보드 회피(포커스 입력을 키보드 위로)는 폼이 들어오는 P0 몫. 여기선 안 한다. */}
+       * 키보드 회피: 이 컴포넌트는 presentational 표면이라 스스로 안 한다. 리프트는
+       * 모달 래퍼(DetentSheet)가 Popup 을 `--inset-keyboard` 만큼 들어 컨테이너를 줄이는
+       * 것으로, 포커스 입력의 scrollIntoView 는 DetentSheet 의 스크롤 컨테이너에 붙은
+       * useKeyboardAwareScroll 이 맡는다(버그 D). 여기 content 는 overflow-hidden 이라
+       * 스크롤 대상이 아니다. */}
       <div className="min-h-0 flex-1 overflow-hidden px-4 pb-safe">
         {children}
       </div>

@@ -10,6 +10,7 @@ import {
 } from "framer-motion"
 
 import { motionTokens } from "@workspace/ui/lib/motion"
+import { useKeyboardAwareScroll } from "@workspace/ui/hooks/use-keyboard-aware-scroll"
 import { cn } from "@workspace/ui/lib/utils"
 
 /**
@@ -68,6 +69,11 @@ function BottomSheet({
 }: BottomSheetProps) {
   const reducedMotion = useReducedMotion()
   const actionsRef = React.useRef<Dialog.Root.Actions | null>(null)
+  const scrollRef = React.useRef<HTMLDivElement | null>(null)
+
+  // 본문 입력이 키보드에 가리면 스크롤 컨테이너를 조정해 끌어올린다(버그 D, DetentSheet 와 정합).
+  // scrollable 일 때만 의미 있다(overflow-hidden 이면 스크롤 대상이 아님).
+  useKeyboardAwareScroll(scrollRef, open && scrollable)
 
   function handleDragEnd(_: PointerEvent, info?: PanInfo) {
     // 방어: framer 의 drag 종료는 항상 PanInfo 를 넘기지만, 핸들러 병합·네이티브
@@ -187,6 +193,7 @@ function BottomSheet({
                   </header>
                 ) : null}
                 <div
+                  ref={scrollRef}
                   className={cn(
                     "min-h-0 flex-1 px-4 pb-safe sm:px-5",
                     scrollable ? "overflow-y-auto" : "overflow-hidden",
